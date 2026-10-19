@@ -4,8 +4,8 @@
 - [x] 3. Embeddings loader (GloVe/FastText)
 - [x] 4. BiLSTM + attention classifier (src/nlp/)
 - [x] 5. RNN/LSTM/GRU/BiLSTM comparison (src/compare/) -> results/diary_comparison.csv
-- [ ] 6. Simulated recovery curves (data/simulated) with plateau/relapse labels
-- [ ] 7. Trend model LSTM/GRU (src/trend/) -> results/trend_comparison.csv
+- [x] 6. Simulated recovery curves (data/simulated) with plateau/relapse labels
+- [x] 7. Trend model LSTM/GRU (src/trend/) -> results/trend_comparison.csv
 - [ ] 8. MediaPipe angles + rep counter demo (src/vision/)
 - [ ] 9. Streamlit dashboard (app/)
 - [ ] 10. Report tables/plots and presentation outline

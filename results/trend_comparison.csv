@@ -1,0 +1,13 @@
+Model,Evaluation_Set,Forecast_MAE,Forecast_RMSE,Symptoms_MAE,ROM_MAE_deg,Status_Accuracy,Status_Macro_F1,Status_Precision,Status_Recall
+Tomorrow = Today,Standard Test Split,0.284,0.708,0.053,1.21,0.745,0.285,0.248,0.333
+Tomorrow = Today,Noisy Simulation Test,0.701,1.644,0.159,2.87,0.740,0.283,0.247,0.333
+7-Day Moving Average,Standard Test Split,0.673,1.634,0.112,2.92,0.745,0.285,0.248,0.333
+7-Day Moving Average,Noisy Simulation Test,1.215,2.907,0.266,5.01,0.740,0.283,0.247,0.333
+Rule-Based Detector,Standard Test Split,0.284,0.708,0.053,1.21,0.720,0.509,0.509,0.578
+Rule-Based Detector,Noisy Simulation Test,0.701,1.644,0.159,2.87,0.473,0.307,0.364,0.435
+RNN,Standard Test Split,0.450 ± 0.011,1.062 ± 0.023,0.100 ± 0.001,1.85 ± 0.06,0.747 ± 0.013,0.508 ± 0.009,0.575 ± 0.071,0.515 ± 0.027
+RNN,Noisy Simulation Test,1.181 ± 0.091,2.894 ± 0.230,0.226 ± 0.004,5.00 ± 0.44,0.640 ± 0.018,0.413 ± 0.015,0.407 ± 0.013,0.447 ± 0.028
+LSTM,Standard Test Split,0.563 ± 0.016,1.352 ± 0.065,0.112 ± 0.006,2.37 ± 0.09,0.737 ± 0.013,0.582 ± 0.006,0.630 ± 0.006,0.552 ± 0.005
+LSTM,Noisy Simulation Test,1.498 ± 0.056,3.646 ± 0.158,0.281 ± 0.015,6.36 ± 0.23,0.621 ± 0.003,0.405 ± 0.001,0.400 ± 0.004,0.418 ± 0.007
+GRU,Standard Test Split,0.475 ± 0.027,1.167 ± 0.064,0.097 ± 0.003,1.99 ± 0.12,0.758 ± 0.006,0.611 ± 0.009,0.642 ± 0.007,0.593 ± 0.011
+GRU,Noisy Simulation Test,1.340 ± 0.027,3.294 ± 0.075,0.246 ± 0.006,5.72 ± 0.12,0.641 ± 0.007,0.438 ± 0.003,0.425 ± 0.002,0.470 ± 0.012
