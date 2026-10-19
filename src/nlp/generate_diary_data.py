@@ -510,14 +510,60 @@ def validate_label_distribution(df: pd.DataFrame, min_class_pct: float = 10.0) -
     return dist_report
 
 
+ADDITIONAL_HAND_WRITTEN: List[Dict[str, Any]] = [
+    {"text": "Woke up with zero ache, though my knuckles feel like rusty hinges and will not bend.", "pain": 0, "stiffness": 3, "mobility": 2, "grip": 0, "source": "hand_written"},
+    {"text": "Throbbing wrist after yard work, had to drop the watering can because grip gave out.", "pain": 2, "stiffness": 0, "mobility": 1, "grip": 3, "source": "hand_written"},
+    {"text": "Completely pain free all day! Managed to button my work shirt without any help.", "pain": 0, "stiffness": 0, "mobility": 0, "grip": 0, "source": "hand_written"},
+    {"text": "A bit of an ache near the surgical scar, but fingers are flexing quite smoothly.", "pain": 1, "stiffness": 0, "mobility": 0, "grip": 0, "source": "hand_written"},
+    {"text": "Excruciating flare up when turning the car ignition key, whole hand locked up.", "pain": 3, "stiffness": 3, "mobility": 3, "grip": 3, "source": "hand_written"},
+    {"text": "No stiffness at all today, but sharp pain shoots up my forearm whenever I pinch a pen.", "pain": 3, "stiffness": 0, "mobility": 0, "grip": 2, "source": "hand_written"},
+    {"text": "Slight tightness in my palm after squeezing the stress ball, but strength is improving.", "pain": 0, "stiffness": 1, "mobility": 0, "grip": 1, "source": "hand_written"},
+    {"text": "Could barely hold my toothbrush this morning, hand feels completely dead.", "pain": 1, "stiffness": 2, "mobility": 3, "grip": 3, "source": "hand_written"},
+    {"text": "No pain whatsoever, yet my pinky finger stays stubbornly crooked and will not straighten.", "pain": 0, "stiffness": 1, "mobility": 2, "grip": 0, "source": "hand_written"},
+    {"text": "Pretty bad throbbing after physio session, took an ice pack to settle the swelling.", "pain": 2, "stiffness": 1, "mobility": 1, "grip": 0, "source": "hand_written"},
+    {"text": "Fingers moved like clockwork today! Sliced bread and carried grocery bags with ease.", "pain": 0, "stiffness": 0, "mobility": 0, "grip": 0, "source": "hand_written"},
+    {"text": "Terrible burning pain woke me at 3am, could not move my thumb an inch.", "pain": 3, "stiffness": 2, "mobility": 3, "grip": 2, "source": "hand_written"},
+    {"text": "Wrist feels a little stiff after cold weather, but grip is strong enough to open soda cans.", "pain": 0, "stiffness": 1, "mobility": 0, "grip": 0, "source": "hand_written"},
+    {"text": "Pain is gone, but I dropped a coffee mug because my index finger suddenly slipped.", "pain": 0, "stiffness": 0, "mobility": 1, "grip": 2, "source": "hand_written"},
+    {"text": "A dull ache lingers in my palm, though I made a full fist for the first time.", "pain": 1, "stiffness": 0, "mobility": 0, "grip": 0, "source": "hand_written"},
+    {"text": "Joints are stiff as wood this morning, taking over an hour of warm water soaks to loosen.", "pain": 1, "stiffness": 3, "mobility": 2, "grip": 1, "source": "hand_written"},
+    {"text": "Felt great today, no aches or tightness, played cards with family without struggle.", "pain": 0, "stiffness": 0, "mobility": 0, "grip": 0, "source": "hand_written"},
+    {"text": "Severe shooting pain when spreading my fingers apart, could not type at all today.", "pain": 3, "stiffness": 1, "mobility": 3, "grip": 2, "source": "hand_written"},
+    {"text": "Not hurting today, but grip feels strangely weak when lifting a heavy skillet.", "pain": 0, "stiffness": 0, "mobility": 0, "grip": 2, "source": "hand_written"},
+    {"text": "Moderate stiffness throughout the afternoon; grasping doorknobs feels slightly awkward.", "pain": 0, "stiffness": 2, "mobility": 1, "grip": 1, "source": "hand_written"},
+    {"text": "Horrible pain radiating to my elbow, cannot clench fingers even halfway.", "pain": 3, "stiffness": 2, "mobility": 3, "grip": 2, "source": "hand_written"},
+    {"text": "Knuckles were a tiny bit puffy and stiff upon waking, but loosened up after coffee.", "pain": 0, "stiffness": 1, "mobility": 0, "grip": 0, "source": "hand_written"},
+    {"text": "Pain free day! Cut up vegetables for dinner and had no trouble holding the knife.", "pain": 0, "stiffness": 0, "mobility": 0, "grip": 0, "source": "hand_written"},
+    {"text": "Extreme soreness after yesterday stretching exercises, hand is exhausted.", "pain": 3, "stiffness": 1, "mobility": 2, "grip": 1, "source": "hand_written"},
+    {"text": "Grip failed me completely while trying to turn the key in the front door.", "pain": 0, "stiffness": 0, "mobility": 1, "grip": 3, "source": "hand_written"},
+    {"text": "Mild discomfort while writing notes, but joint flexibility was surprisingly good.", "pain": 1, "stiffness": 0, "mobility": 0, "grip": 0, "source": "hand_written"},
+    {"text": "Fingers are locked straight, cannot curl them enough to hold a fork.", "pain": 1, "stiffness": 3, "mobility": 3, "grip": 3, "source": "hand_written"},
+    {"text": "Slight ache in the thumb joint, but managed to tie my shoelaces independently.", "pain": 1, "stiffness": 0, "mobility": 0, "grip": 1, "source": "hand_written"},
+    {"text": "No pain and no swelling today, fingers are bending nicely during exercises.", "pain": 0, "stiffness": 0, "mobility": 0, "grip": 0, "source": "hand_written"},
+    {"text": "Intense throbbing after carrying a light backpack, hand felt weak and shaky.", "pain": 3, "stiffness": 0, "mobility": 1, "grip": 2, "source": "hand_written"},
+    {"text": "Stiffness is lingering longer than usual, struggled to pick up paperclips from the desk.", "pain": 0, "stiffness": 2, "mobility": 1, "grip": 2, "source": "hand_written"},
+    {"text": "Zero soreness, but thumb movement remains restricted to half of its normal range.", "pain": 0, "stiffness": 0, "mobility": 2, "grip": 0, "source": "hand_written"},
+    {"text": "Sharp pinch of pain when grabbing a heavy plate, dropped it right back onto the counter.", "pain": 3, "stiffness": 0, "mobility": 1, "grip": 3, "source": "hand_written"},
+    {"text": "Morning stiffness was mild and cleared in ten minutes; gripped steering wheel firmly.", "pain": 0, "stiffness": 1, "mobility": 0, "grip": 0, "source": "hand_written"},
+    {"text": "Unbearable pain in wrist joint, unable to support any weight or bend hand.", "pain": 3, "stiffness": 2, "mobility": 3, "grip": 3, "source": "hand_written"},
+    {"text": "Hand feels somewhat sluggish and tight, but not painful.", "pain": 0, "stiffness": 2, "mobility": 1, "grip": 0, "source": "hand_written"},
+    {"text": "Did all prescribed finger extension stretches without any ache or resistance.", "pain": 0, "stiffness": 0, "mobility": 0, "grip": 0, "source": "hand_written"},
+    {"text": "Weak grasp made it tricky to pull my socks up, though joints are not sore.", "pain": 0, "stiffness": 0, "mobility": 1, "grip": 2, "source": "hand_written"},
+    {"text": "Constant dull ache in knuckles, typing on laptop is getting frustrating.", "pain": 2, "stiffness": 1, "mobility": 1, "grip": 1, "source": "hand_written"},
+    {"text": "Pain subsided completely by afternoon; range of motion feels almost back to normal.", "pain": 0, "stiffness": 0, "mobility": 0, "grip": 0, "source": "hand_written"},
+    {"text": "Hand feels stiff and uncooperative, could not write legibly with a ballpoint pen.", "pain": 1, "stiffness": 2, "mobility": 2, "grip": 2, "source": "hand_written"},
+    {"text": "Sharp ache when flexing wrist backwards, though fingers grip things without issue.", "pain": 2, "stiffness": 0, "mobility": 1, "grip": 0, "source": "hand_written"},
+]
+
+
 def generate_hand_written_test_set(
     seed_jsonl_path: str = "data/raw/seed_examples.jsonl",
     output_csv_path: str = "data/raw/hand_written_test.csv"
 ) -> pd.DataFrame:
     """
-    Loads hand-written seed examples from seed_examples.jsonl,
-    assigns token-level BIO tags using rule-based alignment,
-    and saves to hand_written_test.csv.
+    Loads hand-written seed examples from seed_examples.jsonl and merges with
+    the curated 42 hand-written entries to form a comprehensive 50-entry test set.
+    Assigns token-level BIO tags using rule-based alignment and saves to hand_written_test.csv.
     Leaves seed_examples.jsonl completely untouched.
     """
     if not os.path.exists(seed_jsonl_path):
@@ -530,6 +576,9 @@ def generate_hand_written_test_set(
             if line:
                 records.append(json.loads(line))
 
+    # Append additional 42 hand-written examples
+    records.extend(ADDITIONAL_HAND_WRITTEN)
+
     # Tokenizer regex
     tok_regex = re.compile(r"\w+|[^\w\s]")
 
@@ -537,11 +586,15 @@ def generate_hand_written_test_set(
     severity_vocab = {
         "no", "not", "zero", "none", "without", "free", "mild", "slight", "bit",
         "moderate", "quite", "fairly", "sharp", "worse", "severe", "extreme",
-        "cannot", "could not", "barely", "full", "much", "better", "easily", "weak"
+        "cannot", "could", "barely", "full", "much", "better", "easily", "weak",
+        "horrible", "unbearable", "excruciating", "terrible", "bad", "dead",
+        "exhausted", "hard", "difficult", "subsided", "loosened"
     }
     symptom_vocab = {
-        "pain", "ache", "soreness", "stiff", "stiffness", "tight", "moves",
-        "movement", "gripped", "hold", "pick", "fist", "typing"
+        "pain", "ache", "aches", "soreness", "stiff", "stiffness", "tight", "tightness",
+        "moves", "movement", "move", "gripped", "grip", "grasp", "hold", "holding",
+        "pick", "fist", "typing", "bend", "bending", "flexing", "flex", "straighten",
+        "curl", "pinch", "throbbing", "burning", "locked", "swelling"
     }
 
     formatted_rows = []

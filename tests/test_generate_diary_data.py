@@ -99,8 +99,7 @@ def test_raw_seed_files_preserved():
 
 
 def test_hand_written_test_set():
-    """Hand-written test set is generated with required columns and source='hand_written'."""
     hw_df = generate_hand_written_test_set()
-    assert len(hw_df) >= 8
+    assert len(hw_df) >= 50, f"Expected >= 50 hand-written test rows, got {len(hw_df)}"
     assert "bio_tags" in hw_df.columns
     assert (hw_df["source"] == "hand_written").all()
