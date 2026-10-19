@@ -1,0 +1,7 @@
+Metric,Value
+Total Hand-Written Tokens,588.0
+Hand-Written OOV Before Rebuild,191.0
+Hand-Written OOV Rate Before Rebuild (%),32.48
+Hand-Written OOV After Rebuild,2.0
+Hand-Written OOV Rate After Rebuild (%),0.34
+Absolute OOV Reduction (%),32.14

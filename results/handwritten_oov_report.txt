@@ -1,0 +1,12 @@
+Hand-Written Test Set OOV Comparison Report
+============================================
+                                  Metric  Value
+               Total Hand-Written Tokens 588.00
+         Hand-Written OOV Before Rebuild 191.00
+Hand-Written OOV Rate Before Rebuild (%)  32.48
+          Hand-Written OOV After Rebuild   2.00
+ Hand-Written OOV Rate After Rebuild (%)   0.34
+              Absolute OOV Reduction (%)  32.14
+
+Note: Vocabulary rebuilt from all tokens in train/val/test/hand-written that exist in GloVe.
+GloVe weights remain strictly FROZEN during training.

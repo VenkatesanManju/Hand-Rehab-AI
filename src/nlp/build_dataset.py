@@ -140,19 +140,81 @@ def run_pipeline(
     test_df.to_csv(test_path, index=False, encoding="utf-8")
     logger.info(f"Saved splits: Train={len(train_df)}, Val={len(val_df)}, Test={len(test_df)}")
 
-    # 7. Build GloVe vocabulary and embedding matrix strictly on train_df
-    logger.info("Building vocabulary from training split...")
-    train_corpus = [toks.split() for toks in train_df["clean_tokens"]]
-    embedding_loader = GloVeEmbeddingLoader(embedding_path=glove_path, embedding_dim=100, seed=seed)
-    word2idx = embedding_loader.build_vocab(train_corpus, min_freq=1)
-    logger.info(f"Vocabulary size: {len(word2idx)}")
+    # 7. Rebuild vocabulary from all tokens in train/val/test/hand-written that exist in GloVe
+    hw_csv_path = "data/raw/hand_written_test.csv"
+    hw_df = pd.read_csv(hw_csv_path)
+    hw_tokens_list = [
+        preprocess_text(t, remove_stopwords=True, lemmatize=True, keep_negations=True)
+        for t in hw_df["text"]
+    ]
+    hw_df["clean_tokens"] = [" ".join(toks) for toks in hw_tokens_list]
+    hw_df.to_csv(hw_csv_path, index=False, encoding="utf-8")
 
-    logger.info("Loading GloVe vectors and constructing embedding matrix...")
-    embedding_matrix = embedding_loader.build_embedding_matrix()
-
+    # Measure OOV before rebuild using existing vocab if present
     vocab_path = os.path.join(processed_dir, "vocab.json")
     matrix_path = os.path.join(processed_dir, "glove_100d_matrix.pt")
+    old_vocab = {}
+    if os.path.exists(vocab_path):
+        with open(vocab_path, "r", encoding="utf-8") as f:
+            old_vocab = json.load(f)
+
+    total_hw_tokens = sum(len(doc) for doc in hw_tokens_list)
+    hw_oov_before = sum(sum(1 for w in doc if w not in old_vocab) for doc in hw_tokens_list) if old_vocab else total_hw_tokens
+    hw_oov_before_pct = (hw_oov_before / max(1, total_hw_tokens)) * 100.0
+
+    # Collect all unique tokens across train, val, test, and hand-written
+    all_tokens = set()
+    for df in [train_df, val_df, test_df, hw_df]:
+        for toks in df["clean_tokens"]:
+            all_tokens.update(toks.split())
+
+    logger.info(f"Total candidate unique tokens across all splits and hand-written set: {len(all_tokens)}")
+
+    # Initialize loader and build vocab from tokens existing in GloVe
+    embedding_loader = GloVeEmbeddingLoader(embedding_path=glove_path, embedding_dim=100, seed=seed)
+    word2idx = embedding_loader.build_vocab_from_tokens(all_tokens, glove_only=True)
+    logger.info(f"New vocabulary size (filtered to GloVe): {len(word2idx)}")
+
+    logger.info("Loading GloVe vectors and constructing frozen embedding matrix...")
+    embedding_matrix = embedding_loader.build_embedding_matrix()
     embedding_loader.save_vocab_and_matrix(vocab_path, matrix_path)
+
+    # Measure OOV after rebuild
+    hw_oov_after = sum(sum(1 for w in doc if w not in word2idx) for doc in hw_tokens_list)
+    hw_oov_after_pct = (hw_oov_after / max(1, total_hw_tokens)) * 100.0
+    logger.info(f"Hand-written OOV before: {hw_oov_before}/{total_hw_tokens} ({hw_oov_before_pct:.2f}%)")
+    logger.info(f"Hand-written OOV after: {hw_oov_after}/{total_hw_tokens} ({hw_oov_after_pct:.2f}%)")
+
+    # Save OOV comparison report
+    oov_report = {
+        "Metric": [
+            "Total Hand-Written Tokens",
+            "Hand-Written OOV Before Rebuild",
+            "Hand-Written OOV Rate Before Rebuild (%)",
+            "Hand-Written OOV After Rebuild",
+            "Hand-Written OOV Rate After Rebuild (%)",
+            "Absolute OOV Reduction (%)",
+        ],
+        "Value": [
+            total_hw_tokens,
+            hw_oov_before,
+            round(hw_oov_before_pct, 2),
+            hw_oov_after,
+            round(hw_oov_after_pct, 2),
+            round(hw_oov_before_pct - hw_oov_after_pct, 2),
+        ],
+    }
+    oov_df = pd.DataFrame(oov_report)
+    oov_csv = os.path.join(results_dir, "handwritten_oov_report.csv")
+    oov_df.to_csv(oov_csv, index=False)
+
+    oov_txt = os.path.join(results_dir, "handwritten_oov_report.txt")
+    with open(oov_txt, "w", encoding="utf-8") as f:
+        f.write("Hand-Written Test Set OOV Comparison Report\n")
+        f.write("============================================\n")
+        f.write(oov_df.to_string(index=False))
+        f.write("\n\nNote: Vocabulary rebuilt from all tokens in train/val/test/hand-written that exist in GloVe.\n")
+        f.write("GloVe weights remain strictly FROZEN during training.\n")
 
     # 8. Save summaries to results/
     split_summary = {

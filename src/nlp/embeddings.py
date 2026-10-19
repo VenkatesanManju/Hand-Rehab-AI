@@ -94,6 +94,35 @@ class GloVeEmbeddingLoader:
 
         return self.word2idx
 
+    def build_vocab_from_tokens(
+        self,
+        token_set: Set[str],
+        glove_only: bool = True,
+        raw_embeddings: Optional[Dict[str, np.ndarray]] = None,
+    ) -> Dict[str, int]:
+        """
+        Builds vocabulary from a set of tokens across all splits.
+        If glove_only is True, includes only tokens that exist in GloVe.
+        Index 0 is <pad>, Index 1 is <unk>.
+        """
+        if glove_only and raw_embeddings is None:
+            raw_embeddings = self.load_raw_embeddings(vocab_filter=token_set)
+
+        self.word2idx = {PAD_TOKEN: PAD_IDX, UNK_TOKEN: UNK_IDX}
+        self.idx2word = {PAD_IDX: PAD_TOKEN, UNK_IDX: UNK_TOKEN}
+
+        sorted_tokens = sorted(list(token_set))
+        curr_idx = 2
+        for tok in sorted_tokens:
+            if glove_only and raw_embeddings is not None and tok not in raw_embeddings:
+                continue
+            if tok not in self.word2idx:
+                self.word2idx[tok] = curr_idx
+                self.idx2word[curr_idx] = tok
+                curr_idx += 1
+
+        return self.word2idx
+
     def build_embedding_matrix(
         self,
         raw_embeddings: Optional[Dict[str, np.ndarray]] = None,

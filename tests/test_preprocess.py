@@ -15,13 +15,30 @@ from src.nlp.preprocess import (
 
 
 def test_no_pain_but_stiff():
-    """Explicit MASTER_PLAN requirement: Unit test for 'no pain but stiff'."""
-    tokens = preprocess_text("no pain but stiff")
-    assert "no" in tokens, "'no' was removed from 'no pain but stiff'!"
+    """Unit test for 'no pain but very stiff' and 'no pain but stiff'."""
+    tokens = preprocess_text("no pain but very stiff")
+    assert "no" in tokens, "'no' was removed!"
     assert "pain" in tokens, "'pain' was removed!"
+    assert "but" in tokens, "'but' was removed!"
+    assert "very" in tokens, "'very' was removed!"
     assert "stiff" in tokens, "'stiff' was removed!"
-    # 'but' is a standard stopword and safely removed
-    assert "but" not in tokens
+
+
+def test_protected_modifiers_and_no_bite():
+    """Verify 'bit', 'little', 'barely', 'slightly', 'but' are protected from removal/lemmatization."""
+    # Critical test: 'a bit tight' must become ['bit', 'tight'], NOT ['bite', 'tight']
+    tokens = preprocess_text("a bit tight")
+    assert "bit" in tokens, "'bit' was missing from 'a bit tight'!"
+    assert "bite" not in tokens, "'bit' was erroneously lemmatized to 'bite'!"
+    assert "tight" in tokens
+
+    # Test little, barely, slightly, but
+    text = "little soreness, barely moves, slightly stiff but improving"
+    tokens2 = preprocess_text(text)
+    assert "little" in tokens2
+    assert "barely" in tokens2
+    assert "slightly" in tokens2
+    assert "but" in tokens2
 
 
 def test_all_negations_preserved():

@@ -78,8 +78,18 @@ try:
 except Exception:
     _raw_stopwords = set()
 
-# Safe stopword set: standard stopwords MINUS all negation words
-SAFE_STOPWORDS: Set[str] = _raw_stopwords - NEGATION_WORDS
+# Words explicitly protected from stopword removal and lemmatization
+PROTECTED_WORDS: Set[str] = {
+    "bit",
+    "little",
+    "barely",
+    "slightly",
+    "but",
+    "very",
+}
+
+# Safe stopword set: standard stopwords MINUS all negation and protected words
+SAFE_STOPWORDS: Set[str] = _raw_stopwords - NEGATION_WORDS - PROTECTED_WORDS
 
 
 def expand_contractions(text: str) -> str:
@@ -105,8 +115,8 @@ def preprocess_text(
     1. Expands contractions (e.g. 'can't' -> 'cannot')
     2. Lowercases
     3. Tokenizes into words
-    4. Filters non-negation stop-words (preserving all negations)
-    5. Lemmatizes tokens
+    4. Filters non-negation, non-protected stop-words (preserving negations & modifiers)
+    5. Lemmatizes tokens (protecting words like 'bit', 'little', 'barely', 'slightly', 'but')
     
     Returns list of processed tokens.
     """
@@ -126,20 +136,25 @@ def preprocess_text(
     for token in raw_tokens:
         # Check stopword removal
         if remove_stopwords:
-            if keep_negations and token in NEGATION_WORDS:
-                pass  # Explicitly preserve negation token
+            if keep_negations and (token in NEGATION_WORDS or token in PROTECTED_WORDS):
+                pass  # Explicitly preserve negation and modifier tokens
             elif token in SAFE_STOPWORDS:
                 continue
 
-        # Lemmatize
+        # Lemmatize (skip protected words to prevent 'bit' -> 'bite')
         if lemmatize:
-            lemma = _lemmatizer.lemmatize(token)
-            # Try verb lemmatization if unchanged
-            if lemma == token:
-                lemma = _lemmatizer.lemmatize(token, pos="v")
-            processed_tokens.append(lemma)
+            if token in PROTECTED_WORDS or (keep_negations and token in NEGATION_WORDS):
+                processed_tokens.append(token)
+            else:
+                lemma = _lemmatizer.lemmatize(token)
+                # Try verb lemmatization if unchanged, unless in protected set
+                if lemma == token and token not in PROTECTED_WORDS:
+                    lemma = _lemmatizer.lemmatize(token, pos="v")
+                processed_tokens.append(lemma)
         else:
             processed_tokens.append(token)
+
+    return processed_tokens
 
     return processed_tokens
 

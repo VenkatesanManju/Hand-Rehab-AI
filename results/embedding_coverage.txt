@@ -1,10 +1,10 @@
 GloVe 100d Embedding Coverage Report
 =====================================
        Metric  Value
-   vocab_size 243.00
-content_words 241.00
-   glove_hits 239.00
-    oov_count   2.00
- coverage_pct  99.17
+   vocab_size  398.0
+content_words  396.0
+   glove_hits  396.0
+    oov_count    0.0
+ coverage_pct  100.0
 
-OOV Words (2): ['excruciate', 'physioo']
+OOV Words (0): []
