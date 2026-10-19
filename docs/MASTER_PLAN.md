@@ -43,16 +43,23 @@ Primary contribution = diary NLP + comparison of RNN, LSTM, GRU, BiLSTM(+attenti
   classification (precision, recall, F1). Window length 14 days.
 - Output: results/trend_comparison.csv + forecast plot. State clearly: simulated data.
 
-## Phase 5 - Webcam exercise demo (src/vision/)
-- MediaPipe Hands: 21 landmarks, finger joint angles, range of motion, rep counter (finger curl),
-  simple form score vs target angle. Runs from webcam and from a video file. No training.
-- Test angle maths on synthetic landmark inputs.
+## Phase 5 - Browser-based hand tracking (app/frontend/vendor/)
+- Browser-based hand tracking in JavaScript using MediaPipe Tasks Vision (hand landmarker).
+- 21 landmarks, finger joint angles, range of motion, repetition counter (finger curl),
+  and form score vs target angle computed directly in JS on the webcam feed.
+- Library and model files stored locally in app/frontend/vendor/ so the demo works offline.
 
-## Phase 6 - Fusion and dashboard (app/)
-- Daily feature vector = diary severities + ROM. Store by date (CSV/SQLite).
-- Streamlit app: diary box -> predicted severities + highlighted words; webcam/video ROM result;
-  recovery graph; plateau/relapse alert text ("consult your physiotherapist").
-- Disclaimer shown on every page: monitoring aid, not diagnosis.
+## Phase 6 - Flask API and Web Dashboard (app/)
+- Flask backend (app/backend/) exposing:
+  * POST /api/diary: severities + attention words from the best validation-selected diary model.
+  * POST /api/trend: next-day forecast + plateau/relapse alert.
+- Frontend in app/frontend/ (index.html, style.css, app.js) with Chart.js (vendored locally):
+  * Diary input box with highlighted causal words.
+  * Live webcam panel with real-time angles, ROM, and rep counts.
+  * Recovery graph showing longitudinal trajectory.
+  * Alerts ("consult your physiotherapist" on plateau/relapse).
+  * Prominent, visible "monitoring aid, not diagnosis" disclaimer on the page.
+  * Daily entries stored in browser localStorage.
 
 ## Phase 7 - Report assets (results/, docs/)
 - Final tables and figures; docs/REPORT_NOTES.md with method, results, limitations, future work

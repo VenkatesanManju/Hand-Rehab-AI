@@ -9,8 +9,14 @@
    detection (MAE, RMSE, precision, recall).
 
 ## DEMO - light, no training
-4. MediaPipe Hands: joint angles, range of motion, repetition count, form score on webcam.
-5. Streamlit dashboard showing diary severity, ROM, trend graph and alerts.
+4. Browser-based hand tracking in JavaScript using MediaPipe Tasks Vision (hand landmarker).
+   Joint angles, range of motion, rep counter and form score computed in JS. Library and
+   model files stored locally in app/frontend/vendor/ so the demo works offline.
+5. Flask backend (app/backend/) exposing POST /api/diary (severities + attention words from the
+   best validation-selected diary model) and POST /api/trend (forecast + plateau/relapse alert).
+   Frontend in app/frontend/ (index.html, style.css, app.js) with Chart.js (also vendored locally),
+   a diary box with highlighted words, a webcam panel, a recovery graph, alerts, and a visible
+   "monitoring aid, not diagnosis" disclaimer. Daily entries stored in localStorage.
 
 ## FUTURE WORK - slides only, do NOT build
 - Sign-language dexterity score, Whisper voice diary, sentence-embedding recommender,

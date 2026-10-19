@@ -8,7 +8,7 @@ mediapipe
 opencv-python
 matplotlib
 seaborn
-streamlit
+flask
 shap
 pytest
 jupyter
