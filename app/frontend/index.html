@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HandRehab AI — Recovery Monitoring System</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Local Vendored Chart.js -->
+  <script src="vendor/chart.umd.min.js"></script>
+</head>
+<body>
+  <!-- Clinical Disclaimer Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="logo-area">
+        <span class="icon">🖐️</span>
+        <div>
+          <h1>HandRehab AI</h1>
+          <p class="subtitle">Post-Surgical Hand Rehabilitation & Recovery Monitoring</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="btn-load-sample" class="btn btn-secondary">📁 Load 60-Day Sample Patient</button>
+        <button id="btn-reset-data" class="btn btn-outline">🔄 Reset Session</button>
+      </div>
+    </div>
+    <div class="disclaimer-banner">
+      <span class="badge-notice">CLINICAL NOTICE</span>
+      <span>This system is an objective rehabilitation monitoring aid, not a diagnostic medical device. Alerts advise consulting your physiotherapist.</span>
+    </div>
+  </header>
+
+  <main class="dashboard-grid">
+    <!-- PANEL 1: Rehab Diary NLP -->
+    <section class="card panel-diary">
+      <div class="card-header">
+        <h2>📝 Daily Rehabilitation Diary (NLP)</h2>
+        <span class="pill-tech">BiLSTM / GRU + GloVe</span>
+      </div>
+      <p class="card-desc">Write your daily rehabilitation experience. The NLP model extracts symptoms, predicts severities (0–3), and highlights causal words.</p>
+
+      <div class="quick-samples">
+        <span class="label-tiny">Quick Samples:</span>
+        <button class="chip-sample" data-text="No pain today but my fingers were very stiff in the morning.">Morning Stiffness</button>
+        <button class="chip-sample" data-text="Mild ache after typing, wrist is a bit tight but moving fine.">Mild Ache</button>
+        <button class="chip-sample" data-text="Sharp pain when I tried to close my fist, could not hold a cup.">Acute Flare-Up</button>
+        <button class="chip-sample" data-text="Felt much better, did all my exercises and gripped a bottle easily.">Full Movement</button>
+      </div>
+
+      <textarea id="diary-input" rows="4" placeholder="e.g., Woke up with no pain, but thumb feels slightly tight when opening jars..."></textarea>
+      
+      <div class="action-row">
+        <button id="btn-analyze-diary" class="btn btn-primary">🔍 Analyze Diary Entry</button>
+        <span id="diary-loading" class="spinner-text hidden">Processing NLP tokens...</span>
+      </div>
+
+      <!-- Severities Output Grid -->
+      <div class="severity-grid">
+        <div class="severity-card" id="card-pain">
+          <span class="sev-name">Pain</span>
+          <span class="sev-val" id="val-pain">-</span>
+          <span class="sev-badge" id="badge-pain">Pending</span>
+        </div>
+        <div class="severity-card" id="card-stiffness">
+          <span class="sev-name">Stiffness</span>
+          <span class="sev-val" id="val-stiffness">-</span>
+          <span class="sev-badge" id="badge-stiffness">Pending</span>
+        </div>
+        <div class="severity-card" id="card-mobility">
+          <span class="sev-name">Mobility Limit</span>
+          <span class="sev-val" id="val-mobility">-</span>
+          <span class="sev-badge" id="badge-mobility">Pending</span>
+        </div>
+        <div class="severity-card" id="card-grip">
+          <span class="sev-name">Grip Weakness</span>
+          <span class="sev-val" id="val-grip">-</span>
+          <span class="sev-badge" id="badge-grip">Pending</span>
+        </div>
+      </div>
+
+      <!-- Causal Word Attribution -->
+      <div class="causal-words-container">
+        <h3>🎯 Explainable Attention & Causal Word Attribution</h3>
+        <p class="card-tiny">Words triggering severity predictions (higher intensity indicates higher causal weight):</p>
+        <div id="causal-chips" class="chip-container">
+          <span class="placeholder-text">Submit a diary entry above to view causal words.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 2: Webcam Hand Tracking & ROM (Vision) -->
+    <section class="card panel-vision">
+      <div class="card-header">
+        <h2>📷 Exercise Form Checker (Vision)</h2>
+        <span class="pill-tech">MediaPipe Tasks Vision JS</span>
+      </div>
+      <p class="card-desc">Tracks 21 hand landmarks in the browser. Calculates joint angles, Range of Motion (ROM), reps, and form quality in real time.</p>
+
+      <div class="vision-controls">
+        <button id="btn-start-camera" class="btn btn-success">▶ Start Camera</button>
+        <button id="btn-stop-camera" class="btn btn-secondary" disabled>⏹ Stop</button>
+        <button id="btn-simulate-exercise" class="btn btn-outline">▶ Simulated Demo</button>
+      </div>
+
+      <div class="video-container">
+        <video id="webcam-video" autoplay playsinline muted></video>
+        <canvas id="vision-canvas"></canvas>
+        <div id="vision-placeholder" class="vision-placeholder">
+          <span>Camera paused or inactive.<br>Click <strong>Start Camera</strong> or <strong>Simulated Demo</strong>.</span>
+        </div>
+      </div>
+
+      <!-- Real-Time Movement Readouts -->
+      <div class="vision-metrics-grid">
+        <div class="metric-box">
+          <span class="m-label">Finger Angle</span>
+          <span class="m-val" id="live-angle">175°</span>
+          <span class="m-sub">Index/Middle PIP</span>
+        </div>
+        <div class="metric-box">
+          <span class="m-label">Active ROM</span>
+          <span class="m-val highlight" id="live-rom">5°</span>
+          <span class="m-sub">Flexion (0–100°)</span>
+        </div>
+        <div class="metric-box">
+          <span class="m-label">Reps Completed</span>
+          <span class="m-val" id="live-reps">0</span>
+          <span class="m-sub">Finger Curls</span>
+        </div>
+        <div class="metric-box">
+          <span class="m-label">Form Score</span>
+          <span class="m-val" id="live-form">95%</span>
+          <span class="m-sub">Target Quality</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 3: Recovery Trend & Relapse Alert -->
+    <section class="card panel-trend">
+      <div class="card-header">
+        <h2>📈 Recovery Trend & Relapse Warning</h2>
+        <span class="pill-tech">Multi-Task GRU / LSTM</span>
+      </div>
+      <p class="card-desc">Integrates diary severities with objective ROM over time. Forecasts recovery and warns of clinical plateaus or acute flare-ups.</p>
+
+      <!-- Status Alert Box -->
+      <div id="alert-banner" class="status-banner banner-success">
+        <div class="alert-icon" id="alert-icon">✅</div>
+        <div>
+          <h4 id="alert-title">Recovery Progression On Track</h4>
+          <p id="alert-message">Steady functional improvement observed. Continue your prescribed exercises.</p>
+        </div>
+      </div>
+
+      <!-- Chart Container -->
+      <div class="chart-wrapper">
+        <canvas id="trendChart"></canvas>
+      </div>
+
+      <!-- Next-Day Forecast Box -->
+      <div class="forecast-summary">
+        <h4>Tomorrow's 1-Day AI Forecast:</h4>
+        <div class="forecast-pills">
+          <span class="f-pill">Pain: <strong id="f-pain">1.2</strong>/3</span>
+          <span class="f-pill">Stiffness: <strong id="f-stiff">1.1</strong>/3</span>
+          <span class="f-pill">Mobility: <strong id="f-mob">0.9</strong>/3</span>
+          <span class="f-pill">Grip: <strong id="f-grip">1.0</strong>/3</span>
+          <span class="f-pill">ROM: <strong id="f-rom">68.5°</strong></span>
+        </div>
+      </div>
+
+      <div class="record-session-row">
+        <button id="btn-save-session" class="btn btn-primary btn-block">💾 Record Today's Session to History</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <p>HandRehab AI — Pair Programming Research Prototype | Fixed Seed 42 | PyTorch & MediaPipe Tasks Vision JS</p>
+    <p class="footer-disclaimer">Notice: Simulated and experimental data. Not certified for medical diagnosis or clinical prescription. Consult a licensed physiotherapist.</p>
+  </footer>
+
+  <!-- Application Logic (ES Module for local MediaPipe Tasks Vision JS) -->
+  <script type="module" src="app.js"></script>
+</body>
+</html>

@@ -6,6 +6,7 @@
 - [x] 5. RNN/LSTM/GRU/BiLSTM comparison (src/compare/) -> results/diary_comparison.csv
 - [x] 6. Simulated recovery curves (data/simulated) with plateau/relapse labels
 - [x] 7. Trend model LSTM/GRU (src/trend/) -> results/trend_comparison.csv
-- [ ] 8. Browser-based hand tracking with MediaPipe Tasks Vision JS (app/frontend/vendor/)
-- [ ] 9. Flask API backend (app/backend/) & HTML/CSS/JS dashboard (app/frontend/)
-- [ ] 10. Report tables/plots and presentation outline
+- [x] 8. Browser-based hand tracking with MediaPipe Tasks Vision JS (app/frontend/vendor/)
+- [x] 9. Flask API backend (app/backend/) & HTML/CSS/JS dashboard (app/frontend/)
+- [x] 10. Report tables/plots and presentation outline
+
