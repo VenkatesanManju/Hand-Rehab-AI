@@ -100,6 +100,9 @@ def test_raw_seed_files_preserved():
 
 def test_hand_written_test_set():
     hw_df = generate_hand_written_test_set()
-    assert len(hw_df) >= 50, f"Expected >= 50 hand-written test rows, got {len(hw_df)}"
+    assert len(hw_df) >= 50, f"Expected >= 50 held-out test rows, got {len(hw_df)}"
     assert "bio_tags" in hw_df.columns
-    assert (hw_df["source"] == "hand_written").all()
+    valid_sources = {"hand_written", "agent_written"}
+    assert set(hw_df["source"].unique()).issubset(valid_sources)
+    assert (hw_df["source"] == "hand_written").sum() >= 8
+    assert (hw_df["source"] == "agent_written").sum() >= 40

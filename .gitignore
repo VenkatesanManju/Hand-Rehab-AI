@@ -4,5 +4,4 @@ __pycache__/
 *.bin
 data/embeddings/
 glove.6B/
-*.txt
 .ipynb_checkpoints/
