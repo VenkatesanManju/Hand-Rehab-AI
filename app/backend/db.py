@@ -175,10 +175,37 @@ def get_user_records(user_id: int) -> List[Dict[str, Any]]:
 
 def add_user_record(user_id: int, day: int, pain: float, stiffness: float,
                     mobility: float, grip: float, rom: float, reps: int = 0,
-                    diary_text: str = "") -> Dict[str, Any]:
-    """Appends a new daily rehabilitation session to the user's history."""
+                    diary_text: str = "", update_if_same_day: bool = False) -> Dict[str, Any]:
+    """
+    Appends a new daily rehabilitation session or updates today's existing session.
+    If update_if_same_day is True and a record with this day exists, accumulates reps
+    and keeps peak ROM achieved today.
+    """
     with get_db_connection() as conn:
         cursor = conn.cursor()
+
+        if update_if_same_day:
+            cursor.execute("""
+                SELECT id, rom, reps FROM rehab_records
+                WHERE user_id = ? AND day = ?
+                ORDER BY id DESC LIMIT 1
+            """, (user_id, day))
+            existing = cursor.fetchone()
+
+            if existing:
+                rec_id = existing["id"]
+                peak_rom = max(float(existing["rom"]), float(rom))
+                total_reps = int(existing["reps"]) + int(reps)
+                cursor.execute("""
+                    UPDATE rehab_records
+                    SET pain = ?, stiffness = ?, mobility = ?, grip = ?,
+                        rom = ?, reps = ?, diary_text = ?, recorded_at = CURRENT_TIMESTAMP
+                    WHERE id = ?
+                """, (pain, stiffness, mobility, grip, peak_rom, total_reps, diary_text, rec_id))
+                conn.commit()
+                return {"success": True, "record_id": rec_id, "updated": True}
+
+        # Otherwise insert new record
         cursor.execute("""
             INSERT INTO rehab_records (user_id, day, pain, stiffness, mobility, grip, rom, reps, diary_text)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -186,4 +213,5 @@ def add_user_record(user_id: int, day: int, pain: float, stiffness: float,
         record_id = cursor.lastrowid
         conn.commit()
 
-        return {"success": True, "record_id": record_id}
+        return {"success": True, "record_id": record_id, "updated": False}
+

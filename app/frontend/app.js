@@ -615,6 +615,7 @@ async function loadUserSession(user) {
       updateTrendChart(patientHistory);
       renderHistoryTable(patientHistory);
       requestTrendAnalysis(patientHistory);
+      updateDayLabels();
     }
   } catch (err) {
     console.error('Error fetching user records:', err);
@@ -646,26 +647,72 @@ function showAuthAlert(msg, type = 'error') {
   el.classList.remove('hidden');
 }
 
+function updateDayLabels() {
+  const saveLabel = document.getElementById('label-save-day');
+  const advanceLabel = document.getElementById('label-advance-day');
+  if (!saveLabel || !advanceLabel) return;
+
+  const todayStr = new Date().toISOString().substring(0, 10);
+  if (!patientHistory || patientHistory.length === 0) {
+    saveLabel.textContent = 'Day 1';
+    advanceLabel.textContent = 'Day 2';
+    return;
+  }
+
+  const lastRecord = patientHistory[patientHistory.length - 1];
+  const lastDate = lastRecord.recorded_at ? lastRecord.recorded_at.substring(0, 10) : '';
+
+  if (lastDate === todayStr) {
+    saveLabel.textContent = `Day ${lastRecord.day} (Update Today)`;
+    advanceLabel.textContent = `Day ${lastRecord.day + 1}`;
+  } else {
+    const nextDay = lastRecord.day + 1;
+    saveLabel.textContent = `Day ${nextDay}`;
+    advanceLabel.textContent = `Day ${nextDay + 1}`;
+  }
+}
+
 // --- Session Recording ---
 
-async function saveTodaySession() {
+async function saveSession(advanceDay = false) {
   if (!currentUser) {
     alert('Please sign in to save your session.');
     return;
   }
 
-  const nextDay = patientHistory.length > 0 ? (patientHistory[patientHistory.length - 1].day + 1) : 1;
+  const todayStr = new Date().toISOString().substring(0, 10);
+  let targetDay = 1;
+  let updateIfSame = false;
+
+  if (patientHistory && patientHistory.length > 0) {
+    const lastRecord = patientHistory[patientHistory.length - 1];
+    const lastDate = lastRecord.recorded_at ? lastRecord.recorded_at.substring(0, 10) : '';
+
+    if (advanceDay) {
+      targetDay = lastRecord.day + 1;
+      updateIfSame = false;
+    } else {
+      if (lastDate === todayStr) {
+        targetDay = lastRecord.day;
+        updateIfSame = true;
+      } else {
+        targetDay = lastRecord.day + 1;
+        updateIfSame = false;
+      }
+    }
+  }
 
   const payload = {
     user_id: currentUser.id,
-    day: nextDay,
+    day: targetDay,
     pain: currentDiaryPred.pain,
     stiffness: currentDiaryPred.stiffness,
     mobility: currentDiaryPred.mobility,
     grip: currentDiaryPred.grip,
     rom: currentROM,
     reps: repCount,
-    diary_text: currentDiaryPred.text || 'Daily exercise and finger curl training.'
+    diary_text: currentDiaryPred.text || 'Daily exercise and finger curl training.',
+    update_if_same_day: updateIfSame
   };
 
   try {
@@ -676,7 +723,17 @@ async function saveTodaySession() {
     });
 
     if (!res.ok) throw new Error('Failed to record session.');
-    alert(`Success! Recorded Day ${nextDay} session for ${currentUser.full_name}.`);
+    const data = await res.json();
+
+    if (data.updated) {
+      alert(`Success! Updated today's Day ${targetDay} session for ${currentUser.full_name}.\nPeak ROM and completed reps were accumulated for today.`);
+    } else {
+      alert(`Success! Recorded Day ${targetDay} session for ${currentUser.full_name}.`);
+    }
+
+    // Reset rep counter for next session
+    repCount = 0;
+    updateVisionUI();
 
     // Reload history
     const histRes = await fetch(`/api/user/history?user_id=${currentUser.id}`);
@@ -686,6 +743,7 @@ async function saveTodaySession() {
       updateTrendChart(patientHistory);
       renderHistoryTable(patientHistory);
       requestTrendAnalysis(patientHistory);
+      updateDayLabels();
     }
 
     // Switch to Report Tab so user can see their updated trajectory
@@ -695,6 +753,7 @@ async function saveTodaySession() {
     alert('Failed to save session: ' + err.message);
   }
 }
+
 
 // --- View Navigation ---
 
@@ -835,6 +894,7 @@ window.addEventListener('DOMContentLoaded', async () => {
           updateTrendChart(patientHistory);
           renderHistoryTable(patientHistory);
           requestTrendAnalysis(patientHistory);
+          updateDayLabels();
         });
     }
   });
@@ -857,7 +917,11 @@ window.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('btn-simulate-exercise').addEventListener('click', startSimulation);
 
   // 6. Save Session
-  document.getElementById('btn-save-session').addEventListener('click', saveTodaySession);
+  document.getElementById('btn-save-session').addEventListener('click', () => saveSession(false));
+  const advanceBtn = document.getElementById('btn-advance-day');
+  if (advanceBtn) {
+    advanceBtn.addEventListener('click', () => saveSession(true));
+  }
 
   // Check existing session
   const savedUser = sessionStorage.getItem('handrehab_user');
@@ -868,6 +932,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       sessionStorage.removeItem('handrehab_user');
     }
   }
+
 
   // Preload MediaPipe model in background
   initHandLandmarker();

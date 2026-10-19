@@ -335,9 +335,11 @@ def user_add_record():
     rom = float(data.get("rom", 50.0))
     reps = int(data.get("reps", 0))
     diary_text = str(data.get("diary_text", "")).strip()
+    update_if_same_day = bool(data.get("update_if_same_day", False))
 
-    res = add_user_record(user_id, day, pain, stiffness, mobility, grip, rom, reps, diary_text)
+    res = add_user_record(user_id, day, pain, stiffness, mobility, grip, rom, reps, diary_text, update_if_same_day=update_if_same_day)
     return jsonify(res), 200
+
 
 
 if __name__ == "__main__":
