@@ -1,0 +1,6 @@
+Metric,Value
+vocab_size,243.0
+content_words,241.0
+glove_hits,239.0
+oov_count,2.0
+coverage_pct,99.17

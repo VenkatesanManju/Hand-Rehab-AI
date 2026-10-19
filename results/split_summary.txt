@@ -1,0 +1,14 @@
+Dataset Splitting & De-duplication Summary
+==========================================
+                          Metric  Value
+               Total Raw Entries   2500
+                    Unique Texts   2438
+        Exact Duplicates Removed     62
+          Unique Template Groups    961
+                   Train Samples   1784
+              Validation Samples    341
+                    Test Samples    313
+Train Template Overlap With Test      0
+    Train Text Overlap With Test      0
+
+Split Guarantee: STRICT ZERO TEMPLATE LEAKAGE between train, val, and test.
