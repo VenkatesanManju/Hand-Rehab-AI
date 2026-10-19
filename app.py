@@ -27,8 +27,9 @@ if __name__ == "__main__":
     print("=" * 70)
     print("  HANDREHAB AI - RECOVERY MONITORING DASHBOARD")
     print("=" * 70)
-    print(f"  * Local Web Server: http://127.0.0.1:{port}")
-    print("  * Open your web browser (Chrome, Edge, or Firefox) to view.")
+    print(f"  * Open in your browser: http://localhost:{port} or http://127.0.0.1:{port}")
+    print("    (Note: Web browsers require 'localhost' or '127.0.0.1' for webcam access)")
     print("  * Press CTRL+C in this terminal window to stop the server.")
     print("=" * 70)
-    flask_app.run(host="0.0.0.0", port=port, debug=False)
+    flask_app.run(host="127.0.0.1", port=port, debug=False)
+

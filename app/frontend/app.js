@@ -197,6 +197,19 @@ function updateVisionUI() {
 async function startCamera() {
   if (simulationRunning) stopSimulation();
 
+  // Browsers require a secure context (https or localhost/127.0.0.1) for navigator.mediaDevices
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      const targetUrl = `http://localhost:${window.location.port || 5000}`;
+      if (confirm(`Webcam access in web browsers is blocked on non-localhost IP addresses (like ${window.location.hostname}).\n\nClick OK to open ${targetUrl} (where webcam access is allowed).`)) {
+        window.location.href = targetUrl;
+        return;
+      }
+    }
+    alert('Webcam is not available in this browser window.\nPlease open http://localhost:5000 or http://127.0.0.1:5000 in your browser, or click "Simulated Demo" to test movement tracking.');
+    return;
+  }
+
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
       video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' }
@@ -214,6 +227,7 @@ async function startCamera() {
     alert('Webcam access failed or denied: ' + err.message + '\nYou can test tracking using the "Simulated Demo" mode.');
   }
 }
+
 
 function stopCamera() {
   webcamRunning = false;
