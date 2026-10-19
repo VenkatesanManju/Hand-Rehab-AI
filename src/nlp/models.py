@@ -50,18 +50,17 @@ class AdditiveAttention(nn.Module):
         """
         # (batch_size, seq_len, hidden_dim)
         energy = torch.tanh(self.projection(hidden_states))
-        # (batch_size, seq_len)
         scores = self.context_vector(energy).squeeze(-1)
 
         if mask is not None:
-            # Mask out padding tokens with a large negative value
             scores = scores.masked_fill(~mask, -1e9)
 
         weights = F.softmax(scores, dim=-1)
-        # Avoid NaN if sequence is entirely padding
+        if mask is not None:
+            weights = weights * mask.float()
+            weights = weights / weights.sum(dim=-1, keepdim=True).clamp(min=1e-9)
         weights = torch.nan_to_num(weights, nan=0.0)
 
-        # Context: weighted sum of hidden states
         context = torch.bmm(weights.unsqueeze(1), hidden_states).squeeze(1)
         return context, weights
 
@@ -82,11 +81,13 @@ class MultiHeadDiaryClassifier(nn.Module):
         freeze_embeddings: bool = True,
         dropout: float = 0.3,
         padding_idx: int = 0,
+        pooling_strategy: str = "last",
     ):
         super().__init__()
         self.encoder_type = encoder_type.lower()
         self.padding_idx = padding_idx
         self.hidden_dim = hidden_dim
+        self.pooling_strategy = pooling_strategy
 
         # 1. Embedding Layer
         if pretrained_embeddings is not None:
@@ -173,19 +174,39 @@ class MultiHeadDiaryClassifier(nn.Module):
         # Embedded: (batch_size, seq_len, embedding_dim)
         embeds = self.dropout(self.embedding(input_ids))
 
-        # Pass through recurrent encoder
-        out, _ = self.encoder(embeds)  # out: (batch_size, seq_len, encoder_out_dim)
+        # Pass through recurrent encoder with pack_padded_sequence if lengths provided
+        if lengths is not None:
+            lengths_cpu = lengths.clamp(min=1).cpu()
+            packed_embeds = nn.utils.rnn.pack_padded_sequence(
+                embeds, lengths_cpu, batch_first=True, enforce_sorted=False
+            )
+            packed_out, hidden = self.encoder(packed_embeds)
+            out, _ = nn.utils.rnn.pad_packed_sequence(
+                packed_out, batch_first=True, total_length=input_ids.size(1)
+            )
+        else:
+            out, hidden = self.encoder(embeds)
 
         # Aggregate representations
         attention_weights = None
         if "attention" in self.encoder_type:
             pooled, attention_weights = self.attention(out, mask=mask)
-        else:
-            # Masked mean pooling over valid non-padded tokens
-            expanded_mask = mask.unsqueeze(-1).float()  # (batch_size, seq_len, 1)
+        elif self.pooling_strategy == "last":
+            if isinstance(hidden, tuple):
+                h_n = hidden[0]  # (num_layers * num_directions, batch, hidden_dim)
+            else:
+                h_n = hidden
+            if self.encoder_type == "bilstm":
+                pooled = torch.cat([h_n[-2], h_n[-1]], dim=-1)
+            else:
+                pooled = h_n[-1]
+        elif self.pooling_strategy == "mean":
+            expanded_mask = mask.unsqueeze(-1).float()
             sum_hidden = (out * expanded_mask).sum(dim=1)
             valid_lengths = expanded_mask.sum(dim=1).clamp(min=1.0)
             pooled = sum_hidden / valid_lengths
+        else:
+            raise ValueError(f"Unknown pooling strategy: {self.pooling_strategy}")
 
         pooled = self.dropout(pooled)
 

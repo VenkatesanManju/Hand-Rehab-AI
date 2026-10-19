@@ -10,6 +10,7 @@ from torch.utils.data import Dataset, DataLoader
 import pandas as pd
 
 from src.nlp.embeddings import GloVeEmbeddingLoader, PAD_IDX
+from src.nlp.preprocess import preprocess_text
 
 
 class DiaryDataset(Dataset):
@@ -23,11 +24,19 @@ class DiaryDataset(Dataset):
         self.loader = embedding_loader
         self.max_len = max_len
 
-        # Extract preprocessed tokens
-        if "clean_tokens" in self.df.columns:
-            self.token_lists = [str(t).split() for t in self.df["clean_tokens"]]
+        # Extract preprocessed tokens safely
+        if "clean_tokens" in self.df.columns and not self.df["clean_tokens"].isna().all():
+            self.token_lists = [str(t).split() if pd.notna(t) else [] for t in self.df["clean_tokens"]]
         else:
-            self.token_lists = [str(t).split() for t in self.df["text"]]
+            self.token_lists = [
+                preprocess_text(str(t), remove_stopwords=True, lemmatize=True, keep_negations=True)
+                for t in self.df["text"]
+            ]
+
+        # Ensure no empty token lists (at least one token for RNN)
+        for i in range(len(self.token_lists)):
+            if len(self.token_lists[i]) == 0:
+                self.token_lists[i] = ["symptom"]
 
         self.texts = self.df["text"].tolist()
         self.pain = self.df["pain"].values

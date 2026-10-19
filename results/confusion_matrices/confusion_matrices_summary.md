@@ -1,73 +1,73 @@
-# Confusion Matrices for Best Model: BILSTM_ATTENTION
+# Confusion Matrices for Best Model: GRU
 
 ### Confusion Matrix: Synthetic - Pain
 ```
         Pred_0  Pred_1  Pred_2  Pred_3
-True_0     142       0       0       1
-True_1       0      56       1       0
-True_2       3       0      58       0
-True_3       1       0       0      51
+True_0     143       0       0       0
+True_1       0      57       0       0
+True_2       0       0      60       1
+True_3       0       0       0      52
 ```
 
 ### Confusion Matrix: Synthetic - Stiffness
 ```
         Pred_0  Pred_1  Pred_2  Pred_3
-True_0     131       5       6       1
-True_1       6      45      11       4
-True_2       1       4      43       0
-True_3       0       2       6      48
+True_0     143       0       0       0
+True_1       9      53       4       0
+True_2       0       3      45       0
+True_3       0       0       1      55
 ```
 
 ### Confusion Matrix: Synthetic - Mobility
 ```
         Pred_0  Pred_1  Pred_2  Pred_3
-True_0     106       2       7       5
-True_1       7      42       9       2
-True_2      13       7      54       3
-True_3       2       3       5      46
+True_0     114       1       1       4
+True_1       0      59       1       0
+True_2      10       5      50      12
+True_3       5       3       2      46
 ```
 
 ### Confusion Matrix: Synthetic - Grip
 ```
         Pred_0  Pred_1  Pred_2  Pred_3
-True_0     118       0       0       3
-True_1       3      64       6       1
-True_2       7       1      52       7
-True_3       7       1       2      41
+True_0     117       0       2       2
+True_1       3      70       1       0
+True_2       1       1      64       1
+True_3       1       0       3      47
 ```
 
 ### Confusion Matrix: Held_out - Pain
 ```
         Pred_0  Pred_1  Pred_2  Pred_3
-True_0       0       0       0      36
-True_1       0       0       0       7
-True_2       0       0       0       6
-True_3       0       0       0      13
+True_0      34       1       0       1
+True_1       0       7       0       0
+True_2       0       1       5       0
+True_3       0       0       1      12
 ```
 
 ### Confusion Matrix: Held_out - Stiffness
 ```
         Pred_0  Pred_1  Pred_2  Pred_3
-True_0      33       0       0       2
-True_1       9       6       0       0
-True_2       4       1       0       1
-True_3       4       1       0       1
+True_0      34       1       0       0
+True_1       8       6       1       0
+True_2       2       2       2       0
+True_3       4       0       2       0
 ```
 
 ### Confusion Matrix: Held_out - Mobility
 ```
         Pred_0  Pred_1  Pred_2  Pred_3
-True_0      37       0       0       0
-True_1       8       0       0       0
-True_2       8       0       0       0
-True_3       9       0       0       0
+True_0      33       1       0       3
+True_1       7       0       0       1
+True_2       5       0       1       2
+True_3       4       1       0       4
 ```
 
 ### Confusion Matrix: Held_out - Grip
 ```
         Pred_0  Pred_1  Pred_2  Pred_3
-True_0      12       2       0      20
-True_1       2       0       0       3
-True_2       2       0       2       8
-True_3       0       0       0      11
+True_0      26       3       5       0
+True_1       3       2       0       0
+True_2       5       1       5       1
+True_3       2       1       4       4
 ```

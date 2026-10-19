@@ -31,6 +31,7 @@ import logging
 from typing import Dict, List, Tuple, Any, Optional
 import numpy as np
 import pandas as pd
+from collections import Counter
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
@@ -65,9 +66,11 @@ def train_single_epoch(
     loader: DataLoader,
     optimizer: torch.optim.Optimizer,
     device: torch.device,
-) -> float:
+) -> Tuple[float, float]:
     model.train()
     total_loss = 0.0
+    total_correct = 0
+    total_samples = 0
     for batch in loader:
         input_ids = batch["input_ids"].to(device)
         lengths = batch["lengths"].to(device)
@@ -81,7 +84,15 @@ def train_single_epoch(
         optimizer.step()
 
         total_loss += loss.item()
-    return total_loss / max(1, len(loader))
+        b_size = len(batch["texts"])
+        total_samples += b_size
+        for sym in SYMPTOMS:
+            preds = torch.argmax(logits_dict[sym], dim=-1)
+            total_correct += int((preds == targets[sym]).sum())
+
+    avg_loss = total_loss / max(1, len(loader))
+    avg_acc = total_correct / (total_samples * 4)
+    return avg_loss, avg_acc
 
 
 def evaluate_model(
@@ -171,17 +182,28 @@ def train_and_eval_neural_model(
     epochs: int = 15,
     patience: int = 4,
     device: torch.device = DEVICE,
-) -> Tuple[Dict[str, Any], Dict[str, Any], nn.Module, List[Dict[str, Any]], Dict[str, np.ndarray]]:
+) -> Tuple[Dict[str, Any], Dict[str, Any], Dict[str, Any], nn.Module, List[Dict[str, Any]], Dict[str, np.ndarray]]:
     set_seed(seed)
+
+    pooling_map = {
+        "bilstm": "mean",
+        "rnn": "mean",
+        "lstm": "last",
+        "gru": "last",
+        "bilstm_attention": "last",
+    }
+    pooling = pooling_map.get(encoder_type, "last")
+
     model = MultiHeadDiaryClassifier(
         vocab_size=vocab_size,
         embedding_dim=100,
-        hidden_dim=64,
+        hidden_dim=128,
         encoder_type=encoder_type,
         num_classes=4,
         pretrained_embeddings=embedding_matrix,
         freeze_embeddings=True,
         dropout=0.3,
+        pooling_strategy=pooling,
     ).to(device)
 
     optimizer = torch.optim.Adam(
@@ -190,43 +212,47 @@ def train_and_eval_neural_model(
         weight_decay=1e-5,
     )
 
-    best_val_loss = float("inf")
+    best_val_f1 = -1.0
     best_weights = None
     patience_counter = 0
 
     for epoch in range(epochs):
-        train_loss = train_single_epoch(model, train_loader, optimizer, device)
-        # Validation loss
-        model.eval()
-        val_loss = 0.0
-        with torch.no_grad():
-            for batch in val_loader:
-                input_ids = batch["input_ids"].to(device)
-                lengths = batch["lengths"].to(device)
-                targets = {sym: batch["targets"][sym].to(device) for sym in SYMPTOMS}
-                logits = model(input_ids, lengths=lengths)
-                loss, _ = compute_multihead_loss(logits, targets)
-                val_loss += loss.item()
-        val_loss /= max(1, len(val_loader))
+        train_loss, train_acc = train_single_epoch(model, train_loader, optimizer, device)
+        val_metrics, _, _, _ = evaluate_model(model, val_loader, device)
+        val_acc = val_metrics["overall"]["mean_accuracy"]
+        val_f1 = val_metrics["overall"]["mean_macro_f1"]
 
-        if val_loss < best_val_loss:
-            best_val_loss = val_loss
+        logger.info(
+            f"[{encoder_type.upper()}|Seed {seed}] Epoch {epoch+1:2d}/{epochs:2d} | "
+            f"Train Loss: {train_loss:.4f} Acc: {train_acc:.4f} | Val Acc: {val_acc:.4f} F1: {val_f1:.4f}"
+        )
+
+        if val_f1 > best_val_f1:
+            best_val_f1 = val_f1
             best_weights = {k: v.cpu().clone() for k, v in model.state_dict().items()}
             patience_counter = 0
         else:
             patience_counter += 1
             if patience_counter >= patience:
+                logger.info(f"[{encoder_type.upper()}|Seed {seed}] Early stopping at epoch {epoch+1} (patience={patience})")
                 break
 
     if best_weights is not None:
         model.load_state_dict({k: v.to(device) for k, v in best_weights.items()})
 
-    # Evaluate on Synthetic Test
+    # Final evaluation using best validation checkpoint
+    final_val_metrics, _, _, _ = evaluate_model(model, val_loader, device)
     syn_metrics, syn_preds, syn_true, syn_samples = evaluate_model(model, syn_test_loader, device)
-    # Evaluate on Hand-written Held-out Test
     hw_metrics, hw_preds, hw_true, hw_samples = evaluate_model(model, hw_test_loader, device)
 
-    return syn_metrics, hw_metrics, model, hw_samples, hw_preds
+    # Report predicted-class distribution per symptom on held-out set
+    logger.info(f"[{encoder_type.upper()}|Seed {seed}] Held-Out Set Prediction Class Distributions:")
+    for sym in SYMPTOMS:
+        counts = Counter(hw_preds[sym].tolist())
+        dist_str = ", ".join([f"class {c}: {counts.get(c, 0)} ({counts.get(c, 0)/len(hw_preds[sym])*100:.1f}%)" for c in range(4)])
+        logger.info(f"   {sym.capitalize():10s}: {dist_str}")
+
+    return final_val_metrics, syn_metrics, hw_metrics, model, hw_samples, hw_preds
 
 
 def run_full_comparison():
@@ -272,11 +298,14 @@ def run_full_comparison():
         m: {"synthetic": {}, "hand_written": {}} for m in all_models
     }
 
-    best_overall_score = -1.0
+    best_val_macro_f1 = -1.0
     best_model_obj = None
     best_model_name = ""
     best_hw_samples: List[Dict[str, Any]] = []
-    best_confusion_data: Dict[str, Tuple[np.ndarray, np.ndarray]] = {}
+
+    # Dedicated references for BiLSTM + Attention explainability
+    bilstm_attn_model_obj = None
+    bilstm_attn_hw_samples: List[Dict[str, Any]] = []
 
     # 4. Evaluate TF-IDF + Logistic Regression Baseline
     logger.info("--- Evaluating TF-IDF + Logistic Regression Baseline ---")
@@ -305,7 +334,7 @@ def run_full_comparison():
     for enc in neural_models:
         logger.info(f"--- Training & Evaluating {enc.upper()} across seeds {SEEDS} ---")
         for seed in SEEDS:
-            syn_res, hw_res, model_obj, hw_samples, hw_preds = train_and_eval_neural_model(
+            val_res, syn_res, hw_res, model_obj, hw_samples, hw_preds = train_and_eval_neural_model(
                 encoder_type=enc,
                 train_loader=train_loader,
                 val_loader=val_loader,
@@ -327,9 +356,14 @@ def run_full_comparison():
                 multi_seed_results[enc][eval_set].setdefault("overall_mean_macro_f1", []).append(res["overall"]["mean_macro_f1"])
                 multi_seed_results[enc][eval_set].setdefault("overall_mean_accuracy", []).append(res["overall"]["mean_accuracy"])
 
-            # Check if this model is the best candidate (by synthetic val/test mean macro f1 on seed 42)
-            if seed == 42 and (enc == "bilstm_attention" or syn_res["overall"]["mean_macro_f1"] > best_overall_score):
-                best_overall_score = syn_res["overall"]["mean_macro_f1"]
+            # Store BiLSTM + Attention for explainability
+            if enc == "bilstm_attention" and (bilstm_attn_model_obj is None or seed == 42):
+                bilstm_attn_model_obj = model_obj
+                bilstm_attn_hw_samples = hw_samples
+
+            # Requirement 4: Choose the best model per module by validation score only
+            if val_res["overall"]["mean_macro_f1"] > best_val_macro_f1:
+                best_val_macro_f1 = val_res["overall"]["mean_macro_f1"]
                 best_model_obj = model_obj
                 best_model_name = enc
                 best_hw_samples = hw_samples
@@ -337,7 +371,7 @@ def run_full_comparison():
     # 6. Save Best Model Checkpoint
     best_model_path = os.path.join(results_dir, "best_diary_model.pt")
     torch.save(best_model_obj.state_dict(), best_model_path)
-    logger.info(f"Saved best model ({best_model_name}) checkpoint to {best_model_path}")
+    logger.info(f"Saved best model ({best_model_name}, Val Macro F1={best_val_macro_f1:.4f}) checkpoint to {best_model_path}")
 
     # 7. Compile Results Table with mean ± std
     rows = []
@@ -392,20 +426,30 @@ def run_full_comparison():
     _, hw_preds_best, hw_true_best, _ = evaluate_model(best_model_obj, hw_test_loader, DEVICE)
 
     cm_summary = []
-    for split_name, preds_dict, true_dict in [("synthetic", syn_preds_best, syn_true_best), ("held_out", hw_preds_best, hw_true_best)]:
-        for sym in SYMPTOMS:
-            cm = confusion_matrix(true_dict[sym], preds_dict[sym], labels=[0, 1, 2, 3])
-            cm_df = pd.DataFrame(
-                cm,
-                index=[f"True_{c}" for c in range(4)],
-                columns=[f"Pred_{c}" for c in range(4)],
-            )
-            cm_file = os.path.join(cm_dir, f"cm_{best_model_name}_{split_name}_{sym}.csv")
-            cm_df.to_csv(cm_file)
-            cm_summary.append(f"### Confusion Matrix: {split_name.capitalize()} - {sym.capitalize()}\n```\n{cm_df.to_string()}\n```\n")
+    models_to_eval_cm = [(best_model_name, best_model_obj)]
+    if bilstm_attn_model_obj is not None and best_model_name != "bilstm_attention":
+        models_to_eval_cm.append(("bilstm_attention", bilstm_attn_model_obj))
+
+    for m_name, m_obj in models_to_eval_cm:
+        m_obj.eval()
+        _, s_preds, s_true, _ = evaluate_model(m_obj, syn_test_loader, DEVICE)
+        _, h_preds, h_true, _ = evaluate_model(m_obj, hw_test_loader, DEVICE)
+
+        cm_summary.append(f"## Confusion Matrices: {m_name.upper()}\n")
+        for split_name, preds_dict, true_dict in [("synthetic", s_preds, s_true), ("held_out", h_preds, h_true)]:
+            for sym in SYMPTOMS:
+                cm = confusion_matrix(true_dict[sym], preds_dict[sym], labels=[0, 1, 2, 3])
+                cm_df = pd.DataFrame(
+                    cm,
+                    index=[f"True_{c}" for c in range(4)],
+                    columns=[f"Pred_{c}" for c in range(4)],
+                )
+                cm_file = os.path.join(cm_dir, f"cm_{m_name}_{split_name}_{sym}.csv")
+                cm_df.to_csv(cm_file)
+                cm_summary.append(f"### {m_name.upper()} - {split_name.capitalize()} - {sym.capitalize()}\n```\n{cm_df.to_string()}\n```\n")
 
     with open(os.path.join(cm_dir, "confusion_matrices_summary.md"), "w", encoding="utf-8") as f:
-        f.write(f"# Confusion Matrices for Best Model: {best_model_name.upper()}\n\n")
+        f.write(f"# Confusion Matrices Summary (Selected Best: {best_model_name.upper()} | Attention: BILSTM_ATTENTION)\n\n")
         f.write("\n".join(cm_summary))
 
     # 9. Attention Explainability Report
@@ -416,12 +460,13 @@ def run_full_comparison():
         f.write("The additive attention mechanism dynamically scores the relevance of each token in the diary entry.\n")
         f.write("Below are sample test entries showing top-attended words behind the multi-head severity decisions:\n\n")
 
-        # Pick diverse sample entries from best_hw_samples
+        # Pick diverse sample entries from bilstm_attn_hw_samples
         sample_indices = [0, 1, 3, 5, 11, 14, 20, 32, 43, 48]
-        valid_indices = [idx for idx in sample_indices if idx < len(best_hw_samples)]
+        attn_samples_pool = bilstm_attn_hw_samples if bilstm_attn_hw_samples else best_hw_samples
+        valid_indices = [idx for idx in sample_indices if idx < len(attn_samples_pool)]
 
         for rank, idx in enumerate(valid_indices, 1):
-            sample = best_hw_samples[idx]
+            sample = attn_samples_pool[idx]
             text = sample["text"]
             tokens = sample["tokens"]
             attn = sample.get("attention_weights")
