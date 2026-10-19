@@ -2,6 +2,7 @@
 __pycache__/
 *.pt
 *.bin
+*.db
 data/embeddings/
 glove.6B/
 .ipynb_checkpoints/

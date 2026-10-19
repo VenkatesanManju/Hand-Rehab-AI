@@ -97,3 +97,60 @@ def test_static_frontend_routes(client):
     res_wasm = client.get("/vendor/wasm/vision_wasm_internal.wasm")
     assert res_wasm.status_code == 200
 
+
+def test_auth_and_user_history(client):
+    import time
+    unique_user = f"user_{int(time.time() * 1000)}"
+
+    # 1. Register new user
+    reg_payload = {
+        "username": unique_user,
+        "password": "secretpassword",
+        "full_name": "Test Patient",
+        "surgery_type": "Tendon Repair"
+    }
+    res_reg = client.post("/api/auth/register", data=json.dumps(reg_payload), content_type="application/json")
+    assert res_reg.status_code == 200
+    data_reg = json.loads(res_reg.data)
+    assert data_reg["success"] is True
+    user_id = data_reg["user"]["id"]
+
+    # 2. Login with correct credentials
+    login_payload = {"username": unique_user, "password": "secretpassword"}
+    res_login = client.post("/api/auth/login", data=json.dumps(login_payload), content_type="application/json")
+    assert res_login.status_code == 200
+    data_login = json.loads(res_login.data)
+    assert data_login["success"] is True
+    assert data_login["user"]["full_name"] == "Test Patient"
+
+    # 3. Login with wrong credentials should fail
+    bad_login = client.post("/api/auth/login", data=json.dumps({"username": unique_user, "password": "wrong"}), content_type="application/json")
+    assert bad_login.status_code == 401
+
+    # 4. Fetch history
+    res_hist = client.get(f"/api/user/history?user_id={user_id}")
+    assert res_hist.status_code == 200
+    data_hist = json.loads(res_hist.data)
+    assert data_hist["total_records"] >= 1
+
+    # 5. Add a new record
+    rec_payload = {
+        "user_id": user_id,
+        "day": 1,
+        "pain": 1.5,
+        "stiffness": 1.2,
+        "mobility": 1.0,
+        "grip": 1.1,
+        "rom": 55.0,
+        "reps": 10,
+        "diary_text": "Good flexion exercise."
+    }
+    res_add = client.post("/api/user/record", data=json.dumps(rec_payload), content_type="application/json")
+    assert res_add.status_code == 200
+
+    # 6. Verify history updated
+    res_hist2 = client.get(f"/api/user/history?user_id={user_id}")
+    data_hist2 = json.loads(res_hist2.data)
+    assert data_hist2["total_records"] == 2
+
+

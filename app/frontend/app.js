@@ -1,11 +1,16 @@
 /**
- * HandRehab AI — Frontend Application Logic (Phase 5 & 6)
- * Real-time MediaPipe Hand Tracking, NLP Diary Analysis & Recovery Trend Tracking
+ * HandRehab AI — Frontend Application Logic
+ * Authentication, Multi-Tab Navigation, Real-time MediaPipe Hand Tracking, NLP & Trend Analysis
  */
 
 import { FilesetResolver, HandLandmarker } from './vendor/vision_bundle.mjs';
 
-// --- State Variables ---
+// --- Global Application State ---
+let currentUser = null;
+let patientHistory = [];
+let trendChartInstance = null;
+
+// Vision & Camera State
 let handLandmarker = null;
 let webcamRunning = false;
 let videoElement = null;
@@ -20,7 +25,7 @@ let simAngle = 175.0;
 let simDirection = -1;
 let simInterval = null;
 
-// Vision Metrics & Rep Counter State
+// Vision Metrics & Rep Counter State Machine
 let repCount = 0;
 let repState = 'EXTENDED'; // 'EXTENDED' or 'FLEXED'
 let hasCurled = false;
@@ -30,15 +35,17 @@ let currentFormScore = 95;
 const EXTEND_THRESH = 140.0;
 const FLEX_THRESH = 85.0;
 
-// Longitudinal Patient History (Default Initial 14-day history)
-let patientHistory = [];
-let trendChartInstance = null;
+// Current Daily Diary Prediction State
+let currentDiaryPred = {
+  pain: 0,
+  stiffness: 0,
+  mobility: 0,
+  grip: 0,
+  text: ""
+};
 
 // --- Mathematical Helper Functions ---
 
-/**
- * Calculates 3D angle between points A, B, and C with vertex at B in degrees.
- */
 function computeAngle3D(a, b, c) {
   const ba = [a.x - b.x, a.y - b.y, (a.z || 0) - (b.z || 0)];
   const bc = [c.x - b.x, c.y - b.y, (c.z || 0) - (b.z || 0)];
@@ -52,28 +59,45 @@ function computeAngle3D(a, b, c) {
   return (Math.acos(cosine) * 180.0) / Math.PI;
 }
 
-/**
- * Computes active flexion Range of Motion (0 to 100 degrees) from extension angle.
- */
 function computeROM(meanPipAngle) {
   return Math.max(0.0, Math.min(100.0, 180.0 - meanPipAngle));
 }
 
-/**
- * Updates repetition counter state machine.
- */
 function updateRepCounter(angle) {
+  const banner = document.getElementById('live-action-banner');
+  const actionText = document.getElementById('live-action-text');
+
   if (angle <= FLEX_THRESH) {
     repState = 'FLEXED';
     hasCurled = true;
+    banner.className = 'live-action-banner curling';
+    actionText.textContent = `✊ Full curl achieved (${Math.round(angle)}°)! Now open your hand completely.`;
   } else if (angle >= EXTEND_THRESH) {
     if (repState === 'FLEXED' && hasCurled) {
       repCount += 1;
       hasCurled = false;
-      // Form quality bonus on complete range
-      currentFormScore = Math.min(100, Math.max(80, Math.round(90 + Math.random() * 10)));
+      currentFormScore = Math.min(100, Math.max(85, Math.round(90 + Math.random() * 10)));
+      banner.className = 'live-action-banner completed';
+      actionText.textContent = `✨ Repetition ${repCount} Complete! Excellent extension.`;
+    } else {
+      banner.className = 'live-action-banner ready';
+      actionText.textContent = `🖐️ Open palm ready (${Math.round(angle)}°). Now slowly curl fingers into a fist!`;
     }
     repState = 'EXTENDED';
+  } else {
+    if (repState === 'EXTENDED') {
+      banner.className = 'live-action-banner curling';
+      actionText.textContent = `🔄 Curling inward... bend knuckles past 85° (current: ${Math.round(angle)}°).`;
+    }
+  }
+
+  // Update Curl Depth Progress Bar (0% at 175 deg, 100% at 75 deg)
+  const curlPct = Math.max(0, Math.min(100, Math.round(((175 - angle) / (175 - 75)) * 100)));
+  const fillEl = document.getElementById('curl-progress-fill');
+  const labelEl = document.getElementById('curl-percent');
+  if (fillEl && labelEl) {
+    fillEl.style.width = `${curlPct}%`;
+    labelEl.textContent = `${curlPct}%`;
   }
 }
 
@@ -93,7 +117,7 @@ async function initHandLandmarker() {
       });
       console.log('HandLandmarker initialized with GPU delegate.');
     } catch (gpuErr) {
-      console.warn('GPU initialization failed, falling back to CPU:', gpuErr);
+      console.warn('GPU delegate failed, falling back to CPU:', gpuErr);
       handLandmarker = await HandLandmarker.createFromOptions(vision, {
         baseOptions: {
           modelAssetPath: './vendor/hand_landmarker.task',
@@ -109,7 +133,6 @@ async function initHandLandmarker() {
   }
 }
 
-// Landmark connection indices for hand skeleton drawing
 const HAND_CONNECTIONS = [
   [0, 1], [1, 2], [2, 3], [3, 4],       // Thumb
   [0, 5], [5, 6], [6, 7], [7, 8],       // Index
@@ -123,9 +146,7 @@ function drawLandmarks(ctx, landmarks, width, height) {
   ctx.save();
   ctx.strokeStyle = '#0284c7';
   ctx.lineWidth = 3;
-  ctx.fillStyle = '#38bdf8';
 
-  // Draw connections
   for (const [startIdx, endIdx] of HAND_CONNECTIONS) {
     const p1 = landmarks[startIdx];
     const p2 = landmarks[endIdx];
@@ -135,7 +156,6 @@ function drawLandmarks(ctx, landmarks, width, height) {
     ctx.stroke();
   }
 
-  // Draw points
   for (let i = 0; i < landmarks.length; i++) {
     const pt = landmarks[i];
     const x = pt.x * width;
@@ -167,7 +187,6 @@ async function renderVideoLoop() {
         const lm = results.landmarks[0];
         drawLandmarks(canvasCtx, lm, canvasElement.width, canvasElement.height);
 
-        // Compute PIP angles:
         // Index: 5 (MCP), 6 (PIP), 7 (DIP)
         const indexAngle = computeAngle3D(lm[5], lm[6], lm[7]);
         // Middle: 9 (MCP), 10 (PIP), 11 (DIP)
@@ -176,7 +195,6 @@ async function renderVideoLoop() {
         currentAngle = Math.round((indexAngle + middleAngle) / 2.0);
         currentROM = Math.round(computeROM(currentAngle));
         updateRepCounter(currentAngle);
-
         updateVisionUI();
       }
     }
@@ -190,6 +208,10 @@ function updateVisionUI() {
   document.getElementById('live-rom').textContent = `${currentROM}°`;
   document.getElementById('live-reps').textContent = `${repCount}`;
   document.getElementById('live-form').textContent = `${currentFormScore}%`;
+
+  // Summary card on camera page
+  document.getElementById('summary-rom').textContent = `${currentROM}°`;
+  document.getElementById('summary-reps').textContent = `${repCount}`;
 }
 
 // --- Webcam Handlers ---
@@ -201,12 +223,12 @@ async function startCamera() {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
     if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
       const targetUrl = `http://localhost:${window.location.port || 5000}`;
-      if (confirm(`Webcam access in web browsers is blocked on non-localhost IP addresses (like ${window.location.hostname}).\n\nClick OK to open ${targetUrl} (where webcam access is allowed).`)) {
+      if (confirm(`Webcam access is blocked on non-localhost IP addresses (${window.location.hostname}).\n\nClick OK to open ${targetUrl} (where webcam access is allowed).`)) {
         window.location.href = targetUrl;
         return;
       }
     }
-    alert('Webcam is not available in this browser window.\nPlease open http://localhost:5000 or http://127.0.0.1:5000 in your browser, or click "Simulated Demo" to test movement tracking.');
+    alert('Webcam is not available in this browser window.\nPlease open http://localhost:5000 in your browser, or click "Simulated Demo" to test movement tracking.');
     return;
   }
 
@@ -227,7 +249,6 @@ async function startCamera() {
     alert('Webcam access failed or denied: ' + err.message + '\nYou can test tracking using the "Simulated Demo" mode.');
   }
 }
-
 
 function stopCamera() {
   webcamRunning = false;
@@ -256,7 +277,6 @@ function startSimulation() {
   if (simInterval) clearInterval(simInterval);
 
   simInterval = setInterval(() => {
-    // Oscillate joint angle between 175 and 65
     simAngle += simDirection * 4;
     if (simAngle <= 65) {
       simAngle = 65;
@@ -271,7 +291,6 @@ function startSimulation() {
     updateRepCounter(currentAngle);
     updateVisionUI();
 
-    // Render simulated 2D hand skeleton on canvas
     drawSimulatedHand(canvasCtx, canvasElement.width, canvasElement.height, simAngle);
   }, 50);
 }
@@ -290,19 +309,18 @@ function drawSimulatedHand(ctx, width, height, angle) {
   ctx.clearRect(0, 0, width, height);
 
   ctx.save();
-  ctx.fillStyle = '#1e293b';
+  ctx.fillStyle = '#0f172a';
   ctx.fillRect(0, 0, width, height);
 
-  // Draw simulated finger joint curl
   const rad = (angle * Math.PI) / 180.0;
   const startX = width * 0.5;
-  const startY = height * 0.75;
+  const startY = height * 0.78;
   const mcpX = startX;
   const mcpY = startY - 80;
-  const pipX = mcpX + Math.cos(rad - Math.PI / 2) * 60;
-  const pipY = mcpY - Math.sin(rad - Math.PI / 2) * 60;
-  const dipX = pipX + Math.cos(rad - Math.PI / 2 + 0.3) * 45;
-  const dipY = pipY - Math.sin(rad - Math.PI / 2 + 0.3) * 45;
+  const pipX = mcpX + Math.cos(rad - Math.PI / 2) * 65;
+  const pipY = mcpY - Math.sin(rad - Math.PI / 2) * 65;
+  const dipX = pipX + Math.cos(rad - Math.PI / 2 + 0.3) * 50;
+  const dipY = pipY - Math.sin(rad - Math.PI / 2 + 0.3) * 50;
 
   ctx.strokeStyle = '#38bdf8';
   ctx.lineWidth = 6;
@@ -316,11 +334,10 @@ function drawSimulatedHand(ctx, width, height, angle) {
   ctx.lineTo(dipX, dipY);
   ctx.stroke();
 
-  // Draw joints
   const joints = [
     { x: startX, y: startY, r: 6, color: '#38bdf8' },
     { x: mcpX, y: mcpY, r: 7, color: '#38bdf8' },
-    { x: pipX, y: pipY, r: 9, color: '#f59e0b' },
+    { x: pipX, y: pipY, r: 10, color: '#f59e0b' },
     { x: dipX, y: dipY, r: 5, color: '#38bdf8' }
   ];
 
@@ -334,7 +351,6 @@ function drawSimulatedHand(ctx, width, height, angle) {
     ctx.stroke();
   });
 
-  // Overlay text
   ctx.fillStyle = '#94a3b8';
   ctx.font = '14px sans-serif';
   ctx.fillText(`Simulated Finger Curl: ${Math.round(angle)}° (Vertex PIP)`, 20, 30);
@@ -346,7 +362,7 @@ function drawSimulatedHand(ctx, width, height, angle) {
 async function analyzeDiaryText() {
   const text = document.getElementById('diary-input').value.trim();
   if (!text) {
-    alert('Please enter diary notes or click one of the quick samples above.');
+    alert('Please enter your rehab diary notes or click one of the quick samples.');
     return;
   }
 
@@ -360,12 +376,9 @@ async function analyzeDiaryText() {
       body: JSON.stringify({ text })
     });
 
-    if (!res.ok) {
-      throw new Error(`Server returned error ${res.status}`);
-    }
-
+    if (!res.ok) throw new Error(`Server returned error ${res.status}`);
     const data = await res.json();
-    renderDiaryResults(data);
+    renderDiaryResults(data, text);
   } catch (err) {
     console.error('Diary analysis error:', err);
     alert('Failed to analyze diary: ' + err.message);
@@ -374,7 +387,15 @@ async function analyzeDiaryText() {
   }
 }
 
-function renderDiaryResults(data) {
+function renderDiaryResults(data, originalText) {
+  currentDiaryPred = {
+    pain: data.pain,
+    stiffness: data.stiffness,
+    mobility: data.mobility,
+    grip: data.grip,
+    text: originalText
+  };
+
   const symptoms = ['pain', 'stiffness', 'mobility', 'grip'];
   symptoms.forEach(sym => {
     const val = data[sym];
@@ -385,6 +406,10 @@ function renderDiaryResults(data) {
     badge.textContent = data[`${sym}_label`];
     badge.className = `sev-badge badge-sev-${val}`;
   });
+
+  // Update summary card on Camera tab
+  document.getElementById('summary-pain').textContent = `${data.pain} (${data.pain_label})`;
+  document.getElementById('summary-stiffness').textContent = `${data.stiffness} (${data.stiffness_label})`;
 
   // Render Causal Attribution Chips
   const chipContainer = document.getElementById('causal-chips');
@@ -405,7 +430,9 @@ function renderDiaryResults(data) {
 // --- Trend & Chart Handlers ---
 
 function initTrendChart() {
-  const ctx = document.getElementById('trendChart').getContext('2d');
+  const canvas = document.getElementById('trendChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
   trendChartInstance = new Chart(ctx, {
     type: 'line',
     data: {
@@ -416,6 +443,16 @@ function initTrendChart() {
           data: [],
           borderColor: '#ef4444',
           backgroundColor: 'rgba(239, 68, 68, 0.1)',
+          yAxisID: 'yPain',
+          tension: 0.25,
+          borderWidth: 2,
+          pointRadius: 3
+        },
+        {
+          label: 'Stiffness (0–3)',
+          data: [],
+          borderColor: '#f59e0b',
+          backgroundColor: 'rgba(245, 158, 11, 0.1)',
           yAxisID: 'yPain',
           tension: 0.25,
           borderWidth: 2,
@@ -446,7 +483,7 @@ function initTrendChart() {
           position: 'left',
           min: 0,
           max: 3,
-          title: { display: true, text: 'Pain', font: { size: 11 } }
+          title: { display: true, text: 'Symptoms (0–3)', font: { size: 11 } }
         },
         yRom: {
           type: 'linear',
@@ -469,11 +506,13 @@ function updateTrendChart(history) {
 
   const labels = history.map(d => `Day ${d.day}`);
   const painData = history.map(d => d.pain);
+  const stiffData = history.map(d => d.stiffness);
   const romData = history.map(d => d.rom);
 
   trendChartInstance.data.labels = labels;
   trendChartInstance.data.datasets[0].data = painData;
-  trendChartInstance.data.datasets[1].data = romData;
+  trendChartInstance.data.datasets[1].data = stiffData;
+  trendChartInstance.data.datasets[2].data = romData;
   trendChartInstance.update();
 }
 
@@ -515,7 +554,6 @@ function renderTrendResults(data) {
     title.textContent = 'Progression On Track';
   }
 
-  // Next-day forecast readouts
   if (data.forecast) {
     document.getElementById('f-pain').textContent = data.forecast.pain;
     document.getElementById('f-stiff').textContent = data.forecast.stiffness;
@@ -525,69 +563,159 @@ function renderTrendResults(data) {
   }
 }
 
-// --- Sample Patient Trajectory & Session Storage ---
+function renderHistoryTable(records) {
+  const tbody = document.getElementById('history-table-body');
+  if (!tbody) return;
+  tbody.innerHTML = '';
 
-async function loadSamplePatient() {
+  if (!records || records.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" class="text-center">No recorded sessions yet. Complete Step 1 and Step 2 above!</td></tr>';
+    return;
+  }
+
+  // Display most recent records at the top
+  const sorted = [...records].reverse();
+  sorted.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>Day ${r.day}</strong></td>
+      <td>${r.recorded_at ? r.recorded_at.substring(0, 16) : 'Today'}</td>
+      <td>${Number(r.pain).toFixed(1)}</td>
+      <td>${Number(r.stiffness).toFixed(1)}</td>
+      <td>${Number(r.mobility).toFixed(1)}</td>
+      <td>${Number(r.grip).toFixed(1)}</td>
+      <td><strong>${Number(r.rom).toFixed(1)}°</strong></td>
+      <td>${r.reps || 0}</td>
+      <td>${r.diary_text || '—'}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// --- User Authentication & History Fetching ---
+
+async function loadUserSession(user) {
+  currentUser = user;
+  sessionStorage.setItem('handrehab_user', JSON.stringify(user));
+
+  // Update Header UI
+  document.getElementById('display-user-name').textContent = user.full_name;
+  document.getElementById('display-user-surgery').textContent = user.surgery_type;
+
+  // Switch from Auth screen to Dashboard
+  document.getElementById('auth-screen').classList.add('hidden');
+  document.getElementById('dashboard-app').classList.remove('hidden');
+
+  // Fetch Patient History from SQLite Database
   try {
-    const res = await fetch('/api/sample_patient');
-    if (!res.ok) throw new Error('Sample patient fetch failed');
-    const data = await res.json();
-
-    patientHistory = data.trajectory;
-    localStorage.setItem('handrehab_patient_history', JSON.stringify(patientHistory));
-    updateTrendChart(patientHistory);
-    requestTrendAnalysis(patientHistory);
+    const res = await fetch(`/api/user/history?user_id=${user.id}`);
+    if (res.ok) {
+      const data = await res.json();
+      patientHistory = data.records || [];
+      updateTrendChart(patientHistory);
+      renderHistoryTable(patientHistory);
+      requestTrendAnalysis(patientHistory);
+    }
   } catch (err) {
-    console.error('Error loading sample patient:', err);
-    // Fallback baseline trajectory
-    generateFallbackTrajectory();
+    console.error('Error fetching user records:', err);
   }
 }
 
-function generateFallbackTrajectory() {
-  patientHistory = [];
-  for (let d = 0; d < 20; d++) {
-    patientHistory.push({
-      day: d,
-      pain: Math.max(0.5, (2.6 - d * 0.08 + (Math.random() - 0.5) * 0.3)).toFixed(1),
-      stiffness: Math.max(0.5, (2.5 - d * 0.07 + (Math.random() - 0.5) * 0.3)).toFixed(1),
-      mobility: Math.max(0.4, (2.4 - d * 0.08 + (Math.random() - 0.5) * 0.3)).toFixed(1),
-      grip: Math.max(0.5, (2.5 - d * 0.07 + (Math.random() - 0.5) * 0.3)).toFixed(1),
-      rom: Math.min(85.0, (35.0 + d * 2.2 + (Math.random() - 0.5) * 3.0)).toFixed(1)
+function logoutUser() {
+  currentUser = null;
+  sessionStorage.removeItem('handrehab_user');
+  stopCamera();
+  stopSimulation();
+
+  document.getElementById('dashboard-app').classList.add('hidden');
+  document.getElementById('auth-screen').classList.remove('hidden');
+  document.getElementById('form-login').reset();
+  document.getElementById('form-register').reset();
+  showAuthAlert('', '');
+}
+
+function showAuthAlert(msg, type = 'error') {
+  const el = document.getElementById('auth-alert');
+  if (!msg) {
+    el.classList.add('hidden');
+    el.textContent = '';
+    return;
+  }
+  el.className = `auth-alert ${type}`;
+  el.textContent = msg;
+  el.classList.remove('hidden');
+}
+
+// --- Session Recording ---
+
+async function saveTodaySession() {
+  if (!currentUser) {
+    alert('Please sign in to save your session.');
+    return;
+  }
+
+  const nextDay = patientHistory.length > 0 ? (patientHistory[patientHistory.length - 1].day + 1) : 1;
+
+  const payload = {
+    user_id: currentUser.id,
+    day: nextDay,
+    pain: currentDiaryPred.pain,
+    stiffness: currentDiaryPred.stiffness,
+    mobility: currentDiaryPred.mobility,
+    grip: currentDiaryPred.grip,
+    rom: currentROM,
+    reps: repCount,
+    diary_text: currentDiaryPred.text || 'Daily exercise and finger curl training.'
+  };
+
+  try {
+    const res = await fetch('/api/user/record', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
     });
+
+    if (!res.ok) throw new Error('Failed to record session.');
+    alert(`Success! Recorded Day ${nextDay} session for ${currentUser.full_name}.`);
+
+    // Reload history
+    const histRes = await fetch(`/api/user/history?user_id=${currentUser.id}`);
+    if (histRes.ok) {
+      const histData = await histRes.json();
+      patientHistory = histData.records || [];
+      updateTrendChart(patientHistory);
+      renderHistoryTable(patientHistory);
+      requestTrendAnalysis(patientHistory);
+    }
+
+    // Switch to Report Tab so user can see their updated trajectory
+    switchView('report');
+  } catch (err) {
+    console.error('Error saving session:', err);
+    alert('Failed to save session: ' + err.message);
   }
-  updateTrendChart(patientHistory);
-  requestTrendAnalysis(patientHistory);
 }
 
-function saveTodaySession() {
-  const currentDay = patientHistory.length > 0 ? patientHistory[patientHistory.length - 1].day + 1 : 1;
+// --- View Navigation ---
 
-  const painVal = parseFloat(document.getElementById('val-pain').textContent) || 1.0;
-  const stiffVal = parseFloat(document.getElementById('val-stiffness').textContent) || 1.0;
-  const mobVal = parseFloat(document.getElementById('val-mobility').textContent) || 1.0;
-  const gripVal = parseFloat(document.getElementById('val-grip').textContent) || 1.0;
-  const romVal = parseFloat(currentROM) || 50.0;
-
-  patientHistory.push({
-    day: currentDay,
-    pain: painVal,
-    stiffness: stiffVal,
-    mobility: mobVal,
-    grip: gripVal,
-    rom: romVal
+function switchView(viewName) {
+  const views = ['diary', 'camera', 'report'];
+  views.forEach(v => {
+    const panel = document.getElementById(`view-${v}`);
+    const navBtn = document.getElementById(`nav-btn-${v}`);
+    if (v === viewName) {
+      panel.classList.add('active');
+      navBtn.classList.add('active');
+    } else {
+      panel.classList.remove('active');
+      navBtn.classList.remove('active');
+    }
   });
 
-  localStorage.setItem('handrehab_patient_history', JSON.stringify(patientHistory));
-  updateTrendChart(patientHistory);
-  requestTrendAnalysis(patientHistory);
-  alert(`Recorded Day ${currentDay} session to patient history.`);
-}
-
-function resetSession() {
-  if (confirm('Reset patient session history to default sample patient?')) {
-    localStorage.removeItem('handrehab_patient_history');
-    loadSamplePatient();
+  // If leaving camera tab, pause webcam to preserve resources
+  if (viewName !== 'camera') {
+    if (webcamRunning) stopCamera();
+    if (simulationRunning) stopSimulation();
   }
 }
 
@@ -600,21 +728,118 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   initTrendChart();
 
-  // Load stored history or sample patient
-  const stored = localStorage.getItem('handrehab_patient_history');
-  if (stored) {
-    try {
-      patientHistory = JSON.parse(stored);
-      updateTrendChart(patientHistory);
-      requestTrendAnalysis(patientHistory);
-    } catch {
-      loadSamplePatient();
-    }
-  } else {
-    loadSamplePatient();
-  }
+  // 1. Auth Tabs Toggle
+  const tabLogin = document.getElementById('tab-btn-login');
+  const tabRegister = document.getElementById('tab-btn-register');
+  const formLogin = document.getElementById('form-login');
+  const formRegister = document.getElementById('form-register');
 
-  // Bind Diary Events
+  tabLogin.addEventListener('click', () => {
+    tabLogin.classList.add('active');
+    tabRegister.classList.remove('active');
+    formLogin.classList.remove('hidden');
+    formRegister.classList.add('hidden');
+    showAuthAlert('');
+  });
+
+  tabRegister.addEventListener('click', () => {
+    tabRegister.classList.add('active');
+    tabLogin.classList.remove('active');
+    formRegister.classList.remove('hidden');
+    formLogin.classList.add('hidden');
+    showAuthAlert('');
+  });
+
+  // 2. Auth Submissions
+  formLogin.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('login-username').value.trim();
+    const password = document.getElementById('login-password').value.trim();
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        loadUserSession(data.user);
+      } else {
+        showAuthAlert(data.error || 'Invalid credentials.', 'error');
+      }
+    } catch (err) {
+      showAuthAlert('Network error connecting to auth server: ' + err.message, 'error');
+    }
+  });
+
+  formRegister.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fullName = document.getElementById('reg-fullname').value.trim();
+    const surgeryType = document.getElementById('reg-surgery').value;
+    const username = document.getElementById('reg-username').value.trim();
+    const password = document.getElementById('reg-password').value.trim();
+
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password, full_name: fullName, surgery_type: surgeryType })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showAuthAlert('Registration successful! Logging in...', 'success');
+        setTimeout(() => loadUserSession(data.user), 600);
+      } else {
+        showAuthAlert(data.error || 'Registration failed.', 'error');
+      }
+    } catch (err) {
+      showAuthAlert('Network error during registration: ' + err.message, 'error');
+    }
+  });
+
+  // Quick Demo Shortcut
+  document.getElementById('btn-quick-demo').addEventListener('click', async () => {
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: 'demo_patient', password: 'rehab123' })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        loadUserSession(data.user);
+      }
+    } catch (err) {
+      alert('Could not start quick demo: ' + err.message);
+    }
+  });
+
+  // Logout
+  document.getElementById('btn-logout').addEventListener('click', logoutUser);
+
+  // 3. Navigation Tabs
+  document.getElementById('nav-btn-diary').addEventListener('click', () => switchView('diary'));
+  document.getElementById('nav-btn-camera').addEventListener('click', () => switchView('camera'));
+  document.getElementById('nav-btn-report').addEventListener('click', () => switchView('report'));
+
+  // Step Action Transitions
+  document.getElementById('btn-goto-exercise').addEventListener('click', () => switchView('camera'));
+  document.getElementById('btn-goto-report').addEventListener('click', () => switchView('report'));
+  document.getElementById('btn-refresh-history').addEventListener('click', () => {
+    if (currentUser) {
+      fetch(`/api/user/history?user_id=${currentUser.id}`)
+        .then(r => r.json())
+        .then(d => {
+          patientHistory = d.records || [];
+          updateTrendChart(patientHistory);
+          renderHistoryTable(patientHistory);
+          requestTrendAnalysis(patientHistory);
+        });
+    }
+  });
+
+  // 4. Diary NLP
   document.getElementById('btn-analyze-diary').addEventListener('click', analyzeDiaryText);
   document.querySelectorAll('.chip-sample').forEach(chip => {
     chip.addEventListener('click', () => {
@@ -623,7 +848,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
-  // Bind Vision Events
+  // 5. Vision Camera Controls
   document.getElementById('btn-start-camera').addEventListener('click', startCamera);
   document.getElementById('btn-stop-camera').addEventListener('click', () => {
     stopCamera();
@@ -631,11 +856,19 @@ window.addEventListener('DOMContentLoaded', async () => {
   });
   document.getElementById('btn-simulate-exercise').addEventListener('click', startSimulation);
 
-  // Bind Patient History Events
-  document.getElementById('btn-load-sample').addEventListener('click', loadSamplePatient);
-  document.getElementById('btn-reset-data').addEventListener('click', resetSession);
+  // 6. Save Session
   document.getElementById('btn-save-session').addEventListener('click', saveTodaySession);
 
-  // Initialize MediaPipe Tasks in background
+  // Check existing session
+  const savedUser = sessionStorage.getItem('handrehab_user');
+  if (savedUser) {
+    try {
+      loadUserSession(JSON.parse(savedUser));
+    } catch {
+      sessionStorage.removeItem('handrehab_user');
+    }
+  }
+
+  // Preload MediaPipe model in background
   initHandLandmarker();
 });

@@ -27,12 +27,14 @@ from src.nlp.embeddings import GloVeEmbeddingLoader, DEFAULT_GLOVE_PATH
 from src.nlp.models import MultiHeadDiaryClassifier
 from src.trend.models import MultiTaskTrendModel
 from src.trend.dataset import FEATURE_COLS
+from app.backend.db import init_db, register_user, authenticate_user, get_user_records, add_user_record
 
 STATIC_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../frontend"))
 app = Flask(__name__, static_folder=STATIC_DIR, static_url_path="")
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 SEVERITY_LABELS = {0: "None (0)", 1: "Mild (1)", 2: "Moderate (2)", 3: "Severe (3)"}
+
 
 # Global holders for models and scalers
 EMBEDDING_LOADER = None
@@ -81,9 +83,13 @@ def init_models():
     SCALER_MEAN = np.mean(raw_feats, axis=0)
     SCALER_STD = np.std(raw_feats, axis=0) + 1e-6
 
+    # 4. Initialize SQLite User Database
+    init_db()
 
-# Initialize models upon module import
+
+# Initialize models and DB upon module import
 init_models()
+
 
 
 @app.route("/")
@@ -274,7 +280,68 @@ def get_sample_patient():
     })
 
 
+@app.route("/api/auth/register", methods=["POST"])
+def auth_register():
+    data = request.get_json(force=True, silent=True) or {}
+    username = str(data.get("username", "")).strip()
+    password = str(data.get("password", "")).strip()
+    full_name = str(data.get("full_name", "")).strip()
+    surgery_type = str(data.get("surgery_type", "")).strip()
+
+    res = register_user(username, password, full_name, surgery_type)
+    if res.get("success"):
+        return jsonify(res), 200
+    return jsonify(res), 400
+
+
+@app.route("/api/auth/login", methods=["POST"])
+def auth_login():
+    data = request.get_json(force=True, silent=True) or {}
+    username = str(data.get("username", "")).strip()
+    password = str(data.get("password", "")).strip()
+
+    res = authenticate_user(username, password)
+    if res.get("success"):
+        return jsonify(res), 200
+    return jsonify(res), 401
+
+
+@app.route("/api/user/history", methods=["GET"])
+def user_history():
+    user_id = request.args.get("user_id", type=int)
+    if not user_id:
+        return jsonify({"error": "Missing user_id parameter"}), 400
+
+    records = get_user_records(user_id)
+    return jsonify({
+        "user_id": user_id,
+        "total_records": len(records),
+        "records": records
+    }), 200
+
+
+@app.route("/api/user/record", methods=["POST"])
+def user_add_record():
+    data = request.get_json(force=True, silent=True) or {}
+    user_id = data.get("user_id")
+    if not user_id:
+        return jsonify({"error": "Missing user_id"}), 400
+
+    day = int(data.get("day", 1))
+    pain = float(data.get("pain", 0.0))
+    stiffness = float(data.get("stiffness", 0.0))
+    mobility = float(data.get("mobility", 0.0))
+    grip = float(data.get("grip", 0.0))
+    rom = float(data.get("rom", 50.0))
+    reps = int(data.get("reps", 0))
+    diary_text = str(data.get("diary_text", "")).strip()
+
+    res = add_user_record(user_id, day, pain, stiffness, mobility, grip, rom, reps, diary_text)
+    return jsonify(res), 200
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     print(f"Starting HandRehab Flask Server on http://127.0.0.1:{port}")
     app.run(host="0.0.0.0", port=port, debug=False)
+
