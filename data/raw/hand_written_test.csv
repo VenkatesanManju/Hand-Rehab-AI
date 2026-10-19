@@ -1,0 +1,9 @@
+text,pain,stiffness,mobility,grip,source,bio_tags,tokens
+No pain today but my fingers were very stiff in the morning.,0,3,1,0,hand_written,B-SEVERITY_WORD B-SYMPTOM O O O O O O B-SYMPTOM O O O O,No pain today but my fingers were very stiff in the morning .
+"Sharp pain when I tried to close my fist, could not hold a cup.",3,1,2,3,hand_written,B-SEVERITY_WORD B-SYMPTOM O O O O O O B-SYMPTOM O O B-SEVERITY_WORD B-SYMPTOM O O O,"Sharp pain when I tried to close my fist , could not hold a cup ."
+"Felt much better, did all my exercises and gripped a bottle easily.",0,0,0,0,hand_written,O B-SEVERITY_WORD B-SEVERITY_WORD O O O O O O B-SYMPTOM O O B-SEVERITY_WORD O,"Felt much better , did all my exercises and gripped a bottle easily ."
+"Mild ache after typing, wrist is a bit tight but moving fine.",1,1,0,0,hand_written,B-SEVERITY_WORD B-SYMPTOM O B-SYMPTOM O O O O B-SEVERITY_WORD B-SYMPTOM O O O O,"Mild ache after typing , wrist is a bit tight but moving fine ."
+"Pain is back and worse than last week, thumb barely moves.",3,2,3,2,hand_written,B-SYMPTOM O O O B-SEVERITY_WORD O O O O O B-SEVERITY_WORD B-SYMPTOM O,"Pain is back and worse than last week , thumb barely moves ."
+"Not as stiff as yesterday, but still cannot pick up small coins.",0,1,2,3,hand_written,B-SEVERITY_WORD O B-SYMPTOM O O O O O B-SEVERITY_WORD B-SYMPTOM O O O O,"Not as stiff as yesterday , but still cannot pick up small coins ."
+"Moderate soreness in the evening, grip is weak when opening jars.",2,1,1,2,hand_written,B-SEVERITY_WORD B-SYMPTOM O O O O O O B-SEVERITY_WORD O O O O,"Moderate soreness in the evening , grip is weak when opening jars ."
+"No pain, no stiffness. Full finger movement for the first time since surgery.",0,0,0,0,hand_written,B-SEVERITY_WORD B-SYMPTOM O B-SEVERITY_WORD B-SYMPTOM O B-SEVERITY_WORD O B-SYMPTOM O O O O O O O,"No pain , no stiffness . Full finger movement for the first time since surgery ."

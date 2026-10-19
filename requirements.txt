@@ -1,0 +1,14 @@
+torch
+numpy
+pandas
+scikit-learn
+nltk
+gensim
+mediapipe
+opencv-python
+matplotlib
+seaborn
+streamlit
+shap
+pytest
+jupyter

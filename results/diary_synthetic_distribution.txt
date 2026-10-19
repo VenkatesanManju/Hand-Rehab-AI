@@ -1,0 +1,13 @@
+Synthetic Diary Dataset Label Distribution Report
+=================================================
+Total Rows: 2500
+Notice: Synthetic data generated for research and demo prototype only.
+No clinical validity claimed. System is not a diagnostic tool.
+
+           Class_0_pct  Class_1_pct  Class_2_pct  Class_3_pct  Total_Samples
+pain             45.04        18.68        18.52        17.76           2500
+stiffness        45.52        17.88        18.04        18.56           2500
+mobility         48.56        16.76        16.72        17.96           2500
+grip             45.16        18.20        17.40        19.24           2500
+
+Acceptance Status: PASSED (Every class 0-3 >= 10% per symptom)

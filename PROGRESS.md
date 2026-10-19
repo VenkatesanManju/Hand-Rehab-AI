@@ -1,0 +1,11 @@
+# Progress log
+- [x] 1. Phase 1: diary dataset generator + BIO tags + hand-written test set (see docs/MASTER_PLAN.md)
+- [ ] 2. Preprocessing module (src/nlp/preprocess.py) + tests
+- [ ] 3. Embeddings loader (GloVe/FastText)
+- [ ] 4. BiLSTM + attention classifier (src/nlp/)
+- [ ] 5. RNN/LSTM/GRU/BiLSTM comparison (src/compare/) -> results/diary_comparison.csv
+- [ ] 6. Simulated recovery curves (data/simulated) with plateau/relapse labels
+- [ ] 7. Trend model LSTM/GRU (src/trend/) -> results/trend_comparison.csv
+- [ ] 8. MediaPipe angles + rep counter demo (src/vision/)
+- [ ] 9. Streamlit dashboard (app/)
+- [ ] 10. Report tables/plots and presentation outline
