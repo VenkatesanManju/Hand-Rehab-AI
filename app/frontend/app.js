@@ -18,6 +18,8 @@ let historySortAscending = true; // true = Day 1 -> Day N (chronological), false
 // Vision & Camera State
 let handLandmarker = null;
 let webcamRunning = false;
+let isVideoDemoRunning = false;
+let currentDemoVideoUrl = './vendor/demo_hand.webm';
 let videoElement = null;
 let canvasElement = null;
 let canvasCtx = null;
@@ -1122,14 +1124,86 @@ async function startCamera() {
 
 function stopCamera() {
   webcamRunning = false;
+  isVideoDemoRunning = false;
   if (animationFrameId) cancelAnimationFrame(animationFrameId);
   if (videoElement.srcObject) {
     videoElement.srcObject.getTracks().forEach(track => track.stop());
     videoElement.srcObject = null;
   }
+  if (videoElement.src) {
+    videoElement.pause();
+    videoElement.removeAttribute('src');
+    videoElement.load();
+  }
+
+  const demoBtn = document.getElementById('btn-real-video-demo');
+  if (demoBtn) {
+    demoBtn.textContent = '🎥 Real Video Demo';
+    demoBtn.classList.remove('active');
+  }
+
+  const liveActionDot = document.getElementById('live-status-dot');
+  const liveActionText = document.getElementById('live-action-text');
+  if (liveActionDot) liveActionDot.className = 'live-status-indicator';
+  if (liveActionText) liveActionText.textContent = 'Camera paused. Click "Start Camera" or "Real Video Demo".';
+
   document.getElementById('vision-placeholder').classList.remove('hidden');
   document.getElementById('btn-start-camera').disabled = false;
   document.getElementById('btn-stop-camera').disabled = true;
+}
+
+// --- Real Video Demo Mode (Playback of Real Clinical Video with AI Tracking) ---
+
+async function startRealVideoDemo(customSrc = null) {
+  if (simulationRunning) stopSimulation();
+  if (webcamRunning) stopCamera();
+
+  const src = customSrc || currentDemoVideoUrl;
+  currentDemoVideoUrl = src;
+
+  videoElement.srcObject = null;
+  videoElement.src = src;
+  videoElement.loop = true;
+  videoElement.muted = true;
+  videoElement.playsInline = true;
+
+  document.getElementById('vision-placeholder').classList.add('hidden');
+  document.getElementById('btn-start-camera').disabled = false;
+  document.getElementById('btn-stop-camera').disabled = false;
+
+  const demoBtn = document.getElementById('btn-real-video-demo');
+  if (demoBtn) {
+    demoBtn.textContent = '⏸ Pause Video Demo';
+    demoBtn.classList.add('active');
+  }
+
+  const liveActionDot = document.getElementById('live-status-dot');
+  const liveActionText = document.getElementById('live-action-text');
+  if (liveActionDot) liveActionDot.className = 'live-status-indicator active';
+  if (liveActionText) liveActionText.textContent = '🎥 Real Video Demo: Loading real hand video and starting live AI tracking...';
+
+  videoElement.onloadedmetadata = () => {
+    videoElement.play().then(() => {
+      webcamRunning = true;
+      isVideoDemoRunning = true;
+      renderVideoLoop();
+      updateVisionUI();
+    }).catch(err => {
+      console.warn('Auto-play muted retry:', err);
+      videoElement.muted = true;
+      videoElement.play().then(() => {
+        webcamRunning = true;
+        isVideoDemoRunning = true;
+        renderVideoLoop();
+        updateVisionUI();
+      });
+    });
+  };
+
+  videoElement.onerror = () => {
+    alert(`Could not load video from "${src}".\nPlease check the URL or select a valid MP4/WebM video file.`);
+    stopCamera();
+  };
 }
 
 // --- Simulated Exercise Demo Mode ---
@@ -2538,13 +2612,82 @@ async function initApp() {
     });
   });
 
-  // 5. Vision Camera Controls
+  // 5. Vision Camera Controls & Real Demo Video
   document.getElementById('btn-start-camera').addEventListener('click', startCamera);
   document.getElementById('btn-stop-camera').addEventListener('click', () => {
     stopCamera();
     stopSimulation();
   });
   document.getElementById('btn-simulate-exercise').addEventListener('click', startSimulation);
+
+  const btnRealDemo = document.getElementById('btn-real-video-demo');
+  if (btnRealDemo) {
+    btnRealDemo.addEventListener('click', () => {
+      if (isVideoDemoRunning) {
+        stopCamera();
+      } else {
+        startRealVideoDemo();
+      }
+    });
+  }
+
+  const selectDemoVideo = document.getElementById('select-demo-video');
+  const customPanel = document.getElementById('custom-video-panel');
+  if (selectDemoVideo) {
+    selectDemoVideo.addEventListener('change', (e) => {
+      const val = e.target.value;
+      if (val === 'custom') {
+        if (customPanel) customPanel.classList.remove('hidden');
+      } else {
+        if (customPanel) customPanel.classList.add('hidden');
+        currentDemoVideoUrl = val;
+        if (isVideoDemoRunning) {
+          startRealVideoDemo(val);
+        }
+      }
+    });
+  }
+
+  const btnPlaySelected = document.getElementById('btn-play-selected-video');
+  if (btnPlaySelected) {
+    btnPlaySelected.addEventListener('click', () => {
+      const selVal = selectDemoVideo ? selectDemoVideo.value : currentDemoVideoUrl;
+      if (selVal === 'custom') {
+        const customUrl = document.getElementById('input-custom-video-url')?.value?.trim();
+        if (customUrl) {
+          startRealVideoDemo(customUrl);
+        } else {
+          alert('Please enter a valid video URL below or choose a video file.');
+        }
+      } else {
+        startRealVideoDemo(selVal);
+      }
+    });
+  }
+
+  const btnLoadCustomUrl = document.getElementById('btn-load-custom-url');
+  if (btnLoadCustomUrl) {
+    btnLoadCustomUrl.addEventListener('click', () => {
+      const url = document.getElementById('input-custom-video-url')?.value?.trim();
+      if (!url) {
+        alert('Please enter a direct video URL (e.g., https://.../exercise.mp4 or .webm)');
+        return;
+      }
+      startRealVideoDemo(url);
+    });
+  }
+
+  const fileInput = document.getElementById('input-local-video-file');
+  if (fileInput) {
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (file) {
+        const fileUrl = URL.createObjectURL(file);
+        startRealVideoDemo(fileUrl);
+      }
+    });
+  }
+
   const btnTestBadForm = document.getElementById('btn-test-bad-form');
   if (btnTestBadForm) {
     btnTestBadForm.addEventListener('click', startBadFormSimulation);
