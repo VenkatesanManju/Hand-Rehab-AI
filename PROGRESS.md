@@ -17,4 +17,5 @@
 - [x] 16. Fixed uncaught JavaScript ReferenceError (undefined 'webcamStream' replaced with 'webcamRunning') in updateExerciseGuide that halted execution on page load and blocked Sign In / Quick Demo submissions.
 - [x] 17. Generated comprehensive 14-slide conference presentation (docs/HandRehab_AI_Presentation.pptx) covering Problem & Objectives, Literature Survey, Proposed System, System Architecture, Implementation & Demo, Result & Discussion, and Conclusion & Future Work with embedded high-resolution empirical plots and UI figures.
 - [x] 18. Removed "Advance & Log as Next Day" button from both Step 1: Diary and Step 2: Camera Exercise Tracker as requested, keeping streamlined "Save / Update Today (Day X)" workflow.
+- [x] 19. Removed "Broken Hand Bone Recovery (Metacarpal)" option from both registration and camera condition selector dropdowns.
 

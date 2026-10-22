@@ -148,30 +148,6 @@ const CONDITION_GUIDES = {
     },
     liveTip: 'Keep wrist straight to allow the median nerve to glide freely.'
   },
-  'metacarpal': {
-    name: 'Broken Hand Bone Recovery (Metacarpal Fracture)',
-    shortName: 'Broken Hand Bone Recovery',
-    exerciseTitle: 'Knuckle (MCP) Articulation & Finger Flexion',
-    goal: 'Restore knuckle joint (MCP) range of motion, prevent collateral ligament shortening, and restore grip closure.',
-    hintDesc: 'Rehabilitation after a broken hand bone (palm/knuckle fracture) to restore knuckle movement and prevent palm stiffness.',
-    hintExercise: 'Knuckle Articulation Curls (Open Hand ➡️ Knuckle Bending ➡️ Full Return)',
-    step1: {
-      icon: '🖐️',
-      title: '1. Extended Palm Position',
-      desc: 'Position your hand upright facing the camera with knuckles gently extended and fingers open (angle <strong>&gt;140°</strong>).'
-    },
-    step2: {
-      icon: '✊',
-      title: '2. Knuckle Flexion (Fist)',
-      desc: 'Bend from the main knuckles (MCP joints) curling fingers past <strong>85°</strong> into a compact fist without forcing pain.'
-    },
-    step3: {
-      icon: '✨',
-      title: '3. Controlled Knuckle Return',
-      desc: 'Straighten your knuckles smoothly back to the open start position (<strong>&gt;140°</strong>) to record <strong>+1 Rep</strong>.'
-    },
-    liveTip: 'Focus on bending from the main knuckles without twisting the hand.'
-  },
   'general': {
     name: 'General Hand Mobility & Stiffness (Everyday Recovery)',
     shortName: 'General Hand Mobility',
@@ -205,7 +181,6 @@ function getConditionKey(surgeryType) {
   if (s.includes('flexor')) return 'flexor';
   if (s.includes('radius') || s.includes('wrist')) return 'radius';
   if (s.includes('carpal')) return 'carpal';
-  if (s.includes('metacarpal') || s.includes('bone')) return 'metacarpal';
   if (CONDITION_GUIDES[s]) return s;
   return 'general';
 }

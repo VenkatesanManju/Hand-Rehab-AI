@@ -397,7 +397,7 @@ def test_registration_and_camera_exercise_guidance(client):
     assert "Back of Hand / Finger Straightening" in html
     assert "Broken Wrist Recovery (Distal Radius Fracture)" in html
     assert "Carpal Tunnel Release" in html
-    assert "Broken Hand Bone Recovery" in html
+    assert "Broken Hand Bone Recovery" not in html
     assert "General Hand Mobility &amp; Stiffness" in html
 
     # Registration Hint Card
