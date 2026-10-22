@@ -154,3 +154,125 @@ def test_auth_and_user_history(client):
     assert data_hist2["total_records"] == 2
 
 
+def test_recovery_report_two_charts_and_ui_elements(client):
+    """
+    Verifies that the Recovery Report page contains the two dedicated charts,
+    empty-state text, 1-session notice, and distinct AI forecast container.
+    """
+    res = client.get("/")
+    assert res.status_code == 200
+    html = res.data.decode("utf-8")
+
+    # Chart 1: Recovery Progress Over Time (Pain & Stiffness)
+    assert 'id="painStiffnessChart"' in html
+    assert "Recovery Progress Over Time" in html
+    assert "Daily reported Pain and Stiffness on a 0–3 scale" in html
+
+    # Chart 2: Hand Movement (ROM) Trend
+    assert 'id="romChart"' in html
+    assert "Hand Movement (ROM) Trend" in html
+    assert "Actual measured active range of motion" in html
+
+    # Empty State & 1-Session Notice
+    assert "Record your first session to see your recovery graph." in html
+    assert "1 session recorded." in html
+
+    # AI Forecast clearly separated and labeled
+    assert "Tomorrow's 1-Day AI Recovery Forecast" in html
+    assert "requires at least 14 days of recorded sessions" in html
+
+
+def test_session_records_zero_one_multiple_flow(client):
+    """
+    Tests data retrieval and logic for zero, one, and multiple real session records.
+    """
+    import time
+    from app.backend.db import get_db_connection
+
+    unique_user = f"patient_{int(time.time() * 1000)}"
+    reg_res = client.post("/api/auth/register", data=json.dumps({
+        "username": unique_user,
+        "password": "password123",
+        "full_name": "Chart Test Patient",
+        "surgery_type": "Tendon Repair"
+    }), content_type="application/json")
+    user_id = json.loads(reg_res.data)["user"]["id"]
+
+    # Test 1: Zero sessions state (clear initial seed record to test 0 sessions)
+    with get_db_connection() as conn:
+        conn.cursor().execute("DELETE FROM rehab_records WHERE user_id = ?", (user_id,))
+        conn.commit()
+
+    res_zero = client.get(f"/api/user/history?user_id={user_id}")
+    assert res_zero.status_code == 200
+    data_zero = json.loads(res_zero.data)
+    assert data_zero["total_records"] == 0
+    assert data_zero["records"] == []
+
+    # Test 2: Exactly One session state
+    add_res_1 = client.post("/api/user/record", data=json.dumps({
+        "user_id": user_id,
+        "day": 1,
+        "pain": 2.0,
+        "stiffness": 2.5,
+        "mobility": 1.5,
+        "grip": 1.8,
+        "rom": 45.0,
+        "reps": 10,
+        "diary_text": "First recorded day."
+    }), content_type="application/json")
+    assert add_res_1.status_code == 200
+
+    res_one = client.get(f"/api/user/history?user_id={user_id}")
+    data_one = json.loads(res_one.data)
+    assert data_one["total_records"] == 1
+    rec1 = data_one["records"][0]
+    assert rec1["day"] == 1
+    assert rec1["rom"] == 45.0
+    assert rec1["pain"] == 2.0
+
+    # Test 3: Same-day update accumulates reps and preserves peak ROM
+    update_res = client.post("/api/user/record", data=json.dumps({
+        "user_id": user_id,
+        "day": 1,
+        "pain": 1.5,
+        "stiffness": 2.0,
+        "mobility": 1.0,
+        "grip": 1.5,
+        "rom": 52.0, # Higher ROM
+        "reps": 10,  # 10 more reps -> total 20
+        "diary_text": "Second session today.",
+        "update_if_same_day": True
+    }), content_type="application/json")
+    assert update_res.status_code == 200
+    assert json.loads(update_res.data)["updated"] is True
+
+    res_updated = client.get(f"/api/user/history?user_id={user_id}")
+    data_updated = json.loads(res_updated.data)
+    assert data_updated["total_records"] == 1
+    assert data_updated["records"][0]["rom"] == 52.0
+    assert data_updated["records"][0]["reps"] == 20
+
+    # Test 4: Multiple sessions state
+    for day in range(2, 6):
+        client.post("/api/user/record", data=json.dumps({
+            "user_id": user_id,
+            "day": day,
+            "pain": max(0.5, 2.0 - 0.2 * day),
+            "stiffness": max(0.5, 2.0 - 0.2 * day),
+            "mobility": 1.0,
+            "grip": 1.0,
+            "rom": min(85.0, 52.0 + 3.0 * day),
+            "reps": 10,
+            "diary_text": f"Day {day} routine."
+        }), content_type="application/json")
+
+    res_multi = client.get(f"/api/user/history?user_id={user_id}")
+    data_multi = json.loads(res_multi.data)
+    assert data_multi["total_records"] == 5
+    assert [r["day"] for r in data_multi["records"]] == [1, 2, 3, 4, 5]
+    # Verify ROM increases properly
+    assert data_multi["records"][-1]["rom"] > data_multi["records"][0]["rom"]
+
+
+

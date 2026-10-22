@@ -336,27 +336,86 @@
             </div>
           </div>
 
-          <!-- Chart Card -->
-          <div class="chart-card card">
-            <div class="card-header">
-              <h3>Longitudinal Recovery Trajectory</h3>
-              <span class="pill-tech">Multi-Task GRU (14-Day Window)</span>
+          <!-- RECOVERY CHARTS SECTION (TWO PATIENT-FRIENDLY GRAPHS) -->
+          <div class="recovery-charts-container">
+            <!-- Graph 1: Recovery Progress Over Time (Pain & Stiffness) -->
+            <div class="chart-card card" id="card-pain-stiffness-chart">
+              <div class="card-header">
+                <div>
+                  <h3>1. Recovery Progress Over Time</h3>
+                  <p class="chart-subtitle">Daily reported Pain and Stiffness on a 0–3 scale (0 = None, 1 = Mild, 2 = Moderate, 3 = Severe)</p>
+                </div>
+                <span class="pill-tech">Symptom Tracking</span>
+              </div>
+
+              <!-- Notice when only 1 session is recorded -->
+              <div id="notice-single-session-symptoms" class="chart-notice-banner hidden">
+                <span class="notice-icon">ℹ️</span>
+                <span><strong>1 session recorded.</strong> Showing baseline point. Complete additional daily sessions to identify recovery trends.</span>
+              </div>
+
+              <!-- Empty state when 0 sessions -->
+              <div id="empty-state-symptoms" class="chart-empty-state hidden">
+                <span class="empty-icon">📊</span>
+                <h4>No Recorded Sessions</h4>
+                <p>Record your first session to see your recovery graph.</p>
+              </div>
+
+              <div class="chart-wrapper" id="wrapper-pain-stiffness">
+                <canvas id="painStiffnessChart"></canvas>
+              </div>
             </div>
-            <div class="chart-wrapper">
-              <canvas id="trendChart"></canvas>
+
+            <!-- Graph 2: Hand Movement (ROM) Trend -->
+            <div class="chart-card card" id="card-rom-chart">
+              <div class="card-header">
+                <div>
+                  <h3>2. Hand Movement (ROM) Trend</h3>
+                  <p class="chart-subtitle">Actual measured active range of motion (0° = open palm, 100° = full fist flexion)</p>
+                </div>
+                <span class="pill-tech">Active Flexion (°)</span>
+              </div>
+
+              <!-- Notice when only 1 session is recorded -->
+              <div id="notice-single-session-rom" class="chart-notice-banner hidden">
+                <span class="notice-icon">ℹ️</span>
+                <span><strong>1 session recorded.</strong> Showing baseline measurement. Complete additional daily sessions to identify recovery trends.</span>
+              </div>
+
+              <!-- Empty state when 0 sessions -->
+              <div id="empty-state-rom" class="chart-empty-state hidden">
+                <span class="empty-icon">🖐️</span>
+                <h4>No Recorded Sessions</h4>
+                <p>Record your first session to see your recovery graph.</p>
+              </div>
+
+              <div class="chart-wrapper" id="wrapper-rom">
+                <canvas id="romChart"></canvas>
+              </div>
             </div>
           </div>
 
-          <!-- Forecast Box -->
+          <!-- Forecast Box (Kept separate and clearly labeled as AI Forecast) -->
           <div class="forecast-card card">
-            <h3>Tomorrow's 1-Day AI Recovery Forecast</h3>
-            <p class="card-tiny">Predicted functional score based on your 14-day history:</p>
-            <div class="forecast-pills">
-              <span class="f-pill">Pain: <strong id="f-pain">1.2</strong>/3</span>
-              <span class="f-pill">Stiffness: <strong id="f-stiff">1.1</strong>/3</span>
-              <span class="f-pill">Mobility: <strong id="f-mob">0.9</strong>/3</span>
-              <span class="f-pill">Grip: <strong id="f-grip">1.0</strong>/3</span>
-              <span class="f-pill">Active ROM: <strong id="f-rom">68.5°</strong></span>
+            <div class="card-header">
+              <div>
+                <h3>Tomorrow's 1-Day AI Recovery Forecast</h3>
+                <p class="card-tiny">Predicted functional score based on your 14-day history (separate from actual recorded data):</p>
+              </div>
+              <span id="forecast-model-badge" class="pill-tech">Multi-Task GRU</span>
+            </div>
+
+            <div id="forecast-pending-notice" class="forecast-notice-banner">
+              <span class="notice-icon">⏳</span>
+              <span id="forecast-pending-text">AI 1-day forecasting requires at least 14 days of recorded sessions to detect trends accurately. Currently recorded: <strong>0 / 14 days</strong>.</span>
+            </div>
+
+            <div id="forecast-pills-row" class="forecast-pills hidden">
+              <span class="f-pill">Forecast Pain: <strong id="f-pain">—</strong></span>
+              <span class="f-pill">Forecast Stiffness: <strong id="f-stiff">—</strong></span>
+              <span class="f-pill">Forecast Mobility: <strong id="f-mob">—</strong></span>
+              <span class="f-pill">Forecast Grip: <strong id="f-grip">—</strong></span>
+              <span class="f-pill">Forecast Active ROM: <strong id="f-rom">—</strong></span>
             </div>
           </div>
 

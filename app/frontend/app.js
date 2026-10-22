@@ -8,7 +8,9 @@ import { FilesetResolver, HandLandmarker } from './vendor/vision_bundle.mjs';
 // --- Global Application State ---
 let currentUser = null;
 let patientHistory = [];
-let trendChartInstance = null;
+let painStiffnessChartInstance = null;
+let romChartInstance = null;
+let trendChartInstance = null; // Legacy alias
 
 // Vision & Camera State
 let handLandmarker = null;
@@ -427,98 +429,342 @@ function renderDiaryResults(data, originalText) {
   }
 }
 
-// --- Trend & Chart Handlers ---
+// --- Recovery Progress & Hand Movement (ROM) Trend Chart Handlers ---
 
-function initTrendChart() {
-  const canvas = document.getElementById('trendChart');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  trendChartInstance = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: [],
-      datasets: [
-        {
-          label: 'Pain Severity (0–3)',
-          data: [],
-          borderColor: '#ef4444',
-          backgroundColor: 'rgba(239, 68, 68, 0.1)',
-          yAxisID: 'yPain',
-          tension: 0.25,
-          borderWidth: 2,
-          pointRadius: 3
-        },
-        {
-          label: 'Stiffness (0–3)',
-          data: [],
-          borderColor: '#f59e0b',
-          backgroundColor: 'rgba(245, 158, 11, 0.1)',
-          yAxisID: 'yPain',
-          tension: 0.25,
-          borderWidth: 2,
-          pointRadius: 3
-        },
-        {
-          label: 'Active ROM (°)',
-          data: [],
-          borderColor: '#0284c7',
-          backgroundColor: 'rgba(2, 132, 199, 0.1)',
-          yAxisID: 'yRom',
-          tension: 0.25,
-          borderWidth: 2,
-          pointRadius: 3
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: {
-          title: { display: true, text: 'Rehabilitation Day', font: { size: 11 } },
-          grid: { display: false }
-        },
-        yPain: {
-          type: 'linear',
-          position: 'left',
-          min: 0,
-          max: 3,
-          title: { display: true, text: 'Symptoms (0–3)', font: { size: 11 } }
-        },
-        yRom: {
-          type: 'linear',
-          position: 'right',
-          min: 0,
-          max: 100,
-          title: { display: true, text: 'ROM (°)', font: { size: 11 } },
-          grid: { drawOnChartArea: false }
-        }
-      },
-      plugins: {
-        legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } }
+function parseMetric(val) {
+  if (val === null || val === undefined || val === '' || isNaN(Number(val))) {
+    return null; // Return null so Chart.js does not treat missing data as zero
+  }
+  return Number(val);
+}
+
+function formatDayLabel(d) {
+  let datePart = '';
+  if (d && d.recorded_at) {
+    try {
+      // Handles both ISO strings and SQLite TIMESTAMP strings
+      const dt = new Date(d.recorded_at.replace(' ', 'T'));
+      if (!isNaN(dt.getTime())) {
+        datePart = dt.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
       }
+    } catch (e) {}
+  }
+  return datePart ? `Day ${d.day} (${datePart})` : `Day ${d.day}`;
+}
+
+function getSeverityWord(val) {
+  if (val === null || val === undefined) return 'Not recorded';
+  const rounded = Math.round(val);
+  const words = ['None', 'Mild', 'Moderate', 'Severe'];
+  return words[rounded] !== undefined ? words[rounded] : '';
+}
+
+function updateRecoveryCharts(history) {
+  const records = history || [];
+
+  const emptySymptoms = document.getElementById('empty-state-symptoms');
+  const emptyRom = document.getElementById('empty-state-rom');
+  const noticeSymptoms = document.getElementById('notice-single-session-symptoms');
+  const noticeRom = document.getElementById('notice-single-session-rom');
+  const wrapperSymptoms = document.getElementById('wrapper-pain-stiffness');
+  const wrapperRom = document.getElementById('wrapper-rom');
+
+  if (records.length === 0) {
+    // Zero sessions: display patient-friendly message, hide charts and 1-session banners
+    if (emptySymptoms) emptySymptoms.classList.remove('hidden');
+    if (emptyRom) emptyRom.classList.remove('hidden');
+    if (noticeSymptoms) noticeSymptoms.classList.add('hidden');
+    if (noticeRom) noticeRom.classList.add('hidden');
+    if (wrapperSymptoms) wrapperSymptoms.classList.add('hidden');
+    if (wrapperRom) wrapperRom.classList.add('hidden');
+    return;
+  }
+
+  // 1 or more sessions recorded: show canvas wrappers and hide empty states
+  if (emptySymptoms) emptySymptoms.classList.add('hidden');
+  if (emptyRom) emptyRom.classList.add('hidden');
+  if (wrapperSymptoms) wrapperSymptoms.classList.remove('hidden');
+  if (wrapperRom) wrapperRom.classList.remove('hidden');
+
+  if (records.length === 1) {
+    // Exactly 1 session: show explanation that more sessions are needed for trend slope
+    if (noticeSymptoms) noticeSymptoms.classList.remove('hidden');
+    if (noticeRom) noticeRom.classList.remove('hidden');
+  } else {
+    // 2 or more sessions: hide single-session notices
+    if (noticeSymptoms) noticeSymptoms.classList.add('hidden');
+    if (noticeRom) noticeRom.classList.add('hidden');
+  }
+
+  const labels = records.map(d => formatDayLabel(d));
+  const painData = records.map(d => parseMetric(d.pain));
+  const stiffData = records.map(d => parseMetric(d.stiffness));
+  const romData = records.map(d => parseMetric(d.rom));
+
+  // Prominent point radius if only 1 session, clean standard points if multiple
+  const pointSize = records.length === 1 ? 8 : 4.5;
+  const pointHoverSize = records.length === 1 ? 10 : 7;
+
+  // -------------------------------------------------------------
+  // GRAPH 1: Recovery Progress Over Time (Daily Pain & Stiffness)
+  // -------------------------------------------------------------
+  const ctxSymptoms = document.getElementById('painStiffnessChart');
+  if (ctxSymptoms) {
+    if (painStiffnessChartInstance) {
+      painStiffnessChartInstance.data.labels = labels;
+      painStiffnessChartInstance.data.datasets[0].data = painData;
+      painStiffnessChartInstance.data.datasets[0].pointRadius = pointSize;
+      painStiffnessChartInstance.data.datasets[0].pointHoverRadius = pointHoverSize;
+      painStiffnessChartInstance.data.datasets[1].data = stiffData;
+      painStiffnessChartInstance.data.datasets[1].pointRadius = pointSize;
+      painStiffnessChartInstance.data.datasets[1].pointHoverRadius = pointHoverSize;
+      painStiffnessChartInstance.update();
+    } else {
+      painStiffnessChartInstance = new Chart(ctxSymptoms.getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Pain Score (0–3)',
+              data: painData,
+              borderColor: '#ef4444',
+              backgroundColor: 'rgba(239, 68, 68, 0.1)',
+              borderWidth: 2.5,
+              pointBackgroundColor: '#ef4444',
+              pointBorderColor: '#ffffff',
+              pointBorderWidth: 1.5,
+              pointRadius: pointSize,
+              pointHoverRadius: pointHoverSize,
+              tension: 0.25,
+              spanGaps: true
+            },
+            {
+              label: 'Stiffness Score (0–3)',
+              data: stiffData,
+              borderColor: '#f59e0b',
+              backgroundColor: 'rgba(245, 158, 11, 0.1)',
+              borderWidth: 2.5,
+              pointBackgroundColor: '#f59e0b',
+              pointBorderColor: '#ffffff',
+              pointBorderWidth: 1.5,
+              pointRadius: pointSize,
+              pointHoverRadius: pointHoverSize,
+              tension: 0.25,
+              spanGaps: true
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Rehabilitation Day & Date',
+                font: { size: 12, weight: '600' },
+                color: '#475569'
+              },
+              grid: { color: 'rgba(226, 232, 240, 0.6)' }
+            },
+            y: {
+              min: 0,
+              max: 3,
+              title: {
+                display: true,
+                text: 'Symptom Severity (0–3 Scale)',
+                font: { size: 12, weight: '600' },
+                color: '#475569'
+              },
+              ticks: {
+                stepSize: 1,
+                color: '#475569',
+                callback: function(val) {
+                  const map = { 0: '0 - None', 1: '1 - Mild', 2: '2 - Moderate', 3: '3 - Severe' };
+                  return map[val] !== undefined ? map[val] : val;
+                }
+              },
+              grid: { color: 'rgba(226, 232, 240, 0.6)' }
+            }
+          },
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: { boxWidth: 14, font: { size: 12, weight: '600' }, color: '#334155' }
+            },
+            tooltip: {
+              callbacks: {
+                title: function(items) {
+                  if (!items || items.length === 0) return '';
+                  const idx = items[0].dataIndex;
+                  const record = records[idx];
+                  const dateStr = record && record.recorded_at ? record.recorded_at.substring(0, 16) : 'Recorded Session';
+                  return `Day ${record ? record.day : items[0].label} • ${dateStr}`;
+                },
+                label: function(context) {
+                  if (context.raw === null || context.raw === undefined) {
+                    return `${context.dataset.label}: Not recorded`;
+                  }
+                  const val = Number(context.raw).toFixed(1);
+                  const word = getSeverityWord(context.raw);
+                  return `${context.dataset.label}: ${val} / 3 (${word})`;
+                }
+              }
+            }
+          }
+        }
+      });
     }
-  });
+  }
+
+  // -------------------------------------------------------------
+  // GRAPH 2: Hand Movement (ROM) Trend (Actual Measured ROM in °)
+  // -------------------------------------------------------------
+  const ctxRom = document.getElementById('romChart');
+  if (ctxRom) {
+    if (romChartInstance) {
+      romChartInstance.data.labels = labels;
+      romChartInstance.data.datasets[0].data = romData;
+      romChartInstance.data.datasets[0].pointRadius = pointSize;
+      romChartInstance.data.datasets[0].pointHoverRadius = pointHoverSize;
+      romChartInstance.update();
+    } else {
+      romChartInstance = new Chart(ctxRom.getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Actual Active Range of Motion (°)',
+              data: romData,
+              borderColor: '#0284c7',
+              backgroundColor: 'rgba(2, 132, 199, 0.12)',
+              fill: true,
+              borderWidth: 2.5,
+              pointBackgroundColor: '#0284c7',
+              pointBorderColor: '#ffffff',
+              pointBorderWidth: 1.5,
+              pointRadius: pointSize,
+              pointHoverRadius: pointHoverSize,
+              tension: 0.25,
+              spanGaps: true
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Rehabilitation Day & Date',
+                font: { size: 12, weight: '600' },
+                color: '#475569'
+              },
+              grid: { color: 'rgba(226, 232, 240, 0.6)' }
+            },
+            y: {
+              min: 0,
+              max: 100,
+              title: {
+                display: true,
+                text: 'Active Flexion ROM (°)',
+                font: { size: 12, weight: '600' },
+                color: '#475569'
+              },
+              ticks: {
+                stepSize: 20,
+                color: '#475569',
+                callback: function(val) {
+                  return val + '°';
+                }
+              },
+              grid: { color: 'rgba(226, 232, 240, 0.6)' }
+            }
+          },
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: { boxWidth: 14, font: { size: 12, weight: '600' }, color: '#334155' }
+            },
+            tooltip: {
+              callbacks: {
+                title: function(items) {
+                  if (!items || items.length === 0) return '';
+                  const idx = items[0].dataIndex;
+                  const record = records[idx];
+                  const dateStr = record && record.recorded_at ? record.recorded_at.substring(0, 16) : 'Recorded Session';
+                  return `Day ${record ? record.day : items[0].label} • ${dateStr}`;
+                },
+                label: function(context) {
+                  if (context.raw === null || context.raw === undefined) {
+                    return 'Active ROM: Not measured';
+                  }
+                  const val = Number(context.raw).toFixed(1);
+                  const idx = context.dataIndex;
+                  const record = records[idx];
+                  const repsText = record && record.reps ? ` (${record.reps} reps completed)` : '';
+                  return `Measured Active ROM: ${val}° flexion${repsText}`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+  }
 }
 
+// Backwards-compatible alias
 function updateTrendChart(history) {
-  if (!trendChartInstance) return;
-
-  const labels = history.map(d => `Day ${d.day}`);
-  const painData = history.map(d => d.pain);
-  const stiffData = history.map(d => d.stiffness);
-  const romData = history.map(d => d.rom);
-
-  trendChartInstance.data.labels = labels;
-  trendChartInstance.data.datasets[0].data = painData;
-  trendChartInstance.data.datasets[1].data = stiffData;
-  trendChartInstance.data.datasets[2].data = romData;
-  trendChartInstance.update();
+  updateRecoveryCharts(history);
 }
+
+// --- Longitudinal AI Forecast & Alert Handlers ---
 
 async function requestTrendAnalysis(history) {
-  if (history.length < 14) return;
+  const pendingNotice = document.getElementById('forecast-pending-notice');
+  const pendingText = document.getElementById('forecast-pending-text');
+  const pillsRow = document.getElementById('forecast-pills-row');
+  const banner = document.getElementById('alert-banner');
+  const title = document.getElementById('alert-title');
+  const msg = document.getElementById('alert-message');
+  const icon = document.getElementById('alert-icon');
 
+  const count = (history && history.length) || 0;
+
+  if (count < 14) {
+    // Show clear explanatory pending state instead of dummy values
+    if (pendingNotice) pendingNotice.classList.remove('hidden');
+    if (pendingText) {
+      pendingText.innerHTML = `AI 1-day forecasting requires at least 14 days of recorded sessions to identify recovery slopes accurately. Currently recorded: <strong>${count} / 14 days</strong>.`;
+    }
+    if (pillsRow) pillsRow.classList.add('hidden');
+
+    if (banner) {
+      banner.className = 'status-banner banner-success';
+      if (icon) icon.textContent = 'ℹ️';
+      if (title) title.textContent = count === 0 ? 'Welcome to Your Rehabilitation Dashboard' : 'Baseline Recovery In Progress';
+      if (msg) {
+        msg.textContent = count === 0 
+          ? 'Record your first diary entry and camera exercise to begin tracking your recovery trajectory.'
+          : `You have recorded ${count} session${count > 1 ? 's' : ''}. AI recovery trend and plateau/relapse alerts will activate after 14 days of rehabilitation history. Continue your prescribed exercises.`;
+      }
+    }
+    return;
+  }
+
+  // When 14 or more days exist: fetch real model predictions
   try {
     const res = await fetch('/api/trend', {
       method: 'POST',
@@ -539,27 +785,40 @@ function renderTrendResults(data) {
   const title = document.getElementById('alert-title');
   const msg = document.getElementById('alert-message');
   const icon = document.getElementById('alert-icon');
+  const pendingNotice = document.getElementById('forecast-pending-notice');
+  const pillsRow = document.getElementById('forecast-pills-row');
 
-  banner.className = `status-banner banner-${data.alert_level}`;
-  msg.textContent = data.alert;
+  if (pendingNotice) pendingNotice.classList.add('hidden');
+  if (pillsRow) pillsRow.classList.remove('hidden');
 
-  if (data.alert_level === 'danger') {
-    icon.textContent = '⚠️';
-    title.textContent = 'Acute Flare-Up / Relapse Alert';
-  } else if (data.alert_level === 'warning') {
-    icon.textContent = '⚠️';
-    title.textContent = 'Recovery Plateau Warning';
-  } else {
-    icon.textContent = '✅';
-    title.textContent = 'Progression On Track';
+  if (banner) {
+    banner.className = `status-banner banner-${data.alert_level}`;
+    if (msg) msg.textContent = data.alert;
+
+    if (data.alert_level === 'danger') {
+      if (icon) icon.textContent = '⚠️';
+      if (title) title.textContent = 'Acute Flare-Up / Relapse Alert';
+    } else if (data.alert_level === 'warning') {
+      if (icon) icon.textContent = '⚠️';
+      if (title) title.textContent = 'Recovery Plateau Warning';
+    } else {
+      if (icon) icon.textContent = '✅';
+      if (title) title.textContent = 'Recovery Progression On Track';
+    }
   }
 
   if (data.forecast) {
-    document.getElementById('f-pain').textContent = data.forecast.pain;
-    document.getElementById('f-stiff').textContent = data.forecast.stiffness;
-    document.getElementById('f-mob').textContent = data.forecast.mobility;
-    document.getElementById('f-grip').textContent = data.forecast.grip;
-    document.getElementById('f-rom').textContent = `${data.forecast.rom}°`;
+    const fPain = document.getElementById('f-pain');
+    const fStiff = document.getElementById('f-stiff');
+    const fMob = document.getElementById('f-mob');
+    const fGrip = document.getElementById('f-grip');
+    const fRom = document.getElementById('f-rom');
+
+    if (fPain) fPain.textContent = `${data.forecast.pain} / 3`;
+    if (fStiff) fStiff.textContent = `${data.forecast.stiffness} / 3`;
+    if (fMob) fMob.textContent = `${data.forecast.mobility} / 3`;
+    if (fGrip) fGrip.textContent = `${data.forecast.grip} / 3`;
+    if (fRom) fRom.textContent = `${data.forecast.rom}° flexion`;
   }
 }
 
@@ -612,7 +871,7 @@ async function loadUserSession(user) {
     if (res.ok) {
       const data = await res.json();
       patientHistory = data.records || [];
-      updateTrendChart(patientHistory);
+      updateRecoveryCharts(patientHistory);
       renderHistoryTable(patientHistory);
       requestTrendAnalysis(patientHistory);
       updateDayLabels();
@@ -740,7 +999,7 @@ async function saveSession(advanceDay = false) {
     if (histRes.ok) {
       const histData = await histRes.json();
       patientHistory = histData.records || [];
-      updateTrendChart(patientHistory);
+      updateRecoveryCharts(patientHistory);
       renderHistoryTable(patientHistory);
       requestTrendAnalysis(patientHistory);
       updateDayLabels();
@@ -785,7 +1044,8 @@ window.addEventListener('DOMContentLoaded', async () => {
   canvasElement = document.getElementById('vision-canvas');
   canvasCtx = canvasElement.getContext('2d');
 
-  initTrendChart();
+  // Initialize charts in zero-session state until patient session loads
+  updateRecoveryCharts([]);
 
   // 1. Auth Tabs Toggle
   const tabLogin = document.getElementById('tab-btn-login');
@@ -891,7 +1151,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         .then(r => r.json())
         .then(d => {
           patientHistory = d.records || [];
-          updateTrendChart(patientHistory);
+          updateRecoveryCharts(patientHistory);
           renderHistoryTable(patientHistory);
           requestTrendAnalysis(patientHistory);
           updateDayLabels();
