@@ -1481,13 +1481,10 @@ function showAuthAlert(msg, type = 'error') {
 
 function updateDayLabels() {
   const saveLabel = document.getElementById('label-save-day');
-  const advanceLabel = document.getElementById('label-advance-day');
   const diarySaveLabel = document.getElementById('label-diary-save-day');
-  const diaryAdvanceLabel = document.getElementById('label-diary-advance-day');
 
   const todayStr = new Date().toISOString().substring(0, 10);
   let saveText = 'Day 1';
-  let advanceText = 'Day 2';
 
   if (patientHistory && patientHistory.length > 0) {
     const lastRecord = patientHistory[patientHistory.length - 1];
@@ -1496,26 +1493,21 @@ function updateDayLabels() {
     if (lastRecord.day === 0) {
       // Day 0 is registration baseline; first rehabilitation session is Day 1
       saveText = 'Day 1';
-      advanceText = 'Day 2';
     } else if (lastDate === todayStr) {
       saveText = `Day ${lastRecord.day}`;
-      advanceText = `Day ${lastRecord.day + 1}`;
     } else {
       const nextDay = lastRecord.day + 1;
       saveText = `Day ${nextDay}`;
-      advanceText = `Day ${nextDay + 1}`;
     }
   }
 
   if (saveLabel) saveLabel.textContent = saveText;
-  if (advanceLabel) advanceLabel.textContent = advanceText;
   if (diarySaveLabel) diarySaveLabel.textContent = saveText;
-  if (diaryAdvanceLabel) diaryAdvanceLabel.textContent = advanceText;
 }
 
 // --- Session Recording ---
 
-async function saveSession(advanceDay = false) {
+async function saveSession() {
   if (!currentUser) {
     alert('Please sign in to save your session.');
     return;
@@ -1542,19 +1534,13 @@ async function saveSession(advanceDay = false) {
 
     if (lastRecord.day === 0) {
       // Day 0 is baseline registration; first exercise session is Day 1
-      targetDay = advanceDay ? 2 : 1;
+      targetDay = 1;
       updateIfSame = false;
     } else if (lastDate === todayStr) {
-      if (advanceDay) {
-        targetDay = lastRecord.day + 1;
-        updateIfSame = false;
-      } else {
-        targetDay = lastRecord.day;
-        updateIfSame = true;
-      }
+      targetDay = lastRecord.day;
+      updateIfSame = true;
     } else {
-      const nextDay = lastRecord.day + 1;
-      targetDay = advanceDay ? nextDay + 1 : nextDay;
+      targetDay = lastRecord.day + 1;
       updateIfSame = false;
     }
   }
@@ -1801,19 +1787,10 @@ window.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('btn-simulate-exercise').addEventListener('click', startSimulation);
 
   // 6. Save Session
-  document.getElementById('btn-save-session').addEventListener('click', () => saveSession(false));
-  const advanceBtn = document.getElementById('btn-advance-day');
-  if (advanceBtn) {
-    advanceBtn.addEventListener('click', () => saveSession(true));
-  }
-
+  document.getElementById('btn-save-session').addEventListener('click', saveSession);
   const diarySaveBtn = document.getElementById('btn-diary-save-session');
   if (diarySaveBtn) {
-    diarySaveBtn.addEventListener('click', () => saveSession(false));
-  }
-  const diaryAdvanceBtn = document.getElementById('btn-diary-advance-day');
-  if (diaryAdvanceBtn) {
-    diaryAdvanceBtn.addEventListener('click', () => saveSession(true));
+    diarySaveBtn.addEventListener('click', saveSession);
   }
 
   // 7. History Filter & Sort Controls

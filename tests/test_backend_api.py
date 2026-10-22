@@ -324,8 +324,8 @@ def test_diary_page_session_save_and_elements(client):
 
     assert 'id="btn-diary-save-session"' in html
     assert 'id="label-diary-save-day"' in html
-    assert 'id="btn-diary-advance-day"' in html
-    assert 'id="label-diary-advance-day"' in html
+    assert 'id="btn-diary-advance-day"' not in html
+    assert 'id="btn-advance-day"' not in html
     assert 'id="btn-goto-exercise"' in html
     assert 'id="btn-diary-goto-report"' in html
 
@@ -341,7 +341,7 @@ def test_diary_page_session_save_and_elements(client):
     assert res_js.status_code == 200
     js = res_js.data.decode("utf-8")
     assert "btn-diary-save-session" in js
-    assert "btn-diary-advance-day" in js
+    assert "btn-diary-advance-day" not in js
     assert "label-diary-save-day" in js
     assert "diary-summary-pain" in js
 

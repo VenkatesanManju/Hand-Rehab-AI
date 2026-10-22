@@ -16,4 +16,5 @@
 - [x] 15. Enhanced registration condition selection with plain-English descriptions & dynamic hint card; adapted Step 2 Camera Exercise Tracker to provide condition-specific guided exercises (rehab goals, 3-step cues, and live clinical tips) tailored to each patient's selected surgery.
 - [x] 16. Fixed uncaught JavaScript ReferenceError (undefined 'webcamStream' replaced with 'webcamRunning') in updateExerciseGuide that halted execution on page load and blocked Sign In / Quick Demo submissions.
 - [x] 17. Generated comprehensive 14-slide conference presentation (docs/HandRehab_AI_Presentation.pptx) covering Problem & Objectives, Literature Survey, Proposed System, System Architecture, Implementation & Demo, Result & Discussion, and Conclusion & Future Work with embedded high-resolution empirical plots and UI figures.
+- [x] 18. Removed "Advance & Log as Next Day" button from both Step 1: Diary and Step 2: Camera Exercise Tracker as requested, keeping streamlined "Save / Update Today (Day X)" workflow.
 
