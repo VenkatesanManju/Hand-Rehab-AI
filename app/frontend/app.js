@@ -10,7 +10,10 @@ let currentUser = null;
 let patientHistory = [];
 let painStiffnessChartInstance = null;
 let romChartInstance = null;
+let mobilityGripChartInstance = null;
 let trendChartInstance = null; // Legacy alias
+let currentHistoryFilter = 'all'; // 'all', '14', '7'
+let historySortAscending = true; // true = Day 1 -> Day N (chronological), false = Day N -> Day 1
 
 // Vision & Camera State
 let handLandmarker = null;
@@ -453,10 +456,147 @@ function formatDayLabel(d) {
 }
 
 function getSeverityWord(val) {
-  if (val === null || val === undefined) return 'Not recorded';
-  const rounded = Math.round(val);
+  if (val === null || val === undefined || val === '' || isNaN(Number(val))) return 'Not recorded';
+  const rounded = Math.round(Number(val));
   const words = ['None', 'Mild', 'Moderate', 'Severe'];
   return words[rounded] !== undefined ? words[rounded] : '';
+}
+
+function getMobilityWord(val) {
+  if (val === null || val === undefined || val === '' || isNaN(Number(val))) return 'Not recorded';
+  const rounded = Math.round(Number(val));
+  const words = ['Normal mobility', 'Mild limitation', 'Moderate limitation', 'Severe limitation'];
+  return words[rounded] !== undefined ? words[rounded] : '';
+}
+
+function getGripWord(val) {
+  if (val === null || val === undefined || val === '' || isNaN(Number(val))) return 'Not recorded';
+  const rounded = Math.round(Number(val));
+  const words = ['Normal strength', 'Mild weakness', 'Moderate weakness', 'Severe weakness'];
+  return words[rounded] !== undefined ? words[rounded] : '';
+}
+
+function escapeHtml(str) {
+  if (!str) return '—';
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// --- Recovery Summary Overview (6 Metric Cards) ---
+
+function updateRecoverySummaryCards(history) {
+  const records = history || [];
+  const latest = records.length > 0 ? records[records.length - 1] : null;
+
+  const dayBadge = document.getElementById('summary-last-recorded-day');
+  const valPain = document.getElementById('rep-val-pain');
+  const descPain = document.getElementById('rep-desc-pain');
+  const valStiff = document.getElementById('rep-val-stiffness');
+  const descStiff = document.getElementById('rep-desc-stiffness');
+  const valMob = document.getElementById('rep-val-mobility');
+  const descMob = document.getElementById('rep-desc-mobility');
+  const valGrip = document.getElementById('rep-val-grip');
+  const descGrip = document.getElementById('rep-desc-grip');
+  const valRom = document.getElementById('rep-val-rom');
+  const descRom = document.getElementById('rep-desc-rom');
+  const valReps = document.getElementById('rep-val-reps');
+  const descReps = document.getElementById('rep-desc-reps');
+  const nextStepEl = document.getElementById('summary-next-step');
+
+  if (!latest) {
+    if (dayBadge) dayBadge.textContent = 'Day —';
+    if (valPain) valPain.textContent = '—';
+    if (descPain) descPain.textContent = 'No records yet';
+    if (valStiff) valStiff.textContent = '—';
+    if (descStiff) descStiff.textContent = 'No records yet';
+    if (valMob) valMob.textContent = '—';
+    if (descMob) descMob.textContent = 'No records yet';
+    if (valGrip) valGrip.textContent = '—';
+    if (descGrip) descGrip.textContent = 'No records yet';
+    if (valRom) valRom.textContent = '—';
+    if (descRom) descRom.textContent = 'No records yet';
+    if (valReps) valReps.textContent = '—';
+    if (descReps) descReps.textContent = 'No records yet';
+    if (nextStepEl) {
+      nextStepEl.innerHTML = '<strong>Next Step:</strong> Record your first session in Step 1 and Step 2 above to view your initial recovery summary.';
+    }
+    return;
+  }
+
+  // Date and day label
+  let dateText = '';
+  if (latest.recorded_at) {
+    try {
+      const dt = new Date(latest.recorded_at.replace(' ', 'T'));
+      if (!isNaN(dt.getTime())) {
+        dateText = dt.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+      }
+    } catch (e) {}
+  }
+  if (dayBadge) {
+    dayBadge.textContent = dateText ? `Day ${latest.day} (${dateText})` : `Day ${latest.day}`;
+  }
+
+  // Card 1: Pain
+  if (latest.pain !== null && latest.pain !== undefined && latest.pain !== '' && !isNaN(Number(latest.pain))) {
+    if (valPain) valPain.textContent = `${Number(latest.pain).toFixed(1)} / 3`;
+    if (descPain) descPain.textContent = getSeverityWord(latest.pain);
+  } else {
+    if (valPain) valPain.textContent = '—';
+    if (descPain) descPain.textContent = 'Not recorded';
+  }
+
+  // Card 2: Stiffness
+  if (latest.stiffness !== null && latest.stiffness !== undefined && latest.stiffness !== '' && !isNaN(Number(latest.stiffness))) {
+    if (valStiff) valStiff.textContent = `${Number(latest.stiffness).toFixed(1)} / 3`;
+    if (descStiff) descStiff.textContent = getSeverityWord(latest.stiffness);
+  } else {
+    if (valStiff) valStiff.textContent = '—';
+    if (descStiff) descStiff.textContent = 'Not recorded';
+  }
+
+  // Card 3: Mobility
+  if (latest.mobility !== null && latest.mobility !== undefined && latest.mobility !== '' && !isNaN(Number(latest.mobility))) {
+    if (valMob) valMob.textContent = `${Number(latest.mobility).toFixed(1)} / 3`;
+    if (descMob) descMob.textContent = getMobilityWord(latest.mobility);
+  } else {
+    if (valMob) valMob.textContent = '—';
+    if (descMob) descMob.textContent = 'Not recorded';
+  }
+
+  // Card 4: Grip Strength
+  if (latest.grip !== null && latest.grip !== undefined && latest.grip !== '' && !isNaN(Number(latest.grip))) {
+    if (valGrip) valGrip.textContent = `${Number(latest.grip).toFixed(1)} / 3`;
+    if (descGrip) descGrip.textContent = getGripWord(latest.grip);
+  } else {
+    if (valGrip) valGrip.textContent = '—';
+    if (descGrip) descGrip.textContent = 'Not recorded';
+  }
+
+  // Card 5: Range of Motion (ROM)
+  if (latest.rom !== null && latest.rom !== undefined && latest.rom !== '' && !isNaN(Number(latest.rom))) {
+    const romVal = Number(latest.rom);
+    if (valRom) valRom.textContent = `${romVal.toFixed(1)}°`;
+    if (descRom) {
+      if (romVal >= 80) descRom.textContent = 'Good active flexion';
+      else if (romVal >= 50) descRom.textContent = 'Moderate flexion';
+      else descRom.textContent = 'Early gentle movement';
+    }
+  } else {
+    if (valRom) valRom.textContent = '—';
+    if (descRom) descRom.textContent = 'Not measured';
+  }
+
+  // Card 6: Completed Repetitions
+  const reps = latest.reps !== null && latest.reps !== undefined ? Number(latest.reps) : 0;
+  if (valReps) valReps.textContent = `${reps} reps`;
+  if (descReps) {
+    descReps.textContent = reps >= 10 ? 'Session target reached' : `${reps} of 10 target reps`;
+  }
+
+  // Next-step guidance
+  if (nextStepEl) {
+    nextStepEl.innerHTML = '<strong>Next Step:</strong> Continue your prescribed exercises as advised by your physiotherapist. If you experience persistent pain, sudden stiffness, or sudden drop in movement, contact your physiotherapist.';
+  }
 }
 
 function updateRecoveryCharts(history) {
@@ -464,42 +604,54 @@ function updateRecoveryCharts(history) {
 
   const emptySymptoms = document.getElementById('empty-state-symptoms');
   const emptyRom = document.getElementById('empty-state-rom');
+  const emptyMobGrip = document.getElementById('empty-state-mobility-grip');
   const noticeSymptoms = document.getElementById('notice-single-session-symptoms');
   const noticeRom = document.getElementById('notice-single-session-rom');
+  const noticeMobGrip = document.getElementById('notice-single-session-mobility-grip');
   const wrapperSymptoms = document.getElementById('wrapper-pain-stiffness');
   const wrapperRom = document.getElementById('wrapper-rom');
+  const wrapperMobGrip = document.getElementById('wrapper-mobility-grip');
 
   if (records.length === 0) {
     // Zero sessions: display patient-friendly message, hide charts and 1-session banners
     if (emptySymptoms) emptySymptoms.classList.remove('hidden');
     if (emptyRom) emptyRom.classList.remove('hidden');
+    if (emptyMobGrip) emptyMobGrip.classList.remove('hidden');
     if (noticeSymptoms) noticeSymptoms.classList.add('hidden');
     if (noticeRom) noticeRom.classList.add('hidden');
+    if (noticeMobGrip) noticeMobGrip.classList.add('hidden');
     if (wrapperSymptoms) wrapperSymptoms.classList.add('hidden');
     if (wrapperRom) wrapperRom.classList.add('hidden');
+    if (wrapperMobGrip) wrapperMobGrip.classList.add('hidden');
     return;
   }
 
   // 1 or more sessions recorded: show canvas wrappers and hide empty states
   if (emptySymptoms) emptySymptoms.classList.add('hidden');
   if (emptyRom) emptyRom.classList.add('hidden');
+  if (emptyMobGrip) emptyMobGrip.classList.add('hidden');
   if (wrapperSymptoms) wrapperSymptoms.classList.remove('hidden');
   if (wrapperRom) wrapperRom.classList.remove('hidden');
+  if (wrapperMobGrip) wrapperMobGrip.classList.remove('hidden');
 
   if (records.length === 1) {
     // Exactly 1 session: show explanation that more sessions are needed for trend slope
     if (noticeSymptoms) noticeSymptoms.classList.remove('hidden');
     if (noticeRom) noticeRom.classList.remove('hidden');
+    if (noticeMobGrip) noticeMobGrip.classList.remove('hidden');
   } else {
     // 2 or more sessions: hide single-session notices
     if (noticeSymptoms) noticeSymptoms.classList.add('hidden');
     if (noticeRom) noticeRom.classList.add('hidden');
+    if (noticeMobGrip) noticeMobGrip.classList.add('hidden');
   }
 
   const labels = records.map(d => formatDayLabel(d));
   const painData = records.map(d => parseMetric(d.pain));
   const stiffData = records.map(d => parseMetric(d.stiffness));
   const romData = records.map(d => parseMetric(d.rom));
+  const mobData = records.map(d => parseMetric(d.mobility));
+  const gripData = records.map(d => parseMetric(d.grip));
 
   // Prominent point radius if only 1 session, clean standard points if multiple
   const pointSize = records.length === 1 ? 8 : 4.5;
@@ -708,13 +860,131 @@ function updateRecoveryCharts(history) {
                 },
                 label: function(context) {
                   if (context.raw === null || context.raw === undefined) {
-                    return 'Active ROM: Not measured';
+                    return 'Range of Motion (ROM): Not measured';
                   }
                   const val = Number(context.raw).toFixed(1);
                   const idx = context.dataIndex;
                   const record = records[idx];
                   const repsText = record && record.reps ? ` (${record.reps} reps completed)` : '';
-                  return `Measured Active ROM: ${val}° flexion${repsText}`;
+                  return `Measured Range of Motion (ROM): ${val}° flexion${repsText}`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+  }
+
+  // -------------------------------------------------------------
+  // GRAPH 3: Mobility and Grip Strength Trend (0–3 Functional Scale)
+  // -------------------------------------------------------------
+  const ctxMobGrip = document.getElementById('mobilityGripChart');
+  if (ctxMobGrip) {
+    if (mobilityGripChartInstance) {
+      mobilityGripChartInstance.data.labels = labels;
+      mobilityGripChartInstance.data.datasets[0].data = mobData;
+      mobilityGripChartInstance.data.datasets[0].pointRadius = pointSize;
+      mobilityGripChartInstance.data.datasets[0].pointHoverRadius = pointHoverSize;
+      mobilityGripChartInstance.data.datasets[1].data = gripData;
+      mobilityGripChartInstance.data.datasets[1].pointRadius = pointSize;
+      mobilityGripChartInstance.data.datasets[1].pointHoverRadius = pointHoverSize;
+      mobilityGripChartInstance.update();
+    } else {
+      mobilityGripChartInstance = new Chart(ctxMobGrip.getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Mobility Limitation (0–3)',
+              data: mobData,
+              borderColor: '#8b5cf6',
+              backgroundColor: 'rgba(139, 92, 246, 0.1)',
+              borderWidth: 2.5,
+              pointBackgroundColor: '#8b5cf6',
+              pointBorderColor: '#ffffff',
+              pointBorderWidth: 1.5,
+              pointRadius: pointSize,
+              pointHoverRadius: pointHoverSize,
+              tension: 0.25,
+              spanGaps: true
+            },
+            {
+              label: 'Grip Weakness (0–3)',
+              data: gripData,
+              borderColor: '#06b6d4',
+              backgroundColor: 'rgba(6, 182, 212, 0.1)',
+              borderWidth: 2.5,
+              pointBackgroundColor: '#06b6d4',
+              pointBorderColor: '#ffffff',
+              pointBorderWidth: 1.5,
+              pointRadius: pointSize,
+              pointHoverRadius: pointHoverSize,
+              tension: 0.25,
+              spanGaps: true
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Rehabilitation Day & Date',
+                font: { size: 12, weight: '600' },
+                color: '#475569'
+              },
+              grid: { color: 'rgba(226, 232, 240, 0.6)' }
+            },
+            y: {
+              min: 0,
+              max: 3,
+              title: {
+                display: true,
+                text: 'Functional Score (0–3 Scale)',
+                font: { size: 12, weight: '600' },
+                color: '#475569'
+              },
+              ticks: {
+                stepSize: 1,
+                color: '#475569',
+                callback: function(val) {
+                  const map = { 0: '0 - Normal', 1: '1 - Mild', 2: '2 - Moderate', 3: '3 - Severe' };
+                  return map[val] !== undefined ? map[val] : val;
+                }
+              },
+              grid: { color: 'rgba(226, 232, 240, 0.6)' }
+            }
+          },
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: { boxWidth: 14, font: { size: 12, weight: '600' }, color: '#334155' }
+            },
+            tooltip: {
+              callbacks: {
+                title: function(items) {
+                  if (!items || items.length === 0) return '';
+                  const idx = items[0].dataIndex;
+                  const record = records[idx];
+                  const dateStr = record && record.recorded_at ? record.recorded_at.substring(0, 16) : 'Recorded Session';
+                  return `Day ${record ? record.day : items[0].label} • ${dateStr}`;
+                },
+                label: function(context) {
+                  if (context.raw === null || context.raw === undefined) {
+                    return `${context.dataset.label}: Not recorded`;
+                  }
+                  const val = Number(context.raw).toFixed(1);
+                  const isMob = context.datasetIndex === 0;
+                  const word = isMob ? getMobilityWord(context.raw) : getGripWord(context.raw);
+                  return `${context.dataset.label}: ${val} / 3 (${word})`;
                 }
               }
             }
@@ -747,18 +1017,18 @@ async function requestTrendAnalysis(history) {
     // Show clear explanatory pending state instead of dummy values
     if (pendingNotice) pendingNotice.classList.remove('hidden');
     if (pendingText) {
-      pendingText.innerHTML = `AI 1-day forecasting requires at least 14 days of recorded sessions to identify recovery slopes accurately. Currently recorded: <strong>${count} / 14 days</strong>.`;
+      pendingText.innerHTML = `AI 1-day forecasting requires at least 14 days of recorded sessions to identify recovery trends accurately. Currently recorded: <strong>${count} / 14 days</strong>.`;
     }
     if (pillsRow) pillsRow.classList.add('hidden');
 
     if (banner) {
       banner.className = 'status-banner banner-success';
       if (icon) icon.textContent = 'ℹ️';
-      if (title) title.textContent = count === 0 ? 'Welcome to Your Rehabilitation Dashboard' : 'Baseline Recovery In Progress';
+      if (title) title.textContent = count === 0 ? 'Welcome to Your Recovery Progress' : 'Baseline Recovery In Progress';
       if (msg) {
         msg.textContent = count === 0 
-          ? 'Record your first diary entry and camera exercise to begin tracking your recovery trajectory.'
-          : `You have recorded ${count} session${count > 1 ? 's' : ''}. AI recovery trend and plateau/relapse alerts will activate after 14 days of rehabilitation history. Continue your prescribed exercises.`;
+          ? 'Record your first diary entry and camera exercise to begin tracking your recovery progress.'
+          : `You have recorded ${count} session${count > 1 ? 's' : ''}. AI recovery trends and estimated forecasts will activate after 14 days of rehabilitation history. Continue your prescribed exercises as advised by your physiotherapist.`;
       }
     }
     return;
@@ -797,13 +1067,13 @@ function renderTrendResults(data) {
 
     if (data.alert_level === 'danger') {
       if (icon) icon.textContent = '⚠️';
-      if (title) title.textContent = 'Acute Flare-Up / Relapse Alert';
+      if (title) title.textContent = 'Temporary Symptom Increase / Flare-Up Notice';
     } else if (data.alert_level === 'warning') {
       if (icon) icon.textContent = '⚠️';
-      if (title) title.textContent = 'Recovery Plateau Warning';
+      if (title) title.textContent = 'Movement Plateau Observed';
     } else {
       if (icon) icon.textContent = '✅';
-      if (title) title.textContent = 'Recovery Progression On Track';
+      if (title) title.textContent = 'Steady Recovery Progress Observed';
     }
   }
 
@@ -814,11 +1084,11 @@ function renderTrendResults(data) {
     const fGrip = document.getElementById('f-grip');
     const fRom = document.getElementById('f-rom');
 
-    if (fPain) fPain.textContent = `${data.forecast.pain} / 3`;
-    if (fStiff) fStiff.textContent = `${data.forecast.stiffness} / 3`;
-    if (fMob) fMob.textContent = `${data.forecast.mobility} / 3`;
-    if (fGrip) fGrip.textContent = `${data.forecast.grip} / 3`;
-    if (fRom) fRom.textContent = `${data.forecast.rom}° flexion`;
+    if (fPain) fPain.textContent = `${data.forecast.pain} / 3 (Estimated)`;
+    if (fStiff) fStiff.textContent = `${data.forecast.stiffness} / 3 (Estimated)`;
+    if (fMob) fMob.textContent = `${data.forecast.mobility} / 3 (Estimated)`;
+    if (fGrip) fGrip.textContent = `${data.forecast.grip} / 3 (Estimated)`;
+    if (fRom) fRom.textContent = `${data.forecast.rom}° flexion (Estimated)`;
   }
 }
 
@@ -832,20 +1102,70 @@ function renderHistoryTable(records) {
     return;
   }
 
-  // Display most recent records at the top
-  const sorted = [...records].reverse();
-  sorted.forEach(r => {
+  // Apply active duration filter (all, last 14, last 7)
+  let filtered = [...records];
+  if (currentHistoryFilter === '14') {
+    filtered = filtered.slice(-14);
+  } else if (currentHistoryFilter === '7') {
+    filtered = filtered.slice(-7);
+  }
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" class="text-center">No recorded sessions for this filter view.</td></tr>';
+    return;
+  }
+
+  // Sort order: Chronological (Day 1 -> Day N) if historySortAscending, else newest first
+  filtered.sort((a, b) => {
+    return historySortAscending ? (Number(a.day) - Number(b.day)) : (Number(b.day) - Number(a.day));
+  });
+
+  filtered.forEach(r => {
     const tr = document.createElement('tr');
+
+    let dateStr = 'Today';
+    if (r.recorded_at) {
+      dateStr = r.recorded_at.substring(0, 16).replace('T', ' ');
+    }
+
+    // Pain cell
+    const painCell = (r.pain !== null && r.pain !== undefined && r.pain !== '' && !isNaN(Number(r.pain)))
+      ? `${Number(r.pain).toFixed(1)} <small>(${getSeverityWord(r.pain)})</small>`
+      : '<span class="val-missing" title="Measurement not recorded">—</span>';
+
+    // Stiffness cell
+    const stiffCell = (r.stiffness !== null && r.stiffness !== undefined && r.stiffness !== '' && !isNaN(Number(r.stiffness)))
+      ? `${Number(r.stiffness).toFixed(1)} <small>(${getSeverityWord(r.stiffness)})</small>`
+      : '<span class="val-missing" title="Measurement not recorded">—</span>';
+
+    // Mobility cell
+    const mobCell = (r.mobility !== null && r.mobility !== undefined && r.mobility !== '' && !isNaN(Number(r.mobility)))
+      ? `${Number(r.mobility).toFixed(1)} <small>(${getMobilityWord(r.mobility)})</small>`
+      : '<span class="val-missing" title="Measurement not recorded">—</span>';
+
+    // Grip cell
+    const gripCell = (r.grip !== null && r.grip !== undefined && r.grip !== '' && !isNaN(Number(r.grip)))
+      ? `${Number(r.grip).toFixed(1)} <small>(${getGripWord(r.grip)})</small>`
+      : '<span class="val-missing" title="Measurement not recorded">—</span>';
+
+    // Range of Motion (ROM) cell
+    const romCell = (r.rom !== null && r.rom !== undefined && r.rom !== '' && !isNaN(Number(r.rom)))
+      ? `<strong>${Number(r.rom).toFixed(1)}°</strong>`
+      : '<span class="val-missing" title="Measurement not recorded">—</span>';
+
+    const repsVal = (r.reps !== null && r.reps !== undefined) ? r.reps : 0;
+    const notesStr = escapeHtml(r.diary_text || '—');
+
     tr.innerHTML = `
       <td><strong>Day ${r.day}</strong></td>
-      <td>${r.recorded_at ? r.recorded_at.substring(0, 16) : 'Today'}</td>
-      <td>${Number(r.pain).toFixed(1)}</td>
-      <td>${Number(r.stiffness).toFixed(1)}</td>
-      <td>${Number(r.mobility).toFixed(1)}</td>
-      <td>${Number(r.grip).toFixed(1)}</td>
-      <td><strong>${Number(r.rom).toFixed(1)}°</strong></td>
-      <td>${r.reps || 0}</td>
-      <td>${r.diary_text || '—'}</td>
+      <td>${dateStr}</td>
+      <td>${painCell}</td>
+      <td>${stiffCell}</td>
+      <td>${mobCell}</td>
+      <td>${gripCell}</td>
+      <td>${romCell}</td>
+      <td>${repsVal}</td>
+      <td>${notesStr}</td>
     `;
     tbody.appendChild(tr);
   });
@@ -871,6 +1191,7 @@ async function loadUserSession(user) {
     if (res.ok) {
       const data = await res.json();
       patientHistory = data.records || [];
+      updateRecoverySummaryCards(patientHistory);
       updateRecoveryCharts(patientHistory);
       renderHistoryTable(patientHistory);
       requestTrendAnalysis(patientHistory);
@@ -999,6 +1320,7 @@ async function saveSession(advanceDay = false) {
     if (histRes.ok) {
       const histData = await histRes.json();
       patientHistory = histData.records || [];
+      updateRecoverySummaryCards(patientHistory);
       updateRecoveryCharts(patientHistory);
       renderHistoryTable(patientHistory);
       requestTrendAnalysis(patientHistory);
@@ -1044,7 +1366,8 @@ window.addEventListener('DOMContentLoaded', async () => {
   canvasElement = document.getElementById('vision-canvas');
   canvasCtx = canvasElement.getContext('2d');
 
-  // Initialize charts in zero-session state until patient session loads
+  // Initialize summary cards and charts in zero-session state until patient session loads
+  updateRecoverySummaryCards([]);
   updateRecoveryCharts([]);
 
   // 1. Auth Tabs Toggle
@@ -1151,6 +1474,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         .then(r => r.json())
         .then(d => {
           patientHistory = d.records || [];
+          updateRecoverySummaryCards(patientHistory);
           updateRecoveryCharts(patientHistory);
           renderHistoryTable(patientHistory);
           requestTrendAnalysis(patientHistory);
@@ -1181,6 +1505,31 @@ window.addEventListener('DOMContentLoaded', async () => {
   const advanceBtn = document.getElementById('btn-advance-day');
   if (advanceBtn) {
     advanceBtn.addEventListener('click', () => saveSession(true));
+  }
+
+  // 7. History Filter & Sort Controls
+  ['all', '14', '7'].forEach(filterKey => {
+    const btn = document.getElementById(`filter-${filterKey}`);
+    if (btn) {
+      btn.addEventListener('click', () => {
+        currentHistoryFilter = filterKey;
+        document.querySelectorAll('.history-filter-group .btn-filter').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderHistoryTable(patientHistory);
+      });
+    }
+  });
+
+  const sortBtn = document.getElementById('btn-sort-history');
+  const sortLabel = document.getElementById('sort-order-label');
+  if (sortBtn) {
+    sortBtn.addEventListener('click', () => {
+      historySortAscending = !historySortAscending;
+      if (sortLabel) {
+        sortLabel.textContent = historySortAscending ? 'Oldest First' : 'Newest First';
+      }
+      renderHistoryTable(patientHistory);
+    });
   }
 
   // Check existing session

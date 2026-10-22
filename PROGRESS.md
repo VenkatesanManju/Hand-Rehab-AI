@@ -9,4 +9,5 @@
 - [x] 8. Browser-based hand tracking with MediaPipe Tasks Vision JS (app/frontend/vendor/)
 - [x] 9. Flask API backend (app/backend/) & HTML/CSS/JS dashboard (app/frontend/)
 - [x] 10. Report tables/plots and presentation outline
+- [x] 11. Patient-friendly Step 3 Recovery Progress overhaul: 3 real-data charts (Pain/Stiffness, ROM, Mobility/Grip), 6 recovery summary cards, ROM educational guide, 7/14-day history filters, and separated AI estimates.
 

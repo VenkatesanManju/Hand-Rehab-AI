@@ -154,32 +154,61 @@ def test_auth_and_user_history(client):
     assert data_hist2["total_records"] == 2
 
 
-def test_recovery_report_two_charts_and_ui_elements(client):
+def test_recovery_report_three_charts_and_patient_friendly_ui(client):
     """
-    Verifies that the Recovery Report page contains the two dedicated charts,
-    empty-state text, 1-session notice, and distinct AI forecast container.
+    Verifies that the Recovery Report page contains the patient-friendly header,
+    six summary cards, ROM educational definition box, three dedicated charts,
+    history duration filters, and clearly labeled AI estimated recovery.
     """
     res = client.get("/")
     assert res.status_code == 200
     html = res.data.decode("utf-8")
 
+    # Header and Navigation
+    assert "Step 3: Your Recovery Progress" in html
+    assert "3. Your Recovery Progress" in html
+
+    # Recovery Summary Cards (6 cards)
+    assert 'id="card-metric-pain"' in html
+    assert 'id="card-metric-stiffness"' in html
+    assert 'id="card-metric-mobility"' in html
+    assert 'id="card-metric-grip"' in html
+    assert 'id="card-metric-rom"' in html
+    assert 'id="card-metric-reps"' in html
+    assert "Your Recovery Summary" in html
+
+    # ROM Educational Explanation
+    assert "Understanding Range of Motion (ROM)" in html
+    assert "ROM measures how far a joint can move, in degrees." in html
+    assert "Index &amp; Middle Finger Knuckles" in html
+
     # Chart 1: Recovery Progress Over Time (Pain & Stiffness)
     assert 'id="painStiffnessChart"' in html
-    assert "Recovery Progress Over Time" in html
+    assert "Pain and Stiffness Trend" in html
     assert "Daily reported Pain and Stiffness on a 0–3 scale" in html
 
     # Chart 2: Hand Movement (ROM) Trend
     assert 'id="romChart"' in html
     assert "Hand Movement (ROM) Trend" in html
-    assert "Actual measured active range of motion" in html
+    assert "Range of Motion (ROM)" in html
+
+    # Chart 3: Mobility and Grip Strength Trend
+    assert 'id="mobilityGripChart"' in html
+    assert "Mobility and Grip Strength Trend" in html
 
     # Empty State & 1-Session Notice
     assert "Record your first session to see your recovery graph." in html
     assert "1 session recorded." in html
 
-    # AI Forecast clearly separated and labeled
-    assert "Tomorrow's 1-Day AI Recovery Forecast" in html
+    # AI Estimated Recovery clearly separated and labeled
+    assert "Tomorrow's Estimated Recovery" in html
     assert "requires at least 14 days of recorded sessions" in html
+    assert "Multi-Task GRU (AI Estimate)" in html
+
+    # History Table Filters
+    assert 'id="filter-all"' in html
+    assert 'id="filter-14"' in html
+    assert 'id="filter-7"' in html
 
 
 def test_session_records_zero_one_multiple_flow(client):

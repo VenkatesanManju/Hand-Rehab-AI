@@ -858,6 +858,152 @@ textarea#diary-input:focus {
   gap: 20px;
 }
 
+/* ============================================================ */
+/* RECOVERY SUMMARY OVERVIEW (6 CARDS)                          */
+/* ============================================================ */
+.recovery-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.rec-metric-card {
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.rec-metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.rec-card-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rec-card-icon {
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.rec-card-title {
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.3px;
+}
+
+.rec-card-value {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 3px 0;
+}
+
+.rec-card-scale {
+  font-size: 0.68rem;
+  color: #64748b;
+  line-height: 1.25;
+}
+
+.rec-card-desc {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--primary);
+  margin-top: auto;
+  padding-top: 4px;
+}
+
+.summary-next-step-box {
+  margin-top: 16px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.84rem;
+  color: #166534;
+}
+
+.summary-next-step-box .next-step-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+/* ============================================================ */
+/* ROM EDUCATIONAL BOX                                          */
+/* ============================================================ */
+.rom-educational-card {
+  border-left: 4px solid var(--primary);
+}
+
+.rom-def-banner {
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.92rem;
+  color: #0369a1;
+  font-weight: 500;
+}
+
+.rom-def-banner .rom-def-icon {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.rom-expl-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.rom-expl-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+}
+
+.rom-expl-item .expl-icon {
+  font-size: 1.4rem;
+  line-height: 1;
+  padding-top: 2px;
+}
+
+.rom-expl-item strong {
+  font-size: 0.85rem;
+  color: #1e293b;
+  display: block;
+  margin-bottom: 3px;
+}
+
+.rom-expl-item p {
+  font-size: 0.78rem;
+  color: #64748b;
+  line-height: 1.35;
+  margin: 0;
+}
+
 .chart-subtitle {
   font-size: 0.8rem;
   color: var(--text-muted);
@@ -946,7 +1092,66 @@ textarea#diary-input:focus {
 
 .f-pill strong { color: var(--primary-hover); }
 
-/* History Table */
+.forecast-footnote {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.forecast-footnote .footnote-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* History Table & Filter Controls */
+.history-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.history-filter-group {
+  display: inline-flex;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: #f1f5f9;
+}
+
+.btn-filter {
+  background: transparent;
+  border: none;
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-filter:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.btn-filter.active {
+  background: var(--primary);
+  color: white;
+}
+
+.val-missing {
+  color: #94a3b8;
+  font-style: italic;
+  font-weight: 500;
+}
+
 .table-container {
   overflow-x: auto;
 }
@@ -997,8 +1202,19 @@ textarea#diary-input:focus {
 
 .hidden { display: none !important; }
 
+@media (max-width: 1024px) {
+  .recovery-metrics-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
 @media (max-width: 900px) {
   .camera-layout-grid { grid-template-columns: 1fr; }
   .guide-steps-grid { grid-template-columns: 1fr; }
   .severity-grid { grid-template-columns: repeat(2, 1fr); }
+  .rom-expl-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  .recovery-metrics-grid { grid-template-columns: repeat(2, 1fr); }
+  .history-header-actions { flex-direction: column; align-items: flex-start; }
+  .chart-wrapper { height: 230px; }
 }

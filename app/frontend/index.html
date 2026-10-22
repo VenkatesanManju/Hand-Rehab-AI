@@ -124,7 +124,7 @@
         </button>
         <button id="nav-btn-report" class="nav-tab">
           <span class="nav-icon">📈</span>
-          <span class="nav-text">3. Recovery Report & Trend</span>
+          <span class="nav-text">3. Your Recovery Progress</span>
         </button>
       </nav>
     </header>
@@ -280,7 +280,7 @@
                 <span class="m-sub">Index/Middle PIP</span>
               </div>
               <div class="metric-box">
-                <span class="m-label">Active ROM</span>
+                <span class="m-label">Range of Motion (ROM)</span>
                 <span class="m-val highlight" id="live-rom">5°</span>
                 <span class="m-sub">Flexion (0–100°)</span>
               </div>
@@ -301,7 +301,7 @@
               <ul class="session-bullets">
                 <li>Pain: <strong id="summary-pain">0 (None)</strong></li>
                 <li>Stiffness: <strong id="summary-stiffness">0 (None)</strong></li>
-                <li>Peak Active ROM: <strong id="summary-rom">5°</strong></li>
+                <li>Peak Range of Motion (ROM): <strong id="summary-rom">5°</strong></li>
                 <li>Completed Reps: <strong id="summary-reps">0</strong></li>
               </ul>
             </div>
@@ -311,19 +311,19 @@
               <button id="btn-advance-day" class="btn btn-outline btn-block">⏩ Advance & Log as Next Day (<span id="label-advance-day">Day 2</span>)</button>
               <p class="save-subtext">Multiple sessions on the same calendar day accumulate reps and keep your peak ROM for that day.</p>
             </div>
-            <button id="btn-goto-report" class="btn btn-secondary btn-block">📈 View My Recovery Report & Trend</button>
+            <button id="btn-goto-report" class="btn btn-secondary btn-block">📈 View Your Recovery Progress</button>
 
           </div>
         </div>
       </section>
 
       <!-- ============================================================ -->
-      <!-- VIEW 3: RECOVERY REPORT & TREND ANALYSIS                     -->
+      <!-- VIEW 3: YOUR RECOVERY PROGRESS                               -->
       <!-- ============================================================ -->
       <section id="view-report" class="view-panel">
         <div class="panel-intro">
-          <h2>📈 Step 3: Longitudinal Recovery Report & Flare-Up Detection</h2>
-          <p>Longitudinal sequence models analyze your combined diary symptoms and objective ROM over time to track recovery milestones and detect clinical plateaus or acute relapses.</p>
+          <h2>📈 Step 3: Your Recovery Progress</h2>
+          <p>Track your daily hand recovery journey, symptom changes, and exercise movement in one place. Review your recorded trends and view estimated AI forecasts.</p>
         </div>
 
         <div class="report-layout-grid">
@@ -332,17 +332,149 @@
             <div class="alert-icon" id="alert-icon">✅</div>
             <div>
               <h4 id="alert-title">Recovery Progression On Track</h4>
-              <p id="alert-message">Steady functional improvement observed. Continue your prescribed exercises.</p>
+              <p id="alert-message">Steady functional improvement observed. Continue your prescribed exercises as advised by your physiotherapist.</p>
             </div>
           </div>
 
-          <!-- RECOVERY CHARTS SECTION (TWO PATIENT-FRIENDLY GRAPHS) -->
+          <!-- RECOVERY SUMMARY OVERVIEW (6 SEPARATE CARDS) -->
+          <div class="summary-overview-card card">
+            <div class="card-header">
+              <div>
+                <h3>Your Recovery Summary</h3>
+                <p class="chart-subtitle">Latest recorded rehabilitation measurements and symptom levels</p>
+              </div>
+              <span class="pill-tech" id="summary-last-recorded-day">Day —</span>
+            </div>
+            <div class="recovery-metrics-grid">
+              <!-- Card 1: Pain Level -->
+              <div class="rec-metric-card" id="card-metric-pain">
+                <div class="rec-card-header">
+                  <span class="rec-card-icon">⚡</span>
+                  <span class="rec-card-title">Pain Level</span>
+                </div>
+                <div class="rec-card-value" id="rep-val-pain">—</div>
+                <div class="rec-card-scale">Scale: 0 (None) to 3 (Severe)</div>
+                <div class="rec-card-desc" id="rep-desc-pain">No records yet</div>
+              </div>
+
+              <!-- Card 2: Joint Stiffness -->
+              <div class="rec-metric-card" id="card-metric-stiffness">
+                <div class="rec-card-header">
+                  <span class="rec-card-icon">🪵</span>
+                  <span class="rec-card-title">Joint Stiffness</span>
+                </div>
+                <div class="rec-card-value" id="rep-val-stiffness">—</div>
+                <div class="rec-card-scale">Scale: 0 (None) to 3 (Severe)</div>
+                <div class="rec-card-desc" id="rep-desc-stiffness">No records yet</div>
+              </div>
+
+              <!-- Card 3: Finger Mobility -->
+              <div class="rec-metric-card" id="card-metric-mobility">
+                <div class="rec-card-header">
+                  <span class="rec-card-icon">🖐️</span>
+                  <span class="rec-card-title">Finger Mobility</span>
+                </div>
+                <div class="rec-card-value" id="rep-val-mobility">—</div>
+                <div class="rec-card-scale">Scale: 0 (Full) to 3 (Severe limitation)</div>
+                <div class="rec-card-desc" id="rep-desc-mobility">No records yet</div>
+              </div>
+
+              <!-- Card 4: Grip Strength -->
+              <div class="rec-metric-card" id="card-metric-grip">
+                <div class="rec-card-header">
+                  <span class="rec-card-icon">✊</span>
+                  <span class="rec-card-title">Grip Strength</span>
+                </div>
+                <div class="rec-card-value" id="rep-val-grip">—</div>
+                <div class="rec-card-scale">Scale: 0 (Normal) to 3 (Severe weakness)</div>
+                <div class="rec-card-desc" id="rep-desc-grip">No records yet</div>
+              </div>
+
+              <!-- Card 5: Range of Motion (ROM) -->
+              <div class="rec-metric-card" id="card-metric-rom">
+                <div class="rec-card-header">
+                  <span class="rec-card-icon">📐</span>
+                  <span class="rec-card-title">Range of Motion (ROM)</span>
+                </div>
+                <div class="rec-card-value" id="rep-val-rom">—</div>
+                <div class="rec-card-scale">Scale: 0° (flat) to 100° (full fist curl)</div>
+                <div class="rec-card-desc" id="rep-desc-rom">No records yet</div>
+              </div>
+
+              <!-- Card 6: Completed Repetitions -->
+              <div class="rec-metric-card" id="card-metric-reps">
+                <div class="rec-card-header">
+                  <span class="rec-card-icon">🔄</span>
+                  <span class="rec-card-title">Completed Repetitions</span>
+                </div>
+                <div class="rec-card-value" id="rep-val-reps">—</div>
+                <div class="rec-card-scale">Exercise target: 10 reps / session</div>
+                <div class="rec-card-desc" id="rep-desc-reps">No records yet</div>
+              </div>
+            </div>
+
+            <div class="summary-next-step-box">
+              <span class="next-step-icon">💡</span>
+              <span class="next-step-text" id="summary-next-step"><strong>Next Step:</strong> Continue your prescribed exercises as advised by your physiotherapist. If symptoms persist or worsen, please consult your physiotherapist.</span>
+            </div>
+          </div>
+
+          <!-- UNDERSTANDING RANGE OF MOTION (ROM) EDUCATIONAL BOX -->
+          <div class="rom-educational-card card">
+            <div class="card-header">
+              <div>
+                <h3>Understanding Range of Motion (ROM)</h3>
+                <p class="chart-subtitle">Clear definition and details of your joint movement measurements</p>
+              </div>
+              <span class="pill-tech">Movement Guide</span>
+            </div>
+            <div class="rom-educational-content">
+              <div class="rom-def-banner">
+                <span class="rom-def-icon">💡</span>
+                <div class="rom-def-text">
+                  <strong>ROM Definition:</strong> ROM measures how far a joint can move, in degrees.
+                </div>
+              </div>
+              <div class="rom-expl-grid">
+                <div class="rom-expl-item">
+                  <div class="expl-icon">🖐️</div>
+                  <div>
+                    <strong>Specific Joint Measured</strong>
+                    <p>Index &amp; Middle Finger Knuckles (Proximal Interphalangeal - PIP joints).</p>
+                  </div>
+                </div>
+                <div class="rom-expl-item">
+                  <div class="expl-icon">🔄</div>
+                  <div>
+                    <strong>Specific Movement Measured</strong>
+                    <p>Active finger flexion: curling fingers inward from a straight open palm to a tight closed fist.</p>
+                  </div>
+                </div>
+                <div class="rom-expl-item">
+                  <div class="expl-icon">📐</div>
+                  <div>
+                    <strong>Measurement Scale</strong>
+                    <p>0° indicates a flat open palm (full extension); 100° indicates a complete closed fist (maximum active flexion).</p>
+                  </div>
+                </div>
+                <div class="rom-expl-item">
+                  <div class="expl-icon">🔍</div>
+                  <div>
+                    <strong>Actual Measurement vs. AI Forecast</strong>
+                    <p>Your recorded ROM (e.g. 100°) is the single highest peak flexion achieved during camera exercise today. The AI forecast (e.g. 68.5°) is a smoothed 14-day rolling trend projection estimating your sustained average movement capability.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RECOVERY CHARTS SECTION (THREE PATIENT-FRIENDLY GRAPHS) -->
           <div class="recovery-charts-container">
-            <!-- Graph 1: Recovery Progress Over Time (Pain & Stiffness) -->
+            <!-- Graph 1: Recovery Progress Over Time (Pain & Stiffness Trend) -->
             <div class="chart-card card" id="card-pain-stiffness-chart">
               <div class="card-header">
                 <div>
-                  <h3>1. Recovery Progress Over Time</h3>
+                  <h3>1. Pain and Stiffness Trend (Recovery Progress Over Time)</h3>
                   <p class="chart-subtitle">Daily reported Pain and Stiffness on a 0–3 scale (0 = None, 1 = Mild, 2 = Moderate, 3 = Severe)</p>
                 </div>
                 <span class="pill-tech">Symptom Tracking</span>
@@ -371,9 +503,9 @@
               <div class="card-header">
                 <div>
                   <h3>2. Hand Movement (ROM) Trend</h3>
-                  <p class="chart-subtitle">Actual measured active range of motion (0° = open palm, 100° = full fist flexion)</p>
+                  <p class="chart-subtitle">Actual measured active Range of Motion (ROM) in degrees (0° = open palm, 100° = full fist flexion)</p>
                 </div>
-                <span class="pill-tech">Active Flexion (°)</span>
+                <span class="pill-tech">Range of Motion (ROM)</span>
               </div>
 
               <!-- Notice when only 1 session is recorded -->
@@ -393,16 +525,44 @@
                 <canvas id="romChart"></canvas>
               </div>
             </div>
+
+            <!-- Graph 3: Mobility and Grip Strength Trend -->
+            <div class="chart-card card" id="card-mobility-grip-chart">
+              <div class="card-header">
+                <div>
+                  <h3>3. Mobility and Grip Strength Trend</h3>
+                  <p class="chart-subtitle">Daily reported Mobility Limitation and Grip Weakness on a 0–3 functional scale (0 = Normal, 1 = Mild, 2 = Moderate, 3 = Severe)</p>
+                </div>
+                <span class="pill-tech">Functional Tracking</span>
+              </div>
+
+              <!-- Notice when only 1 session is recorded -->
+              <div id="notice-single-session-mobility-grip" class="chart-notice-banner hidden">
+                <span class="notice-icon">ℹ️</span>
+                <span><strong>1 session recorded.</strong> Showing baseline measurement. Complete additional daily sessions to identify recovery trends.</span>
+              </div>
+
+              <!-- Empty state when 0 sessions -->
+              <div id="empty-state-mobility-grip" class="chart-empty-state hidden">
+                <span class="empty-icon">✊</span>
+                <h4>No Recorded Sessions</h4>
+                <p>Record your first session to see your recovery graph.</p>
+              </div>
+
+              <div class="chart-wrapper" id="wrapper-mobility-grip">
+                <canvas id="mobilityGripChart"></canvas>
+              </div>
+            </div>
           </div>
 
-          <!-- Forecast Box (Kept separate and clearly labeled as AI Forecast) -->
+          <!-- Forecast Box: Tomorrow's Estimated Recovery -->
           <div class="forecast-card card">
             <div class="card-header">
               <div>
-                <h3>Tomorrow's 1-Day AI Recovery Forecast</h3>
-                <p class="card-tiny">Predicted functional score based on your 14-day history (separate from actual recorded data):</p>
+                <h3>Tomorrow's Estimated Recovery</h3>
+                <p class="chart-subtitle">AI statistical estimate based on your 14-day history (separate from actual recorded measurements):</p>
               </div>
-              <span id="forecast-model-badge" class="pill-tech">Multi-Task GRU</span>
+              <span id="forecast-model-badge" class="pill-tech">Multi-Task GRU (AI Estimate)</span>
             </div>
 
             <div id="forecast-pending-notice" class="forecast-notice-banner">
@@ -411,19 +571,35 @@
             </div>
 
             <div id="forecast-pills-row" class="forecast-pills hidden">
-              <span class="f-pill">Forecast Pain: <strong id="f-pain">—</strong></span>
-              <span class="f-pill">Forecast Stiffness: <strong id="f-stiff">—</strong></span>
-              <span class="f-pill">Forecast Mobility: <strong id="f-mob">—</strong></span>
-              <span class="f-pill">Forecast Grip: <strong id="f-grip">—</strong></span>
-              <span class="f-pill">Forecast Active ROM: <strong id="f-rom">—</strong></span>
+              <span class="f-pill">Estimated Pain: <strong id="f-pain">—</strong></span>
+              <span class="f-pill">Estimated Stiffness: <strong id="f-stiff">—</strong></span>
+              <span class="f-pill">Estimated Mobility: <strong id="f-mob">—</strong></span>
+              <span class="f-pill">Estimated Grip Weakness: <strong id="f-grip">—</strong></span>
+              <span class="f-pill">Estimated Range of Motion (ROM): <strong id="f-rom">—</strong></span>
+            </div>
+
+            <div class="forecast-footnote">
+              <span class="footnote-icon">ℹ️</span>
+              <span class="footnote-text"><strong>AI Estimate Note:</strong> Forecasts are mathematical projections based on 14-day trends, not clinical diagnostic results. Model uncertainty may vary across individuals. Always consult your physiotherapist regarding recovery progress.</span>
             </div>
           </div>
 
           <!-- Session History Table -->
           <div class="history-table-card card">
             <div class="card-header">
-              <h3>Your Recorded Rehabilitation Sessions</h3>
-              <button id="btn-refresh-history" class="btn btn-outline btn-sm">🔄 Refresh</button>
+              <div>
+                <h3>Your Recorded Rehabilitation Sessions</h3>
+                <p class="chart-subtitle">Complete chronological history of your recorded rehabilitation sessions</p>
+              </div>
+              <div class="history-header-actions">
+                <div class="history-filter-group" role="group" aria-label="Session Filter">
+                  <button type="button" class="btn btn-filter active" id="filter-all" data-filter="all">All Sessions</button>
+                  <button type="button" class="btn btn-filter" id="filter-14" data-filter="14">Last 14 Days</button>
+                  <button type="button" class="btn btn-filter" id="filter-7" data-filter="7">Last 7 Days</button>
+                </div>
+                <button type="button" id="btn-sort-history" class="btn btn-outline btn-sm" title="Toggle Sort Order">↕️ <span id="sort-order-label">Oldest First</span></button>
+                <button type="button" id="btn-refresh-history" class="btn btn-outline btn-sm">🔄 Refresh</button>
+              </div>
             </div>
             <div class="table-container">
               <table class="history-table">
@@ -431,13 +607,13 @@
                   <tr>
                     <th>Day</th>
                     <th>Date / Time</th>
-                    <th>Pain</th>
-                    <th>Stiffness</th>
-                    <th>Mobility</th>
-                    <th>Grip</th>
-                    <th>ROM (°)</th>
+                    <th>Pain (0–3)</th>
+                    <th>Stiffness (0–3)</th>
+                    <th>Mobility (0–3)</th>
+                    <th>Grip (0–3)</th>
+                    <th>Range of Motion (ROM)</th>
                     <th>Reps</th>
-                    <th>Notes</th>
+                    <th>Diary Notes</th>
                   </tr>
                 </thead>
                 <tbody id="history-table-body">
