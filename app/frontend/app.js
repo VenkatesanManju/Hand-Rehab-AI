@@ -18,19 +18,11 @@ let historySortAscending = true; // true = Day 1 -> Day N (chronological), false
 // Vision & Camera State
 let handLandmarker = null;
 let webcamRunning = false;
-let isVideoDemoRunning = false;
-let currentDemoVideoUrl = './vendor/demo_hand.webm';
 let videoElement = null;
 let canvasElement = null;
 let canvasCtx = null;
 let lastVideoTime = -1;
 let animationFrameId = null;
-
-// Simulation Mode State
-let simulationRunning = false;
-let simAngle = 175.0;
-let simDirection = -1;
-let simInterval = null;
 
 // Vision Metrics & Rep Counter State Machine
 let repCount = 0;
@@ -626,7 +618,7 @@ function updateExerciseGuide(surgeryTypeOrKey, gestureIndex = 0) {
 
   // Update idle camera banner tip if camera is not active
   const actionText = document.getElementById('live-action-text');
-  if (actionText && (!webcamRunning && !simulationRunning)) {
+  if (actionText && !webcamRunning) {
     actionText.textContent = `Camera ready for ${currentGesture.name}. ${currentGesture.liveTip}`;
   }
 }
@@ -1089,8 +1081,6 @@ function updateVisionUI() {
 // --- Webcam Handlers ---
 
 async function startCamera() {
-  if (simulationRunning) stopSimulation();
-
   // Browsers require a secure context (https or localhost/127.0.0.1) for navigator.mediaDevices
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
     if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
@@ -1100,7 +1090,7 @@ async function startCamera() {
         return;
       }
     }
-    alert('Webcam is not available in this browser window.\nPlease open http://localhost:5000 in your browser, or click "Simulated Demo" to test movement tracking.');
+    alert('Webcam is not available in this browser window.\nPlease open http://localhost:5000 in your browser to enable live camera tracking.');
     return;
   }
 
@@ -1115,16 +1105,19 @@ async function startCamera() {
       document.getElementById('vision-placeholder').classList.add('hidden');
       document.getElementById('btn-start-camera').disabled = true;
       document.getElementById('btn-stop-camera').disabled = false;
+      const liveActionDot = document.getElementById('live-status-dot');
+      const liveActionText = document.getElementById('live-action-text');
+      if (liveActionDot) liveActionDot.className = 'live-status-indicator active';
+      if (liveActionText) liveActionText.textContent = 'Camera active: Tracking hand landmarks, joint angles, and repetitions in real time.';
       renderVideoLoop();
     };
   } catch (err) {
-    alert('Webcam access failed or denied: ' + err.message + '\nYou can test tracking using the "Simulated Demo" mode.');
+    alert('Webcam access failed or denied: ' + err.message);
   }
 }
 
 function stopCamera() {
   webcamRunning = false;
-  isVideoDemoRunning = false;
   if (animationFrameId) cancelAnimationFrame(animationFrameId);
   if (videoElement.srcObject) {
     videoElement.srcObject.getTracks().forEach(track => track.stop());
@@ -1136,219 +1129,17 @@ function stopCamera() {
     videoElement.load();
   }
 
-  const demoBtn = document.getElementById('btn-real-video-demo');
-  if (demoBtn) {
-    demoBtn.textContent = '🎥 Real Video Demo';
-    demoBtn.classList.remove('active');
-  }
-
   const liveActionDot = document.getElementById('live-status-dot');
   const liveActionText = document.getElementById('live-action-text');
   if (liveActionDot) liveActionDot.className = 'live-status-indicator';
-  if (liveActionText) liveActionText.textContent = 'Camera paused. Click "Start Camera" or "Real Video Demo".';
+  if (liveActionText) liveActionText.textContent = 'Camera paused. Click "Start Camera" to begin guided tracking.';
 
   document.getElementById('vision-placeholder').classList.remove('hidden');
   document.getElementById('btn-start-camera').disabled = false;
   document.getElementById('btn-stop-camera').disabled = true;
 }
 
-// --- Real Video Demo Mode (Playback of Real Clinical Video with AI Tracking) ---
-
-async function startRealVideoDemo(customSrc = null) {
-  if (simulationRunning) stopSimulation();
-  if (webcamRunning) stopCamera();
-
-  const src = customSrc || currentDemoVideoUrl;
-  currentDemoVideoUrl = src;
-
-  videoElement.srcObject = null;
-  videoElement.src = src;
-  videoElement.loop = true;
-  videoElement.muted = true;
-  videoElement.playsInline = true;
-
-  document.getElementById('vision-placeholder').classList.add('hidden');
-  document.getElementById('btn-start-camera').disabled = false;
-  document.getElementById('btn-stop-camera').disabled = false;
-
-  const demoBtn = document.getElementById('btn-real-video-demo');
-  if (demoBtn) {
-    demoBtn.textContent = '⏸ Pause Video Demo';
-    demoBtn.classList.add('active');
-  }
-
-  const liveActionDot = document.getElementById('live-status-dot');
-  const liveActionText = document.getElementById('live-action-text');
-  if (liveActionDot) liveActionDot.className = 'live-status-indicator active';
-  if (liveActionText) liveActionText.textContent = '🎥 Real Video Demo: Loading real hand video and starting live AI tracking...';
-
-  videoElement.onloadedmetadata = () => {
-    videoElement.play().then(() => {
-      webcamRunning = true;
-      isVideoDemoRunning = true;
-      renderVideoLoop();
-      updateVisionUI();
-    }).catch(err => {
-      console.warn('Auto-play muted retry:', err);
-      videoElement.muted = true;
-      videoElement.play().then(() => {
-        webcamRunning = true;
-        isVideoDemoRunning = true;
-        renderVideoLoop();
-        updateVisionUI();
-      });
-    });
-  };
-
-  videoElement.onerror = () => {
-    alert(`Could not load video from "${src}".\nPlease check the URL or select a valid MP4/WebM video file.`);
-    stopCamera();
-  };
-}
-
-// --- Simulated Exercise Demo Mode ---
-
-function startSimulation() {
-  if (webcamRunning) stopCamera();
-  simulationRunning = true;
-  badFormSimRunning = false;
-  formWarningTimestamp = 0;
-  document.getElementById('vision-placeholder').classList.add('hidden');
-  document.getElementById('btn-start-camera').disabled = false;
-  document.getElementById('btn-stop-camera').disabled = false;
-
-  canvasElement.width = 640;
-  canvasElement.height = 480;
-
-  if (simInterval) clearInterval(simInterval);
-
-  simInterval = setInterval(() => {
-    simAngle += simDirection * 4;
-    if (simAngle <= 65) {
-      simAngle = 65;
-      simDirection = 1;
-    } else if (simAngle >= 175) {
-      simAngle = 175;
-      simDirection = -1;
-    }
-
-    currentAngle = Math.round(simAngle);
-    currentROM = Math.round(computeROM(currentAngle));
-    updateRepCounter(currentAngle);
-    updateVisionUI();
-
-    drawSimulatedHand(canvasCtx, canvasElement.width, canvasElement.height, simAngle);
-  }, 50);
-}
-
-function startBadFormSimulation() {
-  if (webcamRunning) stopCamera();
-  if (simulationRunning) stopSimulation();
-
-  simulationRunning = true;
-  badFormSimRunning = true;
-  document.getElementById('vision-placeholder').classList.add('hidden');
-  document.getElementById('btn-start-camera').disabled = false;
-  document.getElementById('btn-stop-camera').disabled = false;
-
-  canvasElement.width = 640;
-  canvasElement.height = 480;
-
-  // Simulate shallow incomplete curl: curls inward to 108 deg (does not reach 85 deg!) and reverses prematurely
-  simAngle = 175;
-  simDirection = -1;
-
-  if (simInterval) clearInterval(simInterval);
-
-  simInterval = setInterval(() => {
-    simAngle += simDirection * 4;
-    // Premature reversal at 108 deg (Shallow curl -> Triggers warning and blocks rep)
-    if (simAngle <= 108) {
-      simAngle = 108;
-      simDirection = 1;
-    } else if (simAngle >= 175) {
-      simAngle = 175;
-      simDirection = -1;
-    }
-
-    currentAngle = Math.round(simAngle);
-    currentROM = Math.round(computeROM(currentAngle));
-    updateRepCounter(currentAngle);
-    updateVisionUI();
-
-    drawSimulatedHand(canvasCtx, canvasElement.width, canvasElement.height, simAngle);
-  }, 50);
-}
-
-function stopSimulation() {
-  simulationRunning = false;
-  badFormSimRunning = false;
-  if (simInterval) {
-    clearInterval(simInterval);
-    simInterval = null;
-  }
-  document.getElementById('vision-placeholder').classList.remove('hidden');
-  document.getElementById('btn-stop-camera').disabled = true;
-}
-
-function drawSimulatedHand(ctx, width, height, angle) {
-  ctx.clearRect(0, 0, width, height);
-
-  ctx.save();
-  ctx.fillStyle = '#0f172a';
-  ctx.fillRect(0, 0, width, height);
-
-  const rad = (angle * Math.PI) / 180.0;
-  const startX = width * 0.5;
-  const startY = height * 0.78;
-  const mcpX = startX;
-  const mcpY = startY - 80;
-  const pipX = mcpX + Math.cos(rad - Math.PI / 2) * 65;
-  const pipY = mcpY - Math.sin(rad - Math.PI / 2) * 65;
-  const dipX = pipX + Math.cos(rad - Math.PI / 2 + 0.3) * 50;
-  const dipY = pipY - Math.sin(rad - Math.PI / 2 + 0.3) * 50;
-
-  ctx.strokeStyle = badFormSimRunning ? '#f87171' : '#38bdf8';
-  ctx.lineWidth = 6;
-  ctx.lineCap = 'round';
-  ctx.lineJoin = 'round';
-
-  ctx.beginPath();
-  ctx.moveTo(startX, startY);
-  ctx.lineTo(mcpX, mcpY);
-  ctx.lineTo(pipX, pipY);
-  ctx.lineTo(dipX, dipY);
-  ctx.stroke();
-
-  const joints = [
-    { x: startX, y: startY, r: 6, color: badFormSimRunning ? '#f87171' : '#38bdf8' },
-    { x: mcpX, y: mcpY, r: 7, color: badFormSimRunning ? '#f87171' : '#38bdf8' },
-    { x: pipX, y: pipY, r: 10, color: '#f59e0b' },
-    { x: dipX, y: dipY, r: 5, color: badFormSimRunning ? '#f87171' : '#38bdf8' }
-  ];
-
-  joints.forEach(j => {
-    ctx.beginPath();
-    ctx.arc(j.x, j.y, j.r, 0, 2 * Math.PI);
-    ctx.fillStyle = j.color;
-    ctx.fill();
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-  });
-
-  ctx.fillStyle = badFormSimRunning ? '#f87171' : '#94a3b8';
-  ctx.font = '13px sans-serif';
-  const labelText = badFormSimRunning 
-    ? `⚠️ Shallow Curl Demo: ${Math.round(angle)}° (Does not reach 85° threshold)` 
-    : `Simulated Finger Curl: ${Math.round(angle)}° (Vertex PIP)`;
-  ctx.fillText(labelText, 20, 30);
-  ctx.restore();
-
-  if (guideOverlayEnabled) {
-    drawTargetGuideOverlay(ctx, width, height, getActiveGesture(), true, currentAngle, hasCurled);
-  }
-}
+function stopSimulation() {}
 
 // --- Diary NLP Handlers ---
 
@@ -2391,7 +2182,6 @@ function switchView(viewName) {
   // If leaving camera tab, pause webcam to preserve resources
   if (viewName !== 'camera') {
     if (webcamRunning) stopCamera();
-    if (simulationRunning) stopSimulation();
   }
 }
 
@@ -2612,86 +2402,9 @@ async function initApp() {
     });
   });
 
-  // 5. Vision Camera Controls & Real Demo Video
+  // 5. Vision Camera Controls
   document.getElementById('btn-start-camera').addEventListener('click', startCamera);
-  document.getElementById('btn-stop-camera').addEventListener('click', () => {
-    stopCamera();
-    stopSimulation();
-  });
-  document.getElementById('btn-simulate-exercise').addEventListener('click', startSimulation);
-
-  const btnRealDemo = document.getElementById('btn-real-video-demo');
-  if (btnRealDemo) {
-    btnRealDemo.addEventListener('click', () => {
-      if (isVideoDemoRunning) {
-        stopCamera();
-      } else {
-        startRealVideoDemo();
-      }
-    });
-  }
-
-  const selectDemoVideo = document.getElementById('select-demo-video');
-  const customPanel = document.getElementById('custom-video-panel');
-  if (selectDemoVideo) {
-    selectDemoVideo.addEventListener('change', (e) => {
-      const val = e.target.value;
-      if (val === 'custom') {
-        if (customPanel) customPanel.classList.remove('hidden');
-      } else {
-        if (customPanel) customPanel.classList.add('hidden');
-        currentDemoVideoUrl = val;
-        if (isVideoDemoRunning) {
-          startRealVideoDemo(val);
-        }
-      }
-    });
-  }
-
-  const btnPlaySelected = document.getElementById('btn-play-selected-video');
-  if (btnPlaySelected) {
-    btnPlaySelected.addEventListener('click', () => {
-      const selVal = selectDemoVideo ? selectDemoVideo.value : currentDemoVideoUrl;
-      if (selVal === 'custom') {
-        const customUrl = document.getElementById('input-custom-video-url')?.value?.trim();
-        if (customUrl) {
-          startRealVideoDemo(customUrl);
-        } else {
-          alert('Please enter a valid video URL below or choose a video file.');
-        }
-      } else {
-        startRealVideoDemo(selVal);
-      }
-    });
-  }
-
-  const btnLoadCustomUrl = document.getElementById('btn-load-custom-url');
-  if (btnLoadCustomUrl) {
-    btnLoadCustomUrl.addEventListener('click', () => {
-      const url = document.getElementById('input-custom-video-url')?.value?.trim();
-      if (!url) {
-        alert('Please enter a direct video URL (e.g., https://.../exercise.mp4 or .webm)');
-        return;
-      }
-      startRealVideoDemo(url);
-    });
-  }
-
-  const fileInput = document.getElementById('input-local-video-file');
-  if (fileInput) {
-    fileInput.addEventListener('change', (e) => {
-      const file = e.target.files && e.target.files[0];
-      if (file) {
-        const fileUrl = URL.createObjectURL(file);
-        startRealVideoDemo(fileUrl);
-      }
-    });
-  }
-
-  const btnTestBadForm = document.getElementById('btn-test-bad-form');
-  if (btnTestBadForm) {
-    btnTestBadForm.addEventListener('click', startBadFormSimulation);
-  }
+  document.getElementById('btn-stop-camera').addEventListener('click', stopCamera);
 
   // 6. Save Session
   document.getElementById('btn-save-session').addEventListener('click', saveSession);

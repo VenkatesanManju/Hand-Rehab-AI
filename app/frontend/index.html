@@ -338,52 +338,22 @@
           <div class="video-panel card">
             <div class="vision-controls">
               <button id="btn-start-camera" class="btn btn-success">▶ Start Camera</button>
-              <button id="btn-stop-camera" class="btn btn-secondary" disabled>⏹ Stop</button>
-              <button id="btn-real-video-demo" class="btn btn-primary">🎥 Real Video Demo</button>
-              <button id="btn-simulate-exercise" class="btn btn-outline" title="Switch to synthetic stick-figure biomechanical simulation">📐 Biomechanical Sim</button>
-              <button id="btn-test-bad-form" type="button" class="btn btn-outline" style="border-color: #f87171; color: #b91c1c;" title="Simulate an incomplete movement to test form warning alert and rep blocking">⚠️ Test Bad Form</button>
-              <button id="btn-toggle-guide-overlay" type="button" class="btn btn-outline" title="Show or hide target hand alignment silhouette">🎯 Target Guide: ON</button>
-              <button id="btn-toggle-bg-blur" type="button" class="btn btn-outline" title="Blur room background and spotlight your exercising hand">✨ Hand Focus (Blur BG): ON</button>
-            </div>
-
-            <!-- Real Demo Video Source Selector & Custom URL / Upload Bar -->
-            <div id="video-demo-bar" class="video-demo-toolbar">
-              <div class="demo-toolbar-left">
-                <span class="toolbar-label">📹 <strong>Demo Video Source:</strong></span>
-                <select id="select-demo-video" class="select-demo-video">
-                  <option value="./vendor/demo_hand.webm">🖐️ Real Clinical Hand — Finger Flexion & Counting (Default)</option>
-                  <option value="./vendor/hand_animation.webm">🦾 Studio 3D Hand — Joint Flexion Demonstration</option>
-                  <option value="https://commons.wikimedia.org/wiki/Special:FilePath/Aufbau_der_Hand.webm">🌐 Wikimedia: Aufbau der Hand (Online HD)</option>
-                  <option value="https://commons.wikimedia.org/wiki/Special:FilePath/Hands_short_film.webm">🌐 Wikimedia: Hands Film Demo (Online HD)</option>
-                  <option value="custom">🌐 Load Any Video URL from Internet...</option>
-                </select>
-                <button type="button" id="btn-play-selected-video" class="btn btn-sm btn-primary">▶ Play Selected Video</button>
-              </div>
-
-              <div id="custom-video-panel" class="custom-video-panel hidden">
-                <div class="custom-url-row">
-                  <input type="url" id="input-custom-video-url" placeholder="Paste direct video URL (e.g. https://.../rehab_exercise.mp4 or .webm)" />
-                  <button type="button" id="btn-load-custom-url" class="btn btn-sm btn-outline">Load from URL</button>
-                  <label class="btn btn-sm btn-secondary btn-file-label">
-                    📁 Choose Video File
-                    <input type="file" id="input-local-video-file" accept="video/mp4,video/webm,video/ogg" style="display:none;" />
-                  </label>
-                </div>
-                <span class="custom-url-hint">💡 Tip: You can paste any direct MP4 or WebM video link from Wikimedia, GitHub, Pexels, or your physical therapy clinic, or choose a video file from your computer.</span>
-              </div>
+              <button id="btn-stop-camera" class="btn btn-secondary" disabled>⏹ Stop Camera</button>
+              <button id="btn-toggle-guide-overlay" type="button" class="btn btn-primary" title="Show or hide target hand alignment silhouette">🎯 Target Guide: ON</button>
+              <button id="btn-toggle-bg-blur" type="button" class="btn btn-primary" title="Blur room background and spotlight your exercising hand">✨ Hand Focus (Blur BG): ON</button>
             </div>
 
             <!-- Live Status Feedback Banner -->
             <div class="live-action-banner" id="live-action-banner">
               <span class="live-status-indicator" id="live-status-dot"></span>
-              <span id="live-action-text">Camera ready. Click "Start Camera" or "Real Video Demo".</span>
+              <span id="live-action-text">Camera ready. Click "Start Camera" to begin guided tracking.</span>
             </div>
 
             <div class="video-container">
               <video id="webcam-video" autoplay playsinline muted></video>
               <canvas id="vision-canvas"></canvas>
               <div id="vision-placeholder" class="vision-placeholder">
-                <span>Camera paused or inactive.<br>Click <strong>Start Camera</strong> to track your hand,<br>or <strong>Simulated Demo</strong> to test movement.</span>
+                <span>Camera paused or inactive.<br>Click <strong>Start Camera</strong> to track your hand.</span>
               </div>
             </div>
 
