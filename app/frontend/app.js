@@ -269,7 +269,7 @@ function updateExerciseGuide(surgeryTypeOrKey) {
 
   // Update idle camera banner tip if camera is not active
   const actionText = document.getElementById('live-action-text');
-  if (actionText && (!webcamStream && !simulationRunning)) {
+  if (actionText && (!webcamRunning && !simulationRunning)) {
     actionText.textContent = `Camera ready for ${guide.shortName}. ${guide.liveTip}`;
   }
 }
