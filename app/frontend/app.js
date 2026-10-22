@@ -40,6 +40,14 @@ let currentFormScore = 95;
 const EXTEND_THRESH = 140.0;
 const FLEX_THRESH = 85.0;
 
+// Wrong Form Monitoring & Warning State
+let lastFormWarning = "";
+let formWarningTimestamp = 0;
+let repCycleStartTime = 0;
+let minAngleInCycle = 180.0;
+let hasInitiatedCurl = false;
+let badFormSimRunning = false;
+
 // Current Daily Diary Prediction State
 let currentDiaryPred = {
   pain: 0,
@@ -628,21 +636,28 @@ function drawTargetGuideOverlay(ctx, width, height, activeGesture, isHandPresent
 
   ctx.save();
 
+  const isWarning = (performance.now() - formWarningTimestamp < 3000);
+
   // 1. Target alignment bounding box in center
   const boxW = Math.min(270, width * 0.44);
   const boxH = Math.min(320, height * 0.70);
   const boxX = (width - boxW) / 2;
   const boxY = (height - boxH) / 2 + 10;
 
-  // Frame styling: Emerald green if hand is aligned, Sky blue if waiting
-  const strokeColor = isHandPresent 
-    ? (isCurled ? 'rgba(16, 185, 129, 0.95)' : 'rgba(56, 189, 248, 0.9)')
-    : 'rgba(148, 163, 184, 0.6)';
-  const fillColor = isHandPresent
-    ? (isCurled ? 'rgba(16, 185, 129, 0.1)' : 'rgba(56, 189, 248, 0.06)')
-    : 'rgba(15, 23, 42, 0.04)';
+  // Frame styling: Warning crimson if error, Emerald green if curled, Sky blue if ready
+  const strokeColor = isWarning
+    ? 'rgba(239, 68, 68, 0.95)'
+    : (isHandPresent 
+        ? (isCurled ? 'rgba(16, 185, 129, 0.95)' : 'rgba(56, 189, 248, 0.9)')
+        : 'rgba(148, 163, 184, 0.6)');
 
-  ctx.lineWidth = 2.5;
+  const fillColor = isWarning
+    ? 'rgba(239, 68, 68, 0.12)'
+    : (isHandPresent
+        ? (isCurled ? 'rgba(16, 185, 129, 0.1)' : 'rgba(56, 189, 248, 0.06)')
+        : 'rgba(15, 23, 42, 0.04)');
+
+  ctx.lineWidth = isWarning ? 3.5 : 2.5;
   ctx.strokeStyle = strokeColor;
   ctx.fillStyle = fillColor;
 
@@ -654,20 +669,20 @@ function drawTargetGuideOverlay(ctx, width, height, activeGesture, isHandPresent
     ctx.rect(boxX, boxY, boxW, boxH);
   }
   ctx.fill();
-  ctx.setLineDash([8, 6]);
+  ctx.setLineDash(isWarning ? [4, 4] : [8, 6]);
   ctx.stroke();
   ctx.setLineDash([]);
 
   // 2. Wrist rest baseline marker at bottom of box
   const wristY = boxY + boxH - 26;
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+  ctx.strokeStyle = isWarning ? 'rgba(239, 68, 68, 0.6)' : 'rgba(255, 255, 255, 0.45)';
   ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.moveTo(boxX + 24, wristY);
   ctx.lineTo(boxX + boxW - 24, wristY);
   ctx.stroke();
 
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+  ctx.fillStyle = isWarning ? 'rgba(254, 202, 202, 0.9)' : 'rgba(255, 255, 255, 0.8)';
   ctx.font = '11px sans-serif';
   ctx.textAlign = 'center';
   ctx.fillText('Align Wrist Base Here', boxX + boxW / 2, wristY + 16);
@@ -678,7 +693,7 @@ function drawTargetGuideOverlay(ctx, width, height, activeGesture, isHandPresent
   const pillX = (width - pillW) / 2;
   const pillY = Math.max(10, boxY - 36);
 
-  ctx.fillStyle = 'rgba(15, 23, 42, 0.82)';
+  ctx.fillStyle = isWarning ? 'rgba(69, 10, 10, 0.9)' : 'rgba(15, 23, 42, 0.82)';
   ctx.beginPath();
   if (ctx.roundRect) {
     ctx.roundRect(pillX, pillY, pillW, pillH, 8);
@@ -696,10 +711,13 @@ function drawTargetGuideOverlay(ctx, width, height, activeGesture, isHandPresent
   const gestureLabel = activeGesture.name ? activeGesture.name.split(':')[1] || activeGesture.name : 'Exercise';
   ctx.fillText(`Target: ${gestureLabel.trim()} (${activeGesture.analogy || ''})`, pillX + pillW / 2, pillY + 19);
 
-  // 4. Live Alignment Cue text at bottom of frame
+  // 4. Live Alignment Cue / Warning text at bottom of frame
   let cueText = 'Place hand inside guide frame';
   let cueColor = '#e2e8f0';
-  if (isHandPresent) {
+  if (isWarning) {
+    cueText = `⚠️ Form Alert: ${lastFormWarning} (Rep NOT counted)`;
+    cueColor = '#fca5a5';
+  } else if (isHandPresent) {
     if (isCurled) {
       cueText = '✓ Position held! Now open hand back up';
       cueColor = '#4ade80';
@@ -709,9 +727,9 @@ function drawTargetGuideOverlay(ctx, width, height, activeGesture, isHandPresent
     }
   }
 
-  ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+  ctx.fillStyle = isWarning ? 'rgba(69, 10, 10, 0.92)' : 'rgba(15, 23, 42, 0.85)';
   ctx.beginPath();
-  const cueW = Math.min(width - 40, 310);
+  const cueW = Math.min(width - 20, isWarning ? 440 : 310);
   if (ctx.roundRect) {
     ctx.roundRect((width - cueW) / 2, boxY + boxH + 8, cueW, 26, 6);
   } else {
@@ -720,8 +738,11 @@ function drawTargetGuideOverlay(ctx, width, height, activeGesture, isHandPresent
   ctx.fill();
 
   ctx.fillStyle = cueColor;
-  ctx.font = 'bold 11px sans-serif';
+  ctx.font = 'bold 10px sans-serif';
   ctx.fillText(cueText, width / 2, boxY + boxH + 25);
+
+  ctx.restore();
+}
 
   ctx.restore();
 }
@@ -745,32 +766,110 @@ function computeROM(meanPipAngle) {
   return Math.max(0.0, Math.min(100.0, 180.0 - meanPipAngle));
 }
 
+function triggerFormWarning(reason) {
+  lastFormWarning = reason;
+  formWarningTimestamp = performance.now();
+  currentFormScore = Math.max(35, Math.min(65, currentFormScore - 20));
+
+  const banner = document.getElementById('live-action-banner');
+  const actionText = document.getElementById('live-action-text');
+  if (banner) {
+    banner.className = 'live-action-banner warning';
+  }
+  if (actionText) {
+    actionText.textContent = `⚠️ Form Alert: ${reason} (Rep NOT counted!)`;
+  }
+
+  // Flash warning color on curl progress bar fill
+  const fillEl = document.getElementById('curl-progress-fill');
+  if (fillEl) {
+    fillEl.style.backgroundColor = '#ef4444';
+    setTimeout(() => {
+      if (fillEl) fillEl.style.backgroundColor = '';
+    }, 1800);
+  }
+
+  updateVisionUI();
+}
+
 function updateRepCounter(angle) {
   const banner = document.getElementById('live-action-banner');
   const actionText = document.getElementById('live-action-text');
   const activeG = getActiveGesture();
+  const now = performance.now();
+  const warningActive = (now - formWarningTimestamp < 2800);
+
+  // Track the minimum angle achieved in this curl excursion
+  if (angle < minAngleInCycle) {
+    minAngleInCycle = angle;
+  }
 
   if (angle <= FLEX_THRESH) {
-    repState = 'FLEXED';
-    hasCurled = true;
-    if (banner) banner.className = 'live-action-banner curling';
-    if (actionText) actionText.textContent = `🎯 Position reached (${Math.round(angle)}°)! Now return smoothly to complete rep.`;
+    // Reached full curl threshold (<= 85 deg)
+    if (!hasCurled) {
+      repState = 'FLEXED';
+      hasCurled = true;
+      hasInitiatedCurl = true;
+      if (banner && !warningActive) banner.className = 'live-action-banner curling';
+      if (actionText && !warningActive) {
+        actionText.textContent = `🎯 Position reached (${Math.round(angle)}°)! Now return smoothly to complete rep.`;
+      }
+    }
   } else if (angle >= EXTEND_THRESH) {
+    // Reached full extension threshold (>= 140 deg)
     if (repState === 'FLEXED' && hasCurled) {
+      // Validate speed: must take at least 0.55s for safe, non-jerky movement
+      const duration = repCycleStartTime > 0 ? (now - repCycleStartTime) / 1000 : 1.2;
+      if (repCycleStartTime > 0 && duration < 0.55) {
+        // Jerky / snapping movement -> Warning & block rep!
+        triggerFormWarning("Moving too fast! Take at least 1.5 seconds per repetition for safe tendon gliding.");
+        hasCurled = false;
+        hasInitiatedCurl = false;
+        minAngleInCycle = 180.0;
+        repCycleStartTime = 0;
+        return;
+      }
+
+      // Valid repetition!
       repCount += 1;
       hasCurled = false;
-      currentFormScore = Math.min(100, Math.max(85, Math.round(90 + Math.random() * 10)));
+      hasInitiatedCurl = false;
+      minAngleInCycle = 180.0;
+      repCycleStartTime = 0;
+      currentFormScore = Math.min(100, Math.max(88, Math.round(92 + Math.random() * 8)));
       if (banner) banner.className = 'live-action-banner completed';
-      if (actionText) actionText.textContent = `✨ Repetition ${repCount} Complete (${activeG ? activeG.name : 'Exercise'})! Excellent form.`;
+      if (actionText) {
+        actionText.textContent = `✨ Repetition ${repCount} Complete (${activeG ? activeG.name : 'Exercise'})! Excellent form.`;
+      }
+    } else if (hasInitiatedCurl && minAngleInCycle > FLEX_THRESH && minAngleInCycle < (EXTEND_THRESH - 15)) {
+      // Shallow curl: user bent into transition (<125 deg) but reversed before reaching FLEX_THRESH (85 deg)
+      triggerFormWarning(`Incomplete curl! Bend your fingers deeper past 85° before returning (reached only ${Math.round(minAngleInCycle)}°).`);
+      hasInitiatedCurl = false;
+      minAngleInCycle = 180.0;
+      repCycleStartTime = 0;
+      return;
     } else {
-      if (banner) banner.className = 'live-action-banner ready';
-      if (actionText) actionText.textContent = `🖐️ Position ready (${Math.round(angle)}°). Begin: ${activeG ? activeG.name : 'Gesture'}!`;
+      // Normal ready state
+      hasInitiatedCurl = false;
+      minAngleInCycle = 180.0;
+      repCycleStartTime = 0;
+      if (!warningActive) {
+        if (banner) banner.className = 'live-action-banner ready';
+        if (actionText) actionText.textContent = `🖐️ Position ready (${Math.round(angle)}°). Begin: ${activeG ? activeG.name : 'Gesture'}!`;
+      }
     }
     repState = 'EXTENDED';
   } else {
+    // Intermediate angles
     if (repState === 'EXTENDED') {
-      if (banner) banner.className = 'live-action-banner curling';
-      if (actionText) actionText.textContent = `🔄 Moving through gesture... (current: ${Math.round(angle)}°). ${activeG ? activeG.liveTip : ''}`;
+      if (angle < (EXTEND_THRESH - 15)) {
+        hasInitiatedCurl = true;
+        if (repCycleStartTime === 0) repCycleStartTime = now;
+      }
+      if (!warningActive) {
+        if (banner) banner.className = 'live-action-banner curling';
+        if (actionText) actionText.textContent = `🔄 Moving through gesture... (current: ${Math.round(angle)}°). ${activeG ? activeG.liveTip : ''}`;
+      }
     }
   }
 
@@ -969,7 +1068,11 @@ function updateVisionUI() {
   const liveReps = document.getElementById('live-reps');
   if (liveReps) liveReps.textContent = `${repCount}`;
   const liveForm = document.getElementById('live-form');
-  if (liveForm) liveForm.textContent = `${currentFormScore}%`;
+  if (liveForm) {
+    liveForm.textContent = `${currentFormScore}%`;
+    const isWarning = (performance.now() - formWarningTimestamp < 3000);
+    liveForm.classList.toggle('form-score-warn', isWarning || currentFormScore < 75);
+  }
 
   // Summary card on camera page
   const sumRom = document.getElementById('summary-rom');
@@ -1037,6 +1140,8 @@ function stopCamera() {
 function startSimulation() {
   if (webcamRunning) stopCamera();
   simulationRunning = true;
+  badFormSimRunning = false;
+  formWarningTimestamp = 0;
   document.getElementById('vision-placeholder').classList.add('hidden');
   document.getElementById('btn-start-camera').disabled = false;
   document.getElementById('btn-stop-camera').disabled = false;
@@ -1065,8 +1170,48 @@ function startSimulation() {
   }, 50);
 }
 
+function startBadFormSimulation() {
+  if (webcamRunning) stopCamera();
+  if (simulationRunning) stopSimulation();
+
+  simulationRunning = true;
+  badFormSimRunning = true;
+  document.getElementById('vision-placeholder').classList.add('hidden');
+  document.getElementById('btn-start-camera').disabled = false;
+  document.getElementById('btn-stop-camera').disabled = false;
+
+  canvasElement.width = 640;
+  canvasElement.height = 480;
+
+  // Simulate shallow incomplete curl: curls inward to 108 deg (does not reach 85 deg!) and reverses prematurely
+  simAngle = 175;
+  simDirection = -1;
+
+  if (simInterval) clearInterval(simInterval);
+
+  simInterval = setInterval(() => {
+    simAngle += simDirection * 4;
+    // Premature reversal at 108 deg (Shallow curl -> Triggers warning and blocks rep)
+    if (simAngle <= 108) {
+      simAngle = 108;
+      simDirection = 1;
+    } else if (simAngle >= 175) {
+      simAngle = 175;
+      simDirection = -1;
+    }
+
+    currentAngle = Math.round(simAngle);
+    currentROM = Math.round(computeROM(currentAngle));
+    updateRepCounter(currentAngle);
+    updateVisionUI();
+
+    drawSimulatedHand(canvasCtx, canvasElement.width, canvasElement.height, simAngle);
+  }, 50);
+}
+
 function stopSimulation() {
   simulationRunning = false;
+  badFormSimRunning = false;
   if (simInterval) {
     clearInterval(simInterval);
     simInterval = null;
@@ -1092,7 +1237,7 @@ function drawSimulatedHand(ctx, width, height, angle) {
   const dipX = pipX + Math.cos(rad - Math.PI / 2 + 0.3) * 50;
   const dipY = pipY - Math.sin(rad - Math.PI / 2 + 0.3) * 50;
 
-  ctx.strokeStyle = '#38bdf8';
+  ctx.strokeStyle = badFormSimRunning ? '#f87171' : '#38bdf8';
   ctx.lineWidth = 6;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
@@ -1105,10 +1250,10 @@ function drawSimulatedHand(ctx, width, height, angle) {
   ctx.stroke();
 
   const joints = [
-    { x: startX, y: startY, r: 6, color: '#38bdf8' },
-    { x: mcpX, y: mcpY, r: 7, color: '#38bdf8' },
+    { x: startX, y: startY, r: 6, color: badFormSimRunning ? '#f87171' : '#38bdf8' },
+    { x: mcpX, y: mcpY, r: 7, color: badFormSimRunning ? '#f87171' : '#38bdf8' },
     { x: pipX, y: pipY, r: 10, color: '#f59e0b' },
-    { x: dipX, y: dipY, r: 5, color: '#38bdf8' }
+    { x: dipX, y: dipY, r: 5, color: badFormSimRunning ? '#f87171' : '#38bdf8' }
   ];
 
   joints.forEach(j => {
@@ -1121,9 +1266,12 @@ function drawSimulatedHand(ctx, width, height, angle) {
     ctx.stroke();
   });
 
-  ctx.fillStyle = '#94a3b8';
-  ctx.font = '14px sans-serif';
-  ctx.fillText(`Simulated Finger Curl: ${Math.round(angle)}° (Vertex PIP)`, 20, 30);
+  ctx.fillStyle = badFormSimRunning ? '#f87171' : '#94a3b8';
+  ctx.font = '13px sans-serif';
+  const labelText = badFormSimRunning 
+    ? `⚠️ Shallow Curl Demo: ${Math.round(angle)}° (Does not reach 85° threshold)` 
+    : `Simulated Finger Curl: ${Math.round(angle)}° (Vertex PIP)`;
+  ctx.fillText(labelText, 20, 30);
   ctx.restore();
 
   if (guideOverlayEnabled) {
@@ -2352,6 +2500,10 @@ window.addEventListener('DOMContentLoaded', async () => {
     stopSimulation();
   });
   document.getElementById('btn-simulate-exercise').addEventListener('click', startSimulation);
+  const btnTestBadForm = document.getElementById('btn-test-bad-form');
+  if (btnTestBadForm) {
+    btnTestBadForm.addEventListener('click', startBadFormSimulation);
+  }
 
   // 6. Save Session
   document.getElementById('btn-save-session').addEventListener('click', saveSession);

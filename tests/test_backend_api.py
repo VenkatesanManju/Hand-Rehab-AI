@@ -507,6 +507,15 @@ def test_candidate_gestures_and_clinical_advisory(client):
     # Verify vision-canvas is not mirrored with scaleX(-1)
     assert "#vision-canvas {\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  transform: none;" in css
 
+    # Wrong form detection, warning alert, and rep blocking
+    assert 'id="btn-test-bad-form"' in html
+    assert "triggerFormWarning" in js
+    assert "startBadFormSimulation" in js
+    assert "Rep NOT counted" in js
+    assert "Incomplete curl!" in js
+    assert ".live-action-banner.warning" in css
+
+
 
 
 

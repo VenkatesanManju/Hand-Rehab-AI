@@ -1017,6 +1017,20 @@ textarea#diary-input:focus {
 .live-action-banner.ready .live-status-indicator { background: #10b981; }
 .live-action-banner.curling .live-status-indicator { background: #f59e0b; }
 .live-action-banner.completed .live-status-indicator { background: #3b82f6; }
+.live-action-banner.warning {
+  background: #fef2f2;
+  border-color: #f87171;
+  color: #991b1b;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
+}
+.live-action-banner.warning .live-status-indicator {
+  background: #ef4444;
+  box-shadow: 0 0 8px #ef4444;
+}
+.form-score-warn {
+  color: #dc2626 !important;
+  font-weight: 800;
+}
 
 .video-container {
   position: relative;
