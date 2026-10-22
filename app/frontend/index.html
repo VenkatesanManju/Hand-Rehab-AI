@@ -261,30 +261,62 @@
               <button type="button" class="btn-gesture active" id="btn-gesture-1">Gesture 1: Hook Fist</button>
               <button type="button" class="btn-gesture" id="btn-gesture-2">Gesture 2: Individual Finger Bend</button>
             </div>
-            <p id="guide-condition-goal" class="guide-goal-text"><strong>Rehabilitation Goal:</strong> Differential gliding of the flexor digitorum superficialis and profundus tendons while keeping MCP knuckles straight.</p>
+            <!-- EVERYDAY ANALOGY / VISUAL SHORTCUT -->
+            <div class="guide-analogy-callout" id="guide-analogy-callout">
+              <span class="analogy-icon">💡</span>
+              <div class="analogy-text-wrap">
+                <span class="analogy-subtitle">EASY WAY TO PICTURE IT:</span>
+                <strong id="guide-analogy-text" class="analogy-highlight">Think of a Pirate Hook or Cat Claw 🪝</strong>
+              </div>
+            </div>
+            <p id="guide-condition-goal" class="guide-goal-text"><strong>Rehabilitation Goal:</strong> Gently curl only your fingertips while keeping your main knuckles straight.</p>
             <p id="guide-clinical-advisory" class="guide-advisory-text">⚠️ <strong>Clinical Notice:</strong> Important: These are candidate gestures for your project. For tendon repairs and postoperative conditions, show or recommend a gesture only when it is permitted by the patient's surgeon or hand therapist.</p>
           </div>
-          <div class="guide-steps-grid">
-            <div class="guide-step-card" id="guide-step-1">
-              <div class="step-icon" id="guide-step-1-icon">🖐️</div>
-              <div class="step-content">
-                <h4 id="guide-step-1-title">1. Open Palm (Start)</h4>
-                <p id="guide-step-1-desc">Hold your hand upright facing the camera with fingers straight. Finger angle should be <strong>&gt;140°</strong>.</p>
+          <!-- VISUAL ILLUSTRATION & STEP GUIDES -->
+          <div class="guide-main-row">
+            <!-- Left: Visual Hand Posture Diagram -->
+            <div class="guide-posture-card" id="guide-posture-card">
+              <span class="posture-tag">TARGET HAND SHAPE</span>
+              <div class="posture-svg-wrap" id="guide-posture-svg">
+                <!-- SVG dynamically injected via JS -->
+              </div>
+              <strong id="guide-posture-caption" class="posture-caption">Hook Fist Target Shape</strong>
+            </div>
+
+            <!-- Right: 3-Step Action Cards -->
+            <div class="guide-steps-grid">
+              <div class="guide-step-card" id="guide-step-1">
+                <div class="step-icon" id="guide-step-1-icon">🖐️</div>
+                <div class="step-content">
+                  <h4 id="guide-step-1-title">1. Start Flat</h4>
+                  <p id="guide-step-1-desc">Hold your hand upright facing the camera like a stop sign with fingers straight.</p>
+                </div>
+              </div>
+              <div class="guide-step-card" id="guide-step-2">
+                <div class="step-icon" id="guide-step-2-icon">🪝</div>
+                <div class="step-content">
+                  <h4 id="guide-step-2-title">2. Bend into Hook</h4>
+                  <p id="guide-step-2-desc">Curl only your top two finger joints into a hook. Keep your big knuckles straight!</p>
+                </div>
+              </div>
+              <div class="guide-step-card" id="guide-step-3">
+                <div class="step-icon" id="guide-step-3-icon">✨</div>
+                <div class="step-content">
+                  <h4 id="guide-step-3-title">3. Open Flat to Count</h4>
+                  <p id="guide-step-3-desc">Straighten fingers completely back to open palm to register <strong>+1 Rep</strong>!</p>
+                </div>
               </div>
             </div>
-            <div class="guide-step-card" id="guide-step-2">
-              <div class="step-icon" id="guide-step-2-icon">✊</div>
-              <div class="step-content">
-                <h4 id="guide-step-2-title">2. Smooth Fist Curl</h4>
-                <p id="guide-step-2-desc">Slowly curl fingers inward until knuckles bend past <strong>85°</strong>. Watch the curl depth bar fill up.</p>
-              </div>
+          </div>
+          <!-- DO'S & DON'TS -->
+          <div class="guide-dos-donts" id="guide-dos-donts">
+            <div class="dos-box">
+              <span class="dos-badge">✅ WHAT TO DO</span>
+              <span id="guide-do-text">Keep big knuckles flat and upright; curl only the fingertips inward smoothly.</span>
             </div>
-            <div class="guide-step-card" id="guide-step-3">
-              <div class="step-icon" id="guide-step-3-icon">✨</div>
-              <div class="step-content">
-                <h4 id="guide-step-3-title">3. Return &amp; Count Rep</h4>
-                <p id="guide-step-3-desc">Straighten fingers completely back to open palm. Crossing <strong>140°</strong> automatically records <strong>+1 Rep</strong>!</p>
-              </div>
+            <div class="donts-box">
+              <span class="donts-badge">❌ WHAT TO AVOID</span>
+              <span id="guide-dont-text">Do not squeeze into a full tight fist; keep your main knuckles straight.</span>
             </div>
           </div>
         </div>
@@ -296,6 +328,7 @@
               <button id="btn-start-camera" class="btn btn-success">▶ Start Camera</button>
               <button id="btn-stop-camera" class="btn btn-secondary" disabled>⏹ Stop</button>
               <button id="btn-simulate-exercise" class="btn btn-outline">▶ Simulated Demo</button>
+              <button id="btn-toggle-guide-overlay" type="button" class="btn btn-outline" title="Show or hide target hand alignment silhouette">🎯 Target Guide: ON</button>
             </div>
 
             <!-- Live Status Feedback Banner -->

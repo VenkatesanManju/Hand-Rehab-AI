@@ -19,5 +19,7 @@
 - [x] 18. Removed "Advance & Log as Next Day" button from both Step 1: Diary and Step 2: Camera Exercise Tracker as requested, keeping streamlined "Save / Update Today (Day X)" workflow.
 - [x] 19. Removed "Broken Hand Bone Recovery (Metacarpal)" option from both registration and camera condition selector dropdowns.
 - [x] 20. Configured condition-specific candidate camera exercises/gestures for each of the 5 rehabilitation conditions (Hook Fist & Individual Finger Bend for Flexor Tendon; Straight Finger Extension & Tabletop Hand Position for Extensor Tendon; Wrist Flexion & Wrist Extension for Distal Radius; Thumb-to-Index & Thumb-to-Little Fingertip Touch for Carpal Tunnel; Finger Spreading/Closing & Thumb Opposition for General Mobility), interactive gesture switcher toggles, and embedded the mandatory clinical advisory notice across registration and camera tracking UI.
+- [x] 21. Patient-Friendly Clarity Overhaul: replaced confusing anatomical jargon with memorable everyday analogies ("Pirate Hook", "Piano Key", "Flat High-Five", "Tabletop Roof", "Wave Down", "Lift Up", "OK Sign", "Reach to Pinky", "Starfish", "Tap 1-2-3-4"), created dynamic SVG hand posture illustration cards for all 10 candidate gestures, integrated Do's & Don'ts guidance cards, and added an on-screen live camera target alignment silhouette with real-time feedback.
+
 
 

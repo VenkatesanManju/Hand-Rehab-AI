@@ -477,6 +477,24 @@ def test_candidate_gestures_and_clinical_advisory(client):
     assert advisory_text in html
     assert advisory_text in js
 
+    # Patient clarity enhancements: Analogies, Visual Posture Cards, Do's & Don'ts, Camera Overlay
+    assert 'id="guide-analogy-callout"' in html
+    assert 'id="guide-analogy-text"' in html
+    assert 'id="guide-posture-card"' in html
+    assert 'id="guide-posture-svg"' in html
+    assert 'id="guide-dos-donts"' in html
+    assert 'id="btn-toggle-guide-overlay"' in html
+
+    # Everyday analogies presence
+    assert "Pirate Hook" in js
+    assert "Piano Key" in js
+    assert "High-Five" in js
+    assert "Tabletop" in js
+    assert "Starfish" in js
+    assert "getGestureSVG" in js
+    assert "drawTargetGuideOverlay" in js
+
+
 
 
 

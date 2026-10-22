@@ -61,46 +61,54 @@ const CONDITION_GUIDES = {
       {
         id: 'hook_fist',
         name: 'Gesture 1: Hook Fist',
-        exerciseTitle: 'Hook Fist (PIP & DIP Joint Gliding)',
-        goal: 'Differential gliding of the flexor digitorum superficialis (FDS) and profundus (FDP) tendons while keeping MCP knuckles straight.',
+        analogy: 'Think of a Pirate Hook or Cat Claw 🪝',
+        caption: 'Hook Fist Target Shape',
+        exerciseTitle: 'Hook Fist (Fingertip Claw Bend)',
+        goal: 'Gently curl only your fingertips inward while keeping your big knuckles straight, safely gliding the deep tendons without straining your palm.',
         step1: {
           icon: '🖐️',
-          title: '1. Open Hand Ready',
-          desc: 'Hold hand upright facing camera with wrist straight and all fingers open (>140°).'
+          title: '1. Start Flat',
+          desc: 'Hold your hand open flat facing the camera like a stop sign.'
         },
         step2: {
           icon: '🪝',
-          title: '2. Hook Fist Bend',
-          desc: 'Bend middle (PIP) and end (DIP) finger joints inward into a hook claw, keeping main knuckles (MCP) straight.'
+          title: '2. Hook Fingertips',
+          desc: 'Bend only your top two finger joints into a hook claw. Keep your big knuckles straight!'
         },
         step3: {
           icon: '✨',
-          title: '3. Return & Extend',
-          desc: 'Smoothly straighten fingers back open (>140°) to complete 1 repetition without forceful snapping.'
+          title: '3. Return to Open Palm',
+          desc: 'Straighten your fingers flat open again to complete 1 repetition.'
         },
-        liveTip: 'Curl the finger tips into a hook while keeping the base knuckles straight.'
+        doTip: 'Keep big base knuckles straight and flat; bend only your fingertips.',
+        dontTip: 'Do not squeeze into a full tight fist; keep your palm open.',
+        liveTip: 'Bend only your fingertips like a claw; keep base knuckles flat.'
       },
       {
         id: 'individual_bend',
         name: 'Gesture 2: Individual Finger Bend',
-        exerciseTitle: 'Individual Finger Bend (Isolated Tendon Excursion)',
-        goal: 'Isolated flexor tendon excursion to prevent inter-tendinous adhesions and restore independent finger mobility.',
+        analogy: 'Think of Pressing a Piano Key 🎹',
+        caption: 'Single Finger Press',
+        exerciseTitle: 'Individual Finger Bend (Isolated Movement)',
+        goal: 'Bend one finger at a time so your fingers learn to move freely and independently without sticking to neighboring fingers.',
         step1: {
           icon: '🖐️',
-          title: '1. Stable Open Palm',
-          desc: 'Hold hand steady with palm facing camera and all 4 fingers comfortably open (>140°).'
+          title: '1. Open Hand Ready',
+          desc: 'Hold your hand steady with all four fingers open and pointing upright.'
         },
         step2: {
           icon: '👇',
-          title: '2. Isolate & Bend Finger',
-          desc: 'Slowly bend the target finger (index or middle) inward toward your palm while keeping other fingers extended.'
+          title: '2. Press One Finger',
+          desc: 'Slowly bend just your index or middle finger down toward your palm while keeping the rest up.'
         },
         step3: {
           icon: '✨',
-          title: '3. Return to Level Palm',
-          desc: 'Straighten the finger back up in line with your other fingers (>140°) to count +1 Rep.'
+          title: '3. Lift Back Up',
+          desc: 'Straighten that finger back in line with the others to count 1 repetition.'
         },
-        liveTip: 'Bend one finger at a time smoothly; avoid forcing adjacent fingers.'
+        doTip: 'Move slowly and smoothly; keep your other fingers comfortably relaxed.',
+        dontTip: 'Do not strain or force neighboring fingers if they naturally bend a tiny bit.',
+        liveTip: 'Press one finger down gently like a piano key, then lift back up.'
       }
     ]
   },
@@ -113,46 +121,54 @@ const CONDITION_GUIDES = {
       {
         id: 'straight_extension',
         name: 'Gesture 1: Straight Finger Extension',
-        exerciseTitle: 'Straight Finger Extension (Active Extensor Activation)',
-        goal: 'Activate dorsal extensor tendons and eliminate extensor lag by actively lifting all fingers into full alignment.',
+        analogy: 'Think of a Flat High-Five or Stop Sign ✋',
+        caption: 'Full Flat Extension',
+        exerciseTitle: 'Straight Finger Extension (Active Finger Lift)',
+        goal: 'Strengthen the muscles on the back of your hand so your fingers lift and straighten completely without sagging.',
         step1: {
           icon: '✊',
           title: '1. Soft Curved Hand',
-          desc: 'Hold hand in front of camera with fingers relaxed and gently curved inward.'
+          desc: 'Start with fingers gently resting in a loose, curved posture.'
         },
         step2: {
           icon: '🖐️',
-          title: '2. Active Full Extension',
-          desc: 'Actively lift and straighten every knuckle and finger fully to 180° open alignment facing the camera.'
+          title: '2. Lift & Open Flat',
+          desc: 'Actively lift and straighten every knuckle flat open facing the camera.'
         },
         step3: {
           icon: '✨',
-          title: '3. Soft Release & Count',
-          desc: 'Gently release tension back to a soft neutral curve to complete +1 Rep without hyperextending.'
+          title: '3. Soft Release',
+          desc: 'Relax fingers back to the soft resting curve to record 1 repetition.'
         },
-        liveTip: 'Actively focus on straightening every knuckle to prevent extensor lag.'
+        doTip: 'Actively straighten all knuckles all the way to an open flat palm.',
+        dontTip: 'Do not bend fingers backward past a comfortable flat line.',
+        liveTip: 'Lift and straighten all knuckles flat like giving a high-five.'
       },
       {
         id: 'tabletop',
         name: 'Gesture 2: Tabletop Hand Position',
-        exerciseTitle: 'Tabletop Hand Position (Intrinsic Plus Lumbrical Stretch)',
-        goal: 'Strengthen lumbrical and interossei muscles by flexing MCP knuckles 90° while keeping interphalangeal (IP) joints strictly straight.',
+        analogy: 'Think of a Flat Tabletop or Roof 📐',
+        caption: '90° Tabletop Position',
+        exerciseTitle: 'Tabletop Hand Position (90° Knuckle Bend)',
+        goal: 'Strengthen deep hand muscles by bending only at your big base knuckles while keeping your finger shafts completely straight.',
         step1: {
           icon: '🖐️',
           title: '1. Upright Flat Palm',
-          desc: 'Position hand facing camera with fingers held straight together upright (>140°).'
+          desc: 'Hold your hand upright with all four fingers straight together.'
         },
         step2: {
           icon: '📐',
-          title: '2. Tabletop 90° Angle',
-          desc: 'Bend only the base knuckles (MCP joints) to a 90° angle like a flat tabletop, keeping your finger shafts completely straight.'
+          title: '2. Bend Knuckles 90°',
+          desc: 'Bend only at your big base knuckles to make a flat table shape. Keep finger shafts straight!'
         },
         step3: {
           icon: '✨',
-          title: '3. Return to Vertical Palm',
-          desc: 'Lift knuckles back up into a straight upright palm (>140°) to register +1 Rep.'
+          title: '3. Stand Back Up',
+          desc: 'Straighten knuckles back upright into a flat open hand to count 1 rep.'
         },
-        liveTip: 'Keep fingers straight like a flat table while bending only the big knuckles.'
+        doTip: 'Keep your fingers straight like a flat table board.',
+        dontTip: 'Do not curl your fingertips into a fist; fingers must stay straight.',
+        liveTip: 'Make a flat tabletop shape: bend the big knuckles, keep fingers straight.'
       }
     ]
   },
@@ -165,46 +181,54 @@ const CONDITION_GUIDES = {
       {
         id: 'wrist_flexion',
         name: 'Gesture 1: Wrist Flexion',
+        analogy: 'Think of Waving Fingers Down to the Floor ⬇️',
+        caption: 'Downward Wrist Bend',
         exerciseTitle: 'Wrist Flexion (Downward Mobility)',
-        goal: 'Re-establish volar wrist mobility, relieve post-immobilization radiocarpal stiffness, and stretch extensor tendons.',
+        goal: 'Gently bend your wrist downward to loosen stiff wrist joints after cast or brace removal.',
         step1: {
           icon: '✋',
-          title: '1. Neutral Forearm Position',
-          desc: 'Rest forearm steady on table with wrist straight and hand level facing the camera.'
+          title: '1. Rest Forearm Flat',
+          desc: 'Rest your forearm flat on a table with hand level facing the camera.'
         },
         step2: {
           icon: '⬇️',
-          title: '2. Gentle Downward Flexion',
-          desc: 'Smoothly bend your wrist downward toward the floor within a pain-free range, keeping fingers relaxed.'
+          title: '2. Bend Wrist Down',
+          desc: 'Slowly bend your wrist down toward the floor within a comfortable, pain-free range.'
         },
         step3: {
           icon: '✨',
-          title: '3. Return to Level Position',
-          desc: 'Bring hand back up in line with your forearm to complete +1 Rep.'
+          title: '3. Return to Level',
+          desc: 'Bring your hand back level with your forearm to count 1 rep.'
         },
-        liveTip: 'Bend gently from the wrist joint; keep forearm resting steady.'
+        doTip: 'Keep forearm resting steady; bend smoothly only from the wrist.',
+        dontTip: 'Do not push through sharp pain; stop where it feels tight.',
+        liveTip: 'Wave hand gently downward from the wrist; keep forearm resting steady.'
       },
       {
         id: 'wrist_extension',
         name: 'Gesture 2: Wrist Extension',
+        analogy: 'Think of Pointing Fingers Up to the Ceiling ⬆️',
+        caption: 'Upward Wrist Lift',
         exerciseTitle: 'Wrist Extension (Upward Lift)',
-        goal: 'Restore functional dorsiflexion Range of Motion (ROM) necessary for pushing, gripping, and everyday weight bearing.',
+        goal: 'Lift your wrist upward to rebuild pushing, gripping, and everyday hand strength.',
         step1: {
           icon: '✋',
-          title: '1. Neutral Level Hand',
-          desc: 'Hold forearm steady with hand flat in line with the wrist facing camera.'
+          title: '1. Level Hand Position',
+          desc: 'Hold forearm steady with hand flat and straight facing camera.'
         },
         step2: {
           icon: '⬆️',
-          title: '2. Upward Wrist Extension',
-          desc: 'Gently lift your hand upward toward the ceiling, bending at the wrist joint without moving your forearm.'
+          title: '2. Lift Hand Upward',
+          desc: 'Gently lift your hand up toward the ceiling, bending backwards from the wrist.'
         },
         step3: {
           icon: '✨',
-          title: '3. Return to Neutral Alignment',
-          desc: 'Lower hand back to the horizontal resting position to register +1 Rep.'
+          title: '3. Lower Back Level',
+          desc: 'Lower hand back to the straight horizontal position to register 1 rep.'
         },
-        liveTip: 'Lift hand upward using the wrist muscles without twisting your elbow.'
+        doTip: 'Lift gently from the wrist muscles without lifting your elbow.',
+        dontTip: 'Do not lift your entire forearm off the table; keep arm steady.',
+        liveTip: 'Point fingers up to the ceiling using your wrist muscles.'
       }
     ]
   },
@@ -217,46 +241,54 @@ const CONDITION_GUIDES = {
       {
         id: 'thumb_index_touch',
         name: 'Gesture 1: Thumb-to-Index Fingertip Touch',
+        analogy: 'Think of Making the "OK" Sign 👌',
+        caption: 'Thumb-to-Index "OK" Circle',
         exerciseTitle: 'Thumb-to-Index Fingertip Touch (O-Pinch)',
-        goal: 'Mobilize the median nerve through the carpal canal and rebuild fine motor tip-to-tip precision coordination.',
+        goal: 'Gently glide the healing nerve through your wrist and rebuild fine fingertip precision coordination.',
         step1: {
           icon: '🖐️',
           title: '1. Open Hand Spread',
-          desc: 'Hold hand facing camera with thumb and index finger opened apart.'
+          desc: 'Hold hand upright with thumb and index finger opened apart.'
         },
         step2: {
           icon: '👌',
-          title: '2. Fingertip Circle Touch',
-          desc: 'Bring the tip of your thumb and the tip of your index finger together to form a gentle circle (O-shape).'
+          title: '2. Form "OK" Circle',
+          desc: 'Touch thumb tip and index fingertip together to form a round circle (O-shape).'
         },
         step3: {
           icon: '✨',
-          title: '3. Release & Re-Open',
-          desc: 'Separate thumb and index finger back apart fully to complete +1 Rep.'
+          title: '3. Open Apart to Count',
+          desc: 'Separate thumb and index back apart to complete 1 repetition.'
         },
-        liveTip: 'Touch tips gently into an O-shape; do not squeeze or press hard.'
+        doTip: 'Touch fingertips lightly to form a round O-shape circle.',
+        dontTip: 'Do not pinch or squeeze hard; a soft touch is best.',
+        liveTip: 'Make a gentle "OK" circle by touching thumb and index tips together.'
       },
       {
         id: 'thumb_little_touch',
         name: 'Gesture 2: Thumb-to-Little Finger Touch',
-        exerciseTitle: 'Thumb-to-Little Finger Touch (Full Palmar Opposition)',
-        goal: 'Promote full thenar muscle opposition across the carpal arch, stretching the healing transverse carpal retinaculum.',
+        analogy: 'Think of Reaching Across to Tap your Pinky 🤙',
+        caption: 'Cross-Palm Pinky Reach',
+        exerciseTitle: 'Thumb-to-Little Finger Touch (Full Opposition)',
+        goal: 'Stretch the palm tissues and strengthen thumb muscles for opening jars and holding objects.',
         step1: {
           icon: '🖐️',
           title: '1. Open Wide Palm',
-          desc: 'Open palm facing camera with thumb extended comfortably outward.'
+          desc: 'Open your hand wide with thumb extended outward.'
         },
         step2: {
           icon: '🤙',
-          title: '2. Cross-Palm Opposition',
+          title: '2. Reach to Pinky Tip',
           desc: 'Reach your thumb tip across your palm to gently touch the tip of your little (pinky) finger.'
         },
         step3: {
           icon: '✨',
-          title: '3. Open Hand Return',
-          desc: 'Extend thumb all the way back out to the open palm position to record +1 Rep.'
+          title: '3. Stretch Back Open',
+          desc: 'Open thumb all the way back out to the wide open palm to record 1 rep.'
         },
-        liveTip: 'Reach across the palm smoothly within your comfortable range.'
+        doTip: 'Reach across palm smoothly within your comfortable stretch range.',
+        dontTip: 'Do not strain or force thumb if you cannot reach all the way yet.',
+        liveTip: 'Reach your thumb across your palm to tap your pinky tip.'
       }
     ]
   },
@@ -269,46 +301,54 @@ const CONDITION_GUIDES = {
       {
         id: 'finger_spread_close',
         name: 'Gesture 1: Finger Spreading and Closing',
-        exerciseTitle: 'Finger Spreading and Closing (Abduction/Adduction Fan)',
-        goal: 'Activate dorsal and palmar interossei muscles, expand web spaces, and relieve global morning hand stiffness.',
+        analogy: 'Think of a Starfish Opening & Closing 🌟',
+        caption: 'Starfish Finger Spread',
+        exerciseTitle: 'Finger Spreading and Closing (Starfish Fan)',
+        goal: 'Relieve morning hand stiffness, stretch finger web spaces, and improve overall hand flexibility.',
         step1: {
           icon: '✊',
-          title: '1. Fingers Closed Together',
-          desc: 'Hold hand facing camera with all fingers held straight and pressed gently side-by-side.'
+          title: '1. Fingers Side-by-Side',
+          desc: 'Hold hand upright with all fingers straight and pressed gently together.'
         },
         step2: {
           icon: '🖐️',
-          title: '2. Wide Starburst Spread',
-          desc: 'Spread all five fingers as wide apart as possible into a full starburst abduction fan.'
+          title: '2. Spread Wide Open',
+          desc: 'Spread all five fingers as wide apart as possible like a shining star.'
         },
         step3: {
           icon: '✨',
-          title: '3. Close Fingers & Count',
-          desc: 'Bring fingers back together into a closed straight palm to complete +1 Rep.'
+          title: '3. Bring Back Together',
+          desc: 'Bring fingers back side-by-side to complete 1 repetition.'
         },
-        liveTip: 'Spread fingers wide like a star, then bring them back together.'
+        doTip: 'Open fingers as wide as comfortably possible like a fan.',
+        dontTip: 'Do not curl fingers inward; keep fingers flat while spreading.',
+        liveTip: 'Spread fingers wide like a star, then close them side-by-side.'
       },
       {
         id: 'thumb_opposition',
         name: 'Gesture 2: Thumb Opposition',
+        analogy: 'Think of Counting 1-2-3-4 on Each Fingertip 👍',
+        caption: 'Sequential Fingertip Tap',
         exerciseTitle: 'Thumb Opposition (Sequential Finger Touch)',
-        goal: 'Stimulate joint fluid circulation across all metacarpal and digital joints while maintaining thumb dexterity.',
+        goal: 'Stimulate healthy joint fluid and restore thumb dexterity across all your fingers.',
         step1: {
           icon: '🖐️',
-          title: '1. Open Palm Facing Camera',
-          desc: 'Hold hand upright with palm facing camera and fingers comfortably relaxed.'
+          title: '1. Open Hand Ready',
+          desc: 'Hold hand upright with palm facing camera and fingers relaxed.'
         },
         step2: {
           icon: '👍',
-          title: '2. Sequential Fingertip Tap',
-          desc: 'Touch your thumb tip to each finger tip in sequence (Index ➡️ Middle ➡️ Ring ➡️ Little).'
+          title: '2. Tap Index ➡️ Pinky',
+          desc: 'Tap your thumb tip to each fingertip in order: Index (1) ➡️ Middle (2) ➡️ Ring (3) ➡️ Pinky (4).'
         },
         step3: {
           icon: '✨',
-          title: '3. Full Hand Stretch',
-          desc: 'Open hand wide after completing the sequence to record +1 Rep.'
+          title: '3. Open Wide to Count',
+          desc: 'Open your hand wide after tapping all four fingers to record 1 rep.'
         },
-        liveTip: 'Touch thumb smoothly to each fingertip in sequence, then open wide.'
+        doTip: 'Tap each fingertip gently and rhythmically one by one.',
+        dontTip: 'Do not rush; make sure thumb clearly touches each finger.',
+        liveTip: 'Tap thumb gently to each fingertip: 1 (Index) ➡️ 2 ➡️ 3 ➡️ 4 (Pinky).'
       }
     ]
   }
@@ -316,6 +356,139 @@ const CONDITION_GUIDES = {
 
 let currentActiveConditionKey = 'flexor';
 let currentActiveGestureIndex = 0;
+let guideOverlayEnabled = true;
+
+function getGestureSVG(gestureId) {
+  switch (gestureId) {
+    case 'hook_fist':
+      return `<svg viewBox="0 0 140 110" xmlns="http://www.w3.org/2000/svg">
+        <rect width="140" height="110" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+        <path d="M 60 100 L 60 75 L 80 75 L 80 100 Z" fill="#e0f2fe" stroke="#0284c7" stroke-width="2.5"/>
+        <path d="M 52 75 L 52 48 L 88 48 L 88 75 Z" fill="#bae6fd" stroke="#0284c7" stroke-width="2.5"/>
+        <path d="M 52 68 Q 40 65 42 55 Q 46 50 52 56" fill="#e0f2fe" stroke="#0284c7" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M 58 48 L 58 35 Q 58 24 68 24 L 72 24 Q 76 24 76 35 L 76 42 Q 76 46 72 46" fill="none" stroke="#0284c7" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M 86 28 Q 98 34 94 48" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round"/>
+        <polygon points="94,54 88,44 98,46" fill="#10b981"/>
+        <text x="70" y="103" text-anchor="middle" font-size="8.5" font-weight="700" fill="#0369a1">HOOK FINGERTIPS</text>
+      </svg>`;
+    case 'individual_bend':
+      return `<svg viewBox="0 0 140 110" xmlns="http://www.w3.org/2000/svg">
+        <rect width="140" height="110" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+        <rect x="52" y="55" width="36" height="38" rx="4" fill="#bae6fd" stroke="#0284c7" stroke-width="2.5"/>
+        <path d="M 52 75 Q 40 70 42 60 Q 48 56 52 65" fill="#e0f2fe" stroke="#0284c7" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="68" y1="55" x2="68" y2="20" stroke="#0284c7" stroke-width="4.5" stroke-linecap="round"/>
+        <line x1="76" y1="55" x2="76" y2="24" stroke="#0284c7" stroke-width="4.5" stroke-linecap="round"/>
+        <line x1="84" y1="55" x2="84" y2="30" stroke="#0284c7" stroke-width="4" stroke-linecap="round"/>
+        <path d="M 60 55 L 60 40 Q 60 34 54 34 L 52 42" fill="none" stroke="#10b981" stroke-width="4.5" stroke-linecap="round"/>
+        <circle cx="53" cy="38" r="4" fill="#10b981"/>
+        <text x="70" y="103" text-anchor="middle" font-size="8.5" font-weight="700" fill="#0369a1">BEND ONE FINGER</text>
+      </svg>`;
+    case 'straight_extension':
+      return `<svg viewBox="0 0 140 110" xmlns="http://www.w3.org/2000/svg">
+        <rect width="140" height="110" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+        <rect x="52" y="52" width="36" height="42" rx="4" fill="#bae6fd" stroke="#0284c7" stroke-width="2.5"/>
+        <path d="M 46 72 Q 34 62 38 46 Q 44 44 48 56" fill="#e0f2fe" stroke="#0284c7" stroke-width="3" stroke-linecap="round"/>
+        <line x1="56" y1="52" x2="56" y2="18" stroke="#0284c7" stroke-width="4" stroke-linecap="round"/>
+        <line x1="64" y1="52" x2="64" y2="14" stroke="#0284c7" stroke-width="4" stroke-linecap="round"/>
+        <line x1="72" y1="52" x2="72" y2="16" stroke="#0284c7" stroke-width="4" stroke-linecap="round"/>
+        <line x1="80" y1="52" x2="80" y2="24" stroke="#0284c7" stroke-width="4" stroke-linecap="round"/>
+        <line x1="64" y1="8" x2="64" y2="3" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
+        <line x1="48" y1="12" x2="43" y2="8" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
+        <line x1="80" y1="12" x2="85" y2="8" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
+        <text x="70" y="103" text-anchor="middle" font-size="8.5" font-weight="700" fill="#0369a1">OPEN FLAT PALM</text>
+      </svg>`;
+    case 'tabletop':
+      return `<svg viewBox="0 0 140 110" xmlns="http://www.w3.org/2000/svg">
+        <rect width="140" height="110" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+        <path d="M 74 95 L 74 50" stroke="#0284c7" stroke-width="10" stroke-linecap="round"/>
+        <path d="M 74 50 L 32 50" stroke="#0284c7" stroke-width="9" stroke-linecap="round"/>
+        <path d="M 66 50 L 66 58 L 74 58" fill="none" stroke="#10b981" stroke-width="2"/>
+        <text x="60" y="44" font-size="8" font-weight="700" fill="#10b981">90°</text>
+        <line x1="30" y1="42" x2="76" y2="42" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3,2"/>
+        <text x="70" y="103" text-anchor="middle" font-size="8.5" font-weight="700" fill="#0369a1">FLAT TABLETOP ROOF</text>
+      </svg>`;
+    case 'wrist_flexion':
+      return `<svg viewBox="0 0 140 110" xmlns="http://www.w3.org/2000/svg">
+        <rect width="140" height="110" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+        <path d="M 25 50 L 68 50" stroke="#0284c7" stroke-width="9" stroke-linecap="round"/>
+        <path d="M 68 50 L 98 78" stroke="#0284c7" stroke-width="8" stroke-linecap="round"/>
+        <line x1="20" y1="56" x2="70" y2="56" stroke="#94a3b8" stroke-width="2"/>
+        <path d="M 76 42 Q 95 44 98 62" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round"/>
+        <polygon points="101,68 93,60 102,58" fill="#10b981"/>
+        <text x="70" y="103" text-anchor="middle" font-size="8.5" font-weight="700" fill="#0369a1">WAVE WRIST DOWN</text>
+      </svg>`;
+    case 'wrist_extension':
+      return `<svg viewBox="0 0 140 110" xmlns="http://www.w3.org/2000/svg">
+        <rect width="140" height="110" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+        <path d="M 25 65 L 68 65" stroke="#0284c7" stroke-width="9" stroke-linecap="round"/>
+        <path d="M 68 65 L 98 32" stroke="#0284c7" stroke-width="8" stroke-linecap="round"/>
+        <line x1="20" y1="71" x2="70" y2="71" stroke="#94a3b8" stroke-width="2"/>
+        <path d="M 76 72 Q 96 68 98 46" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round"/>
+        <polygon points="101,40 93,48 102,50" fill="#10b981"/>
+        <text x="70" y="103" text-anchor="middle" font-size="8.5" font-weight="700" fill="#0369a1">LIFT WRIST UP</text>
+      </svg>`;
+    case 'thumb_index_touch':
+      return `<svg viewBox="0 0 140 110" xmlns="http://www.w3.org/2000/svg">
+        <rect width="140" height="110" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+        <rect x="56" y="58" width="32" height="36" rx="4" fill="#bae6fd" stroke="#0284c7" stroke-width="2.5"/>
+        <line x1="72" y1="58" x2="72" y2="24" stroke="#0284c7" stroke-width="4" stroke-linecap="round"/>
+        <line x1="80" y1="58" x2="80" y2="28" stroke="#0284c7" stroke-width="4" stroke-linecap="round"/>
+        <line x1="88" y1="58" x2="88" y2="36" stroke="#0284c7" stroke-width="3.5" stroke-linecap="round"/>
+        <ellipse cx="56" cy="42" rx="14" ry="12" fill="none" stroke="#10b981" stroke-width="4"/>
+        <text x="56" y="45" text-anchor="middle" font-size="8" font-weight="800" fill="#10b981">OK</text>
+        <text x="70" y="103" text-anchor="middle" font-size="8.5" font-weight="700" fill="#0369a1">FORM 'OK' CIRCLE</text>
+      </svg>`;
+    case 'thumb_little_touch':
+      return `<svg viewBox="0 0 140 110" xmlns="http://www.w3.org/2000/svg">
+        <rect width="140" height="110" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+        <rect x="52" y="55" width="38" height="38" rx="4" fill="#bae6fd" stroke="#0284c7" stroke-width="2.5"/>
+        <line x1="60" y1="55" x2="60" y2="22" stroke="#0284c7" stroke-width="4" stroke-linecap="round"/>
+        <line x1="68" y1="55" x2="68" y2="18" stroke="#0284c7" stroke-width="4" stroke-linecap="round"/>
+        <line x1="76" y1="55" x2="76" y2="22" stroke="#0284c7" stroke-width="4" stroke-linecap="round"/>
+        <line x1="84" y1="55" x2="84" y2="34" stroke="#0284c7" stroke-width="3.5" stroke-linecap="round"/>
+        <path d="M 46 72 Q 56 64 80 38" fill="none" stroke="#10b981" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="82" cy="36" r="4.5" fill="#f59e0b"/>
+        <text x="70" y="103" text-anchor="middle" font-size="8.5" font-weight="700" fill="#0369a1">REACH TO PINKY TIP</text>
+      </svg>`;
+    case 'finger_spread_close':
+      return `<svg viewBox="0 0 140 110" xmlns="http://www.w3.org/2000/svg">
+        <rect width="140" height="110" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+        <rect x="54" y="58" width="32" height="36" rx="4" fill="#bae6fd" stroke="#0284c7" stroke-width="2.5"/>
+        <line x1="54" y1="62" x2="30" y2="44" stroke="#0284c7" stroke-width="4" stroke-linecap="round"/>
+        <line x1="58" y1="58" x2="42" y2="22" stroke="#0284c7" stroke-width="4" stroke-linecap="round"/>
+        <line x1="70" y1="58" x2="70" y2="14" stroke="#0284c7" stroke-width="4" stroke-linecap="round"/>
+        <line x1="82" y1="58" x2="98" y2="22" stroke="#0284c7" stroke-width="4" stroke-linecap="round"/>
+        <line x1="86" y1="62" x2="110" y2="44" stroke="#0284c7" stroke-width="4" stroke-linecap="round"/>
+        <path d="M 38 32 Q 52 24 64 18" fill="none" stroke="#10b981" stroke-width="1.8" stroke-dasharray="2,2"/>
+        <path d="M 76 18 Q 88 24 102 32" fill="none" stroke="#10b981" stroke-width="1.8" stroke-dasharray="2,2"/>
+        <text x="70" y="103" text-anchor="middle" font-size="8.5" font-weight="700" fill="#0369a1">SPREAD LIKE A STAR</text>
+      </svg>`;
+    case 'thumb_opposition':
+      return `<svg viewBox="0 0 140 110" xmlns="http://www.w3.org/2000/svg">
+        <rect width="140" height="110" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+        <rect x="52" y="58" width="36" height="36" rx="4" fill="#bae6fd" stroke="#0284c7" stroke-width="2.5"/>
+        <line x1="58" y1="58" x2="58" y2="30" stroke="#0284c7" stroke-width="3.5" stroke-linecap="round"/>
+        <circle cx="58" cy="22" r="5" fill="#10b981"/>
+        <text x="58" y="25" text-anchor="middle" font-size="7" font-weight="800" fill="#ffffff">1</text>
+        <line x1="68" y1="58" x2="68" y2="28" stroke="#0284c7" stroke-width="3.5" stroke-linecap="round"/>
+        <circle cx="68" cy="18" r="5" fill="#0284c7"/>
+        <text x="68" y="21" text-anchor="middle" font-size="7" font-weight="800" fill="#ffffff">2</text>
+        <line x1="78" y1="58" x2="78" y2="30" stroke="#0284c7" stroke-width="3.5" stroke-linecap="round"/>
+        <circle cx="78" cy="22" r="5" fill="#0284c7"/>
+        <text x="78" y="25" text-anchor="middle" font-size="7" font-weight="800" fill="#ffffff">3</text>
+        <line x1="88" y1="58" x2="88" y2="38" stroke="#0284c7" stroke-width="3.5" stroke-linecap="round"/>
+        <circle cx="88" cy="30" r="5" fill="#0284c7"/>
+        <text x="88" y="33" text-anchor="middle" font-size="7" font-weight="800" fill="#ffffff">4</text>
+        <path d="M 44 75 Q 46 50 56 27" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="3,2"/>
+        <text x="70" y="103" text-anchor="middle" font-size="8.5" font-weight="700" fill="#0369a1">TAP 1 ➡️ 2 ➡️ 3 ➡️ 4</text>
+      </svg>`;
+    default:
+      return `<svg viewBox="0 0 140 110" xmlns="http://www.w3.org/2000/svg">
+        <rect width="140" height="110" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+        <text x="70" y="55" text-anchor="middle" font-size="10" font-weight="700" fill="#0369a1">HAND GESTURE</text>
+      </svg>`;
+  }
+}
 
 function getConditionKey(surgeryType) {
   if (!surgeryType) return 'general';
@@ -380,6 +553,22 @@ function updateExerciseGuide(surgeryTypeOrKey, gestureIndex = 0) {
     btnG2.className = `btn-gesture ${currentActiveGestureIndex === 1 ? 'active' : ''}`;
   }
 
+  // Update Everyday Analogy Callout
+  const analogyEl = document.getElementById('guide-analogy-text');
+  if (analogyEl) {
+    analogyEl.textContent = currentGesture.analogy || 'Perform the prescribed hand gesture';
+  }
+
+  // Update Visual Posture Diagram (SVG) & Caption
+  const svgWrap = document.getElementById('guide-posture-svg');
+  if (svgWrap) {
+    svgWrap.innerHTML = getGestureSVG(currentGesture.id);
+  }
+  const captionEl = document.getElementById('guide-posture-caption');
+  if (captionEl) {
+    captionEl.textContent = currentGesture.caption || currentGesture.name;
+  }
+
   const goalEl = document.getElementById('guide-condition-goal');
   if (goalEl) goalEl.innerHTML = `<strong>Rehabilitation Goal:</strong> ${currentGesture.goal}`;
 
@@ -412,6 +601,12 @@ function updateExerciseGuide(surgeryTypeOrKey, gestureIndex = 0) {
   const s3Desc = document.getElementById('guide-step-3-desc');
   if (s3Desc) s3Desc.innerHTML = currentGesture.step3.desc;
 
+  // Update Do's & Don'ts
+  const doEl = document.getElementById('guide-do-text');
+  if (doEl) doEl.textContent = currentGesture.doTip || 'Move slowly and smoothly.';
+  const dontEl = document.getElementById('guide-dont-text');
+  if (dontEl) dontEl.textContent = currentGesture.dontTip || 'Do not push through sharp pain.';
+
   // Sync selector dropdown
   const selectEl = document.getElementById('guide-condition-select');
   if (selectEl && selectEl.value !== key) {
@@ -423,6 +618,111 @@ function updateExerciseGuide(surgeryTypeOrKey, gestureIndex = 0) {
   if (actionText && (!webcamRunning && !simulationRunning)) {
     actionText.textContent = `Camera ready for ${currentGesture.name}. ${currentGesture.liveTip}`;
   }
+}
+
+// --- Live Camera Target Silhouette Overlay ---
+
+function drawTargetGuideOverlay(ctx, width, height, activeGesture, isHandPresent, angle, isCurled) {
+  if (!activeGesture || !guideOverlayEnabled) return;
+
+  ctx.save();
+
+  // 1. Target alignment bounding box in center
+  const boxW = Math.min(270, width * 0.44);
+  const boxH = Math.min(320, height * 0.70);
+  const boxX = (width - boxW) / 2;
+  const boxY = (height - boxH) / 2 + 10;
+
+  // Frame styling: Emerald green if hand is aligned, Sky blue if waiting
+  const strokeColor = isHandPresent 
+    ? (isCurled ? 'rgba(16, 185, 129, 0.95)' : 'rgba(56, 189, 248, 0.9)')
+    : 'rgba(148, 163, 184, 0.6)';
+  const fillColor = isHandPresent
+    ? (isCurled ? 'rgba(16, 185, 129, 0.1)' : 'rgba(56, 189, 248, 0.06)')
+    : 'rgba(15, 23, 42, 0.04)';
+
+  ctx.lineWidth = 2.5;
+  ctx.strokeStyle = strokeColor;
+  ctx.fillStyle = fillColor;
+
+  // Draw rounded target guide box
+  ctx.beginPath();
+  if (ctx.roundRect) {
+    ctx.roundRect(boxX, boxY, boxW, boxH, 14);
+  } else {
+    ctx.rect(boxX, boxY, boxW, boxH);
+  }
+  ctx.fill();
+  ctx.setLineDash([8, 6]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // 2. Wrist rest baseline marker at bottom of box
+  const wristY = boxY + boxH - 26;
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(boxX + 24, wristY);
+  ctx.lineTo(boxX + boxW - 24, wristY);
+  ctx.stroke();
+
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+  ctx.font = '11px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Align Wrist Base Here', boxX + boxW / 2, wristY + 16);
+
+  // 3. Top Floating Target Badge (Analogy & Cue)
+  const pillW = Math.min(width - 30, 360);
+  const pillH = 30;
+  const pillX = (width - pillW) / 2;
+  const pillY = Math.max(10, boxY - 36);
+
+  ctx.fillStyle = 'rgba(15, 23, 42, 0.82)';
+  ctx.beginPath();
+  if (ctx.roundRect) {
+    ctx.roundRect(pillX, pillY, pillW, pillH, 8);
+  } else {
+    ctx.rect(pillX, pillY, pillW, pillH);
+  }
+  ctx.fill();
+  ctx.strokeStyle = strokeColor;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 11px sans-serif';
+  ctx.textAlign = 'center';
+  const gestureLabel = activeGesture.name ? activeGesture.name.split(':')[1] || activeGesture.name : 'Exercise';
+  ctx.fillText(`Target: ${gestureLabel.trim()} (${activeGesture.analogy || ''})`, pillX + pillW / 2, pillY + 19);
+
+  // 4. Live Alignment Cue text at bottom of frame
+  let cueText = 'Place hand inside guide frame';
+  let cueColor = '#e2e8f0';
+  if (isHandPresent) {
+    if (isCurled) {
+      cueText = '✓ Position held! Now open hand back up';
+      cueColor = '#4ade80';
+    } else {
+      cueText = `Ready! ${activeGesture.analogy || 'Begin movement'}`;
+      cueColor = '#38bdf8';
+    }
+  }
+
+  ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+  ctx.beginPath();
+  const cueW = Math.min(width - 40, 310);
+  if (ctx.roundRect) {
+    ctx.roundRect((width - cueW) / 2, boxY + boxH + 8, cueW, 26, 6);
+  } else {
+    ctx.rect((width - cueW) / 2, boxY + boxH + 8, cueW, 26);
+  }
+  ctx.fill();
+
+  ctx.fillStyle = cueColor;
+  ctx.font = 'bold 11px sans-serif';
+  ctx.fillText(cueText, width / 2, boxY + boxH + 25);
+
+  ctx.restore();
 }
 
 // --- Mathematical Helper Functions ---
@@ -563,9 +863,11 @@ async function renderVideoLoop() {
     canvasElement.height = videoElement.videoHeight || 480;
     canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
 
+    let handDetected = false;
     if (handLandmarker) {
       const results = handLandmarker.detectForVideo(videoElement, performance.now());
       if (results && results.landmarks && results.landmarks.length > 0) {
+        handDetected = true;
         const lm = results.landmarks[0];
         drawLandmarks(canvasCtx, lm, canvasElement.width, canvasElement.height);
 
@@ -579,6 +881,10 @@ async function renderVideoLoop() {
         updateRepCounter(currentAngle);
         updateVisionUI();
       }
+    }
+
+    if (guideOverlayEnabled) {
+      drawTargetGuideOverlay(canvasCtx, canvasElement.width, canvasElement.height, getActiveGesture(), handDetected, currentAngle, hasCurled);
     }
   }
 
@@ -749,6 +1055,10 @@ function drawSimulatedHand(ctx, width, height, angle) {
   ctx.font = '14px sans-serif';
   ctx.fillText(`Simulated Finger Curl: ${Math.round(angle)}° (Vertex PIP)`, 20, 30);
   ctx.restore();
+
+  if (guideOverlayEnabled) {
+    drawTargetGuideOverlay(ctx, width, height, getActiveGesture(), true, currentAngle, hasCurled);
+  }
 }
 
 // --- Diary NLP Handlers ---
@@ -1904,6 +2214,17 @@ window.addEventListener('DOMContentLoaded', async () => {
   const btnG2 = document.getElementById('btn-gesture-2');
   if (btnG2) {
     btnG2.addEventListener('click', () => updateExerciseGuide(currentActiveConditionKey, 1));
+  }
+
+  // Toggle Camera Target Alignment Guide
+  const btnToggleGuide = document.getElementById('btn-toggle-guide-overlay');
+  if (btnToggleGuide) {
+    btnToggleGuide.addEventListener('click', () => {
+      guideOverlayEnabled = !guideOverlayEnabled;
+      btnToggleGuide.textContent = guideOverlayEnabled ? '🎯 Target Guide: ON' : '🎯 Target Guide: OFF';
+      btnToggleGuide.classList.toggle('btn-primary', guideOverlayEnabled);
+      btnToggleGuide.classList.toggle('btn-outline', !guideOverlayEnabled);
+    });
   }
 
   // Pre-seed default exercise guide
