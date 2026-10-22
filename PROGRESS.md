@@ -14,4 +14,5 @@
 - [x] 13. Final Project Report compilation: verified all table metrics, filled Tables 4.4 & 4.5, embedded System Architecture (Fig 3.1), generated Word Cloud & Bigram Association Graph from real project data, embedded all UI screenshots and empirical plots into docs/HandRehab_AI_Project_Report.docx.
 - [x] 14. Integrated "Today's Session Ready" box and save actions directly into Step 1: Daily Rehab Diary with real-time 6-metric summary, day advance/update controls, Day 0 baseline handling, and automated NLP analysis on direct save.
 - [x] 15. Enhanced registration condition selection with plain-English descriptions & dynamic hint card; adapted Step 2 Camera Exercise Tracker to provide condition-specific guided exercises (rehab goals, 3-step cues, and live clinical tips) tailored to each patient's selected surgery.
+- [x] 16. Fixed uncaught JavaScript ReferenceError (undefined 'webcamStream' replaced with 'webcamRunning') in updateExerciseGuide that halted execution on page load and blocked Sign In / Quick Demo submissions.
 
