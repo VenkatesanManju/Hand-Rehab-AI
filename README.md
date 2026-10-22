@@ -1,8 +1,11 @@
-# AI-Based Hand Rehabilitation Recovery Monitoring System
-NLP course project: diary NLP (BiLSTM + attention), RNN/LSTM/GRU/BiLSTM comparison,
-recovery-trend forecasting, and a MediaPipe exercise-form demo.
+# HandRehab-AI: A Multimodal Framework Fusing Attentive Patient Diaries and Markerless Joint Kinematics for Longitudinal Telerehabilitation Monitoring
 
-Full plan: `docs/PROJECT_PLAN.md`. Build scope: `SCOPE.md`. Agent rules: `AGENTS.md`.
+> **Official Conference Paper Title:** *HandRehab-AI: A Multimodal Framework Fusing Attentive Patient Diaries and Markerless Joint Kinematics for Longitudinal Telerehabilitation Monitoring*  
+> **Subtitle:** *Integrating Explainable Natural Language Processing with Real-Time Edge Vision for Post-Surgical Recovery Forecasting and Trajectory Anomaly Detection*
+
+NLP and Multimodal Deep Learning Project: patient diary NLP (BiLSTM + additive attention with causal token occlusion), systematic recurrent comparison (RNN/LSTM/GRU/BiLSTM), longitudinal 14-day recovery trend forecasting (plateau & relapse detection), and offline browser-based MediaPipe hand kinematics.
+
+Full plan: `docs/PROJECT_PLAN.md`. Build scope: `SCOPE.md`. Agent rules: `AGENTS.md`. Detailed report: `docs/REPORT_NOTES.md`.
 
 ## Setup
 ```bash

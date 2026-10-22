@@ -10,4 +10,5 @@
 - [x] 9. Flask API backend (app/backend/) & HTML/CSS/JS dashboard (app/frontend/)
 - [x] 10. Report tables/plots and presentation outline
 - [x] 11. Patient-friendly Step 3 Recovery Progress overhaul: 3 real-data charts (Pain/Stiffness, ROM, Mobility/Grip), 6 recovery summary cards, ROM educational guide, 7/14-day history filters, and separated AI estimates.
+- [x] 12. Conference paper title and metadata added to documentation (README.md & docs/REPORT_NOTES.md).
 

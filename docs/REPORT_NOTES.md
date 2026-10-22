@@ -1,4 +1,9 @@
-# HandRehab AI — Comprehensive Project Report Notes
+# HandRehab-AI: A Multimodal Framework Fusing Attentive Patient Diaries and Markerless Joint Kinematics for Longitudinal Telerehabilitation Monitoring
+
+> **Proposed Conference Paper Title:**  
+> *HandRehab-AI: A Multimodal Framework Fusing Attentive Patient Diaries and Markerless Joint Kinematics for Longitudinal Telerehabilitation Monitoring*  
+> **Running Head (Short Title):** *Multimodal Hand Telerehabilitation Monitoring via NLP and Markerless Kinematics*  
+> **Target Venues:** IEEE EMBC (Biomedical & Health Informatics) / IEEE BHI / ACM CHIL / BioNLP
 
 > **Clinical Notice & Regulatory Disclaimer:**  
 > This system is designed as an objective rehabilitation monitoring aid, **not a diagnostic medical device**. All diary datasets and longitudinal recovery curves utilized in training and benchmarking are synthetic and simulated; no clinical claims of diagnostic accuracy or treatment efficacy are made. Alerts systematically instruct patients: *"Consult your physiotherapist"*.
