@@ -744,9 +744,6 @@ function drawTargetGuideOverlay(ctx, width, height, activeGesture, isHandPresent
   ctx.restore();
 }
 
-  ctx.restore();
-}
-
 // --- Mathematical Helper Functions ---
 
 function computeAngle3D(a, b, c) {
