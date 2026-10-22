@@ -2103,34 +2103,49 @@ function renderHistoryTable(records) {
 // --- User Authentication & History Fetching ---
 
 async function loadUserSession(user) {
-  currentUser = user;
-  sessionStorage.setItem('handrehab_user', JSON.stringify(user));
-
-  // Update Header UI
-  document.getElementById('display-user-name').textContent = user.full_name;
-  document.getElementById('display-user-surgery').textContent = user.surgery_type;
-
-  // Tailor Camera Exercise Guide to Patient's Rehab Condition
-  updateExerciseGuide(user.surgery_type);
-
-  // Switch from Auth screen to Dashboard
-  document.getElementById('auth-screen').classList.add('hidden');
-  document.getElementById('dashboard-app').classList.remove('hidden');
-
-  // Fetch Patient History from SQLite Database
   try {
-    const res = await fetch(`/api/user/history?user_id=${user.id}`);
-    if (res.ok) {
-      const data = await res.json();
-      patientHistory = data.records || [];
-      updateRecoverySummaryCards(patientHistory);
-      updateRecoveryCharts(patientHistory);
-      renderHistoryTable(patientHistory);
-      requestTrendAnalysis(patientHistory);
-      updateDayLabels();
+    currentUser = user;
+    sessionStorage.setItem('handrehab_user', JSON.stringify(user));
+
+    // Update Header UI
+    const nameEl = document.getElementById('display-user-name');
+    if (nameEl) nameEl.textContent = user.full_name || 'Patient';
+    const surgEl = document.getElementById('display-user-surgery');
+    if (surgEl) surgEl.textContent = user.surgery_type || 'Rehabilitation';
+
+    // Tailor Camera Exercise Guide to Patient's Rehab Condition
+    try {
+      updateExerciseGuide(user.surgery_type);
+    } catch (e) {
+      console.warn('Exercise guide update warning:', e);
     }
-  } catch (err) {
-    console.error('Error fetching user records:', err);
+
+    // Switch from Auth screen to Dashboard
+    const authScreen = document.getElementById('auth-screen');
+    const dashboardApp = document.getElementById('dashboard-app');
+    if (authScreen) authScreen.classList.add('hidden');
+    if (dashboardApp) dashboardApp.classList.remove('hidden');
+
+    // Fetch Patient History from SQLite Database
+    try {
+      const res = await fetch(`/api/user/history?user_id=${user.id}`);
+      if (res.ok) {
+        const data = await res.json();
+        patientHistory = data.records || [];
+        updateRecoverySummaryCards(patientHistory);
+        updateRecoveryCharts(patientHistory);
+        renderHistoryTable(patientHistory);
+        requestTrendAnalysis(patientHistory);
+        updateDayLabels();
+      }
+    } catch (err) {
+      console.error('Error fetching user records:', err);
+    }
+  } catch (outerErr) {
+    console.error('Fatal loadUserSession error:', outerErr);
+    // Guarantee dashboard transition
+    document.getElementById('auth-screen')?.classList.add('hidden');
+    document.getElementById('dashboard-app')?.classList.remove('hidden');
   }
 }
 
@@ -2339,11 +2354,31 @@ window.addEventListener('DOMContentLoaded', async () => {
     showAuthAlert('');
   });
 
-  // 2. Auth Submissions
+  // 2. Auth Submissions & Demo Helpers
+  const btnFillCreds = document.getElementById('btn-fill-credentials');
+  if (btnFillCreds) {
+    btnFillCreds.addEventListener('click', () => {
+      const u = document.getElementById('login-username');
+      const p = document.getElementById('login-password');
+      if (u) u.value = 'demo_patient';
+      if (p) p.value = 'rehab123';
+      showAuthAlert('Demo credentials filled! Click "Sign In to Dashboard" to proceed.', 'success');
+    });
+  }
+
   formLogin.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const username = document.getElementById('login-username').value.trim();
-    const password = document.getElementById('login-password').value.trim();
+    const uInput = document.getElementById('login-username');
+    const pInput = document.getElementById('login-password');
+    const username = uInput ? uInput.value.trim() : '';
+    const password = pInput ? pInput.value.trim() : '';
+
+    if (!username || !password) {
+      showAuthAlert('Please enter both username and password.', 'error');
+      return;
+    }
+
+    showAuthAlert('Signing in...', 'success');
 
     try {
       const res = await fetch('/api/auth/login', {
@@ -2353,9 +2388,10 @@ window.addEventListener('DOMContentLoaded', async () => {
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        loadUserSession(data.user);
+        showAuthAlert('');
+        await loadUserSession(data.user);
       } else {
-        showAuthAlert(data.error || 'Invalid credentials.', 'error');
+        showAuthAlert(data.error || 'Invalid credentials. Hint: use demo_patient / rehab123', 'error');
       }
     } catch (err) {
       showAuthAlert('Network error connecting to auth server: ' + err.message, 'error');
@@ -2388,8 +2424,14 @@ window.addEventListener('DOMContentLoaded', async () => {
   });
 
   // Quick Demo Shortcut
-  document.getElementById('btn-quick-demo').addEventListener('click', async () => {
+  document.getElementById('btn-quick-demo')?.addEventListener('click', async () => {
     try {
+      showAuthAlert('Signing in as Alex Mercer (Demo Patient)...', 'success');
+      const uInput = document.getElementById('login-username');
+      const pInput = document.getElementById('login-password');
+      if (uInput) uInput.value = 'demo_patient';
+      if (pInput) pInput.value = 'rehab123';
+
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -2397,10 +2439,13 @@ window.addEventListener('DOMContentLoaded', async () => {
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        loadUserSession(data.user);
+        showAuthAlert('');
+        await loadUserSession(data.user);
+      } else {
+        showAuthAlert('Quick demo login failed: ' + (data.error || 'Check server connection'), 'error');
       }
     } catch (err) {
-      alert('Could not start quick demo: ' + err.message);
+      showAuthAlert('Could not start quick demo: ' + err.message, 'error');
     }
   });
 

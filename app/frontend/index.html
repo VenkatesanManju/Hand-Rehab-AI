@@ -34,15 +34,27 @@
       <!-- Error / Status Message Alert -->
       <div id="auth-alert" class="auth-alert hidden"></div>
 
+      <!-- Demo Credentials Helper Pill -->
+      <div class="auth-demo-pill" id="demo-credentials-pill">
+        <div class="demo-pill-header">
+          <span>🔑 <strong>Demo Account (Ready to Test):</strong></span>
+          <button type="button" id="btn-fill-credentials" class="btn-fill-creds" title="Fill demo credentials">Fill In</button>
+        </div>
+        <div class="demo-pill-fields">
+          <span>Username: <strong class="cred-tag">demo_patient</strong></span>
+          <span>Password: <strong class="cred-tag">rehab123</strong></span>
+        </div>
+      </div>
+
       <!-- LOGIN FORM -->
       <form id="form-login" class="auth-form">
         <div class="form-group">
           <label for="login-username">Username</label>
-          <input type="text" id="login-username" placeholder="e.g. demo_patient" required autocomplete="username">
+          <input type="text" id="login-username" value="demo_patient" placeholder="e.g. demo_patient" required autocomplete="username">
         </div>
         <div class="form-group">
           <label for="login-password">Password</label>
-          <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password">
+          <input type="password" id="login-password" value="rehab123" placeholder="••••••••" required autocomplete="current-password">
         </div>
         <button type="submit" class="btn btn-primary btn-block">Sign In to Dashboard</button>
         
