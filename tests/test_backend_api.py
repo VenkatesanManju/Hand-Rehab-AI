@@ -381,5 +381,59 @@ def test_diary_page_session_save_and_elements(client):
     assert [r["day"] for r in hist2["records"]] == [0, 1]
 
 
+def test_registration_and_camera_exercise_guidance(client):
+    """
+    Verifies that the registration form includes easy-to-understand plain English
+    condition descriptions, dynamic hint card, and that the Camera Exercise Tracker
+    adapts guided exercise instructions to the patient's selected condition.
+    """
+    # 1. HTML Verification: Plain-English options & dynamic hint card
+    res_index = client.get("/")
+    assert res_index.status_code == 200
+    html = res_index.data.decode("utf-8")
+
+    # Friendly option labels
+    assert "Palm / Finger Tendon Repair" in html
+    assert "Back of Hand / Finger Straightening" in html
+    assert "Broken Wrist Recovery (Distal Radius Fracture)" in html
+    assert "Carpal Tunnel Release" in html
+    assert "Broken Hand Bone Recovery" in html
+    assert "General Hand Mobility &amp; Stiffness" in html
+
+    # Registration Hint Card
+    assert 'id="reg-condition-info"' in html
+    assert 'id="reg-card-title"' in html
+    assert 'id="reg-card-desc"' in html
+    assert 'id="reg-card-exercise"' in html
+
+    # Camera Exercise Tracker Condition Guide Elements
+    assert 'id="guide-condition-badge"' in html
+    assert 'id="guide-condition-select"' in html
+    assert 'id="guide-exercise-title"' in html
+    assert 'id="guide-condition-goal"' in html
+    assert 'id="guide-step-1-title"' in html
+    assert 'id="guide-step-2-title"' in html
+    assert 'id="guide-step-3-title"' in html
+
+    # 2. CSS Verification
+    res_css = client.get("/style.css")
+    assert res_css.status_code == 200
+    css = res_css.data.decode("utf-8")
+    assert ".reg-condition-card" in css
+    assert ".guide-condition-pill" in css
+    assert ".guide-condition-select" in css
+    assert ".guide-goal-text" in css
+
+    # 3. JavaScript Verification
+    res_js = client.get("/app.js")
+    assert res_js.status_code == 200
+    js = res_js.data.decode("utf-8")
+    assert "CONDITION_GUIDES" in js
+    assert "updateRegistrationHint" in js
+    assert "updateExerciseGuide" in js
+    assert "getConditionKey" in js
+
+
+
 
 

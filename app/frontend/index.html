@@ -61,13 +61,24 @@
         <div class="form-group">
           <label for="reg-surgery">Rehab Condition / Surgery</label>
           <select id="reg-surgery">
-            <option value="Flexor Tendon Repair (Zone II)">Flexor Tendon Repair (Zone II)</option>
-            <option value="Extensor Tendon Repair">Extensor Tendon Repair</option>
-            <option value="Distal Radius Fracture Recovery">Distal Radius Fracture Recovery</option>
-            <option value="Carpal Tunnel Release Post-Op">Carpal Tunnel Release Post-Op</option>
-            <option value="Metacarpal Fracture Rehab">Metacarpal Fracture Rehab</option>
-            <option value="General Hand Mobility Rehabilitation">General Hand Mobility Rehabilitation</option>
+            <option value="Flexor Tendon Repair (Zone II)">Palm / Finger Tendon Repair (Flexor Tendon Zone II)</option>
+            <option value="Extensor Tendon Repair">Back of Hand / Finger Straightening (Extensor Tendon)</option>
+            <option value="Distal Radius Fracture Recovery">Broken Wrist Recovery (Distal Radius Fracture)</option>
+            <option value="Carpal Tunnel Release Post-Op">Carpal Tunnel Release (Nerve Decompression &amp; Recovery)</option>
+            <option value="Metacarpal Fracture Rehab">Broken Hand Bone Recovery (Metacarpal Fracture)</option>
+            <option value="General Hand Mobility Rehabilitation">General Hand Mobility &amp; Stiffness (Everyday Recovery)</option>
           </select>
+          <div id="reg-condition-info" class="reg-condition-card">
+            <div class="condition-card-header">
+              <span class="condition-badge" id="reg-card-badge">Condition Guide</span>
+              <strong id="reg-card-title">Palm / Finger Tendon Repair</strong>
+            </div>
+            <p id="reg-card-desc" class="condition-card-desc">Repair of tendons on the palm side that pull your fingers inward. Rehabilitation focuses on gentle active gliding to prevent internal scar adhesions.</p>
+            <div class="condition-card-ex">
+              <span class="ex-label">Prescribed Camera Exercise:</span>
+              <strong id="reg-card-exercise">Controlled Finger Flexion &amp; Tendon Gliding</strong>
+            </div>
+          </div>
         </div>
         <div class="form-group">
           <label for="reg-username">Choose Username</label>
@@ -227,29 +238,46 @@
         <!-- INTERACTIVE EXERCISE GUIDE: WHAT TO DO WITH YOUR HAND -->
         <div class="exercise-guide-box">
           <div class="guide-header">
-            <span class="guide-badge">EXERCISE GUIDE</span>
-            <h3>Prescribed Exercise: Active Finger Flexion & Extension (Tendon Gliding)</h3>
+            <div class="guide-header-row">
+              <div class="guide-badge-group">
+                <span class="guide-badge">EXERCISE GUIDE</span>
+                <span id="guide-condition-badge" class="guide-condition-pill">🎯 Prescribed for: Palm / Finger Tendon Repair</span>
+              </div>
+              <div class="guide-selector-wrap">
+                <label for="guide-condition-select" class="guide-select-label">Condition Guide:</label>
+                <select id="guide-condition-select" class="guide-condition-select">
+                  <option value="flexor">Palm / Finger Tendon Repair (Flexor)</option>
+                  <option value="extensor">Back of Hand Tendon Repair (Extensor)</option>
+                  <option value="radius">Broken Wrist Recovery (Distal Radius)</option>
+                  <option value="carpal">Carpal Tunnel Release Post-Op</option>
+                  <option value="metacarpal">Broken Hand Bone Recovery (Metacarpal)</option>
+                  <option value="general">General Hand Mobility &amp; Stiffness</option>
+                </select>
+              </div>
+            </div>
+            <h3 id="guide-exercise-title">Prescribed Exercise: Controlled Finger Flexion &amp; Tendon Gliding (Tendon Glide)</h3>
+            <p id="guide-condition-goal" class="guide-goal-text"><strong>Rehabilitation Goal:</strong> Smooth, non-jerky finger curls to safely glide deep flexor tendons without excessive load, preventing scar adhesions inside the tendon sheath.</p>
           </div>
           <div class="guide-steps-grid">
             <div class="guide-step-card" id="guide-step-1">
-              <div class="step-icon">🖐️</div>
+              <div class="step-icon" id="guide-step-1-icon">🖐️</div>
               <div class="step-content">
-                <h4>1. Open Palm (Start)</h4>
-                <p>Hold your hand upright facing the camera with fingers straight. Finger angle should be <strong>&gt;140°</strong>.</p>
+                <h4 id="guide-step-1-title">1. Open Palm (Start)</h4>
+                <p id="guide-step-1-desc">Hold your hand upright facing the camera with fingers straight. Finger angle should be <strong>&gt;140°</strong>.</p>
               </div>
             </div>
             <div class="guide-step-card" id="guide-step-2">
-              <div class="step-icon">✊</div>
+              <div class="step-icon" id="guide-step-2-icon">✊</div>
               <div class="step-content">
-                <h4>2. Full Fist Curl</h4>
-                <p>Slowly curl fingers inward until knuckles bend past <strong>85°</strong>. Watch the curl depth bar fill up.</p>
+                <h4 id="guide-step-2-title">2. Smooth Fist Curl</h4>
+                <p id="guide-step-2-desc">Slowly curl fingers inward until knuckles bend past <strong>85°</strong>. Watch the curl depth bar fill up.</p>
               </div>
             </div>
             <div class="guide-step-card" id="guide-step-3">
-              <div class="step-icon">✨</div>
+              <div class="step-icon" id="guide-step-3-icon">✨</div>
               <div class="step-content">
-                <h4>3. Return & Count Rep</h4>
-                <p>Straighten fingers completely back to open palm. Crossing <strong>140°</strong> automatically records <strong>+1 Rep</strong>!</p>
+                <h4 id="guide-step-3-title">3. Return &amp; Count Rep</h4>
+                <p id="guide-step-3-desc">Straighten fingers completely back to open palm. Crossing <strong>140°</strong> automatically records <strong>+1 Rep</strong>!</p>
               </div>
             </div>
           </div>

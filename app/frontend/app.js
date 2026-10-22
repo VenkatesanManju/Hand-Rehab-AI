@@ -49,6 +49,231 @@ let currentDiaryPred = {
   text: ""
 };
 
+// --- Rehab Condition Guides & Adaptive Instructions ---
+
+const CONDITION_GUIDES = {
+  'flexor': {
+    name: 'Palm / Finger Tendon Repair (Flexor Tendon Zone II)',
+    shortName: 'Palm / Finger Tendon Repair',
+    exerciseTitle: 'Controlled Finger Flexion & Tendon Gliding (Tendon Glide)',
+    goal: 'Smooth, non-jerky finger curls to safely glide deep flexor tendons without excessive load, preventing scar adhesions inside the tendon sheath.',
+    hintDesc: 'Repair of tendons on the palm side that pull your fingers inward to make a fist. Rehabilitation focuses on gentle active gliding to prevent internal scar adhesions.',
+    hintExercise: 'Controlled Finger Flexion & Tendon Gliding (Open Palm ➡️ Gentle Fist ➡️ Open)',
+    step1: {
+      icon: '🖐️',
+      title: '1. Open Palm Facing Camera',
+      desc: 'Hold your hand upright facing the camera with fingers relaxed and straight. Finger angle should exceed <strong>140°</strong>.'
+    },
+    step2: {
+      icon: '✊',
+      title: '2. Smooth Composite Fist Curl',
+      desc: 'Slowly curl all four fingers inward toward your palm until knuckles bend past <strong>85°</strong>. Watch the curl depth bar fill up.'
+    },
+    step3: {
+      icon: '✨',
+      title: '3. Controlled Extension Return',
+      desc: 'Smoothly straighten fingers back to full open palm. Crossing <strong>140°</strong> records <strong>+1 Rep</strong> without snapping.'
+    },
+    liveTip: 'Focus on smooth, non-jerky finger curls to safely glide repaired flexor tendons.'
+  },
+  'extensor': {
+    name: 'Back of Hand / Finger Straightening (Extensor Tendon)',
+    shortName: 'Back of Hand Tendon Repair',
+    exerciseTitle: 'Active Finger Extension & Tabletop/Hook Curl',
+    goal: 'Rebuild finger straightening strength, eliminate extensor tendon lag, and restore balanced opening coordination.',
+    hintDesc: 'Repair of tendons on the back of your hand that lift and straighten fingers. Rehabilitation focuses on active extension and eliminating tendon lag.',
+    hintExercise: 'Active Finger Extension & Tabletop Curl (Tabletop ➡️ Gentle Fist ➡️ Full Open)',
+    step1: {
+      icon: '🖐️',
+      title: '1. Aligned Open Hand (Start)',
+      desc: 'Position palm facing camera with fingers actively held straight and upright (angle <strong>&gt;140°</strong>).'
+    },
+    step2: {
+      icon: '✊',
+      title: '2. Gentle Knuckle Curl',
+      desc: 'Bend fingers smoothly inward past <strong>85°</strong> into a comfortable curl. Avoid strain on the back of the hand.'
+    },
+    step3: {
+      icon: '✨',
+      title: '3. Active Extension & Rep Count',
+      desc: 'Actively focus on straightening every knuckle completely back to <strong>&gt;140°</strong> to register <strong>+1 Rep</strong>.'
+    },
+    liveTip: 'Actively straighten fingers on each rep to prevent extensor tendon lag.'
+  },
+  'radius': {
+    name: 'Broken Wrist Recovery (Distal Radius Fracture)',
+    shortName: 'Broken Wrist Recovery',
+    exerciseTitle: 'Finger-to-Wrist Mobility & Composite Curl (Post-Cast)',
+    goal: 'Overcome post-cast finger stiffness, promote lymphatic drainage, and rebuild coordinated active range of motion.',
+    hintDesc: 'Recovery after a wrist fracture (broken distal radius) treated with a cast or surgery. Rehab restores finger mobility and prevents forearm stiffness.',
+    hintExercise: 'Finger-to-Wrist Mobility Curls (Forearm Steady ➡️ Finger Curl ➡️ Wide Spread)',
+    step1: {
+      icon: '🖐️',
+      title: '1. Neutral Forearm & Open Palm',
+      desc: 'Support your forearm comfortably on a table with palm facing camera and fingers spread (angle <strong>&gt;140°</strong>).'
+    },
+    step2: {
+      icon: '✊',
+      title: '2. Full Composite Curl',
+      desc: 'Slowly curl all fingers into a full fist past <strong>85°</strong>, keeping your wrist neutral and relaxed.'
+    },
+    step3: {
+      icon: '✨',
+      title: '3. Wide Finger Spread & Count',
+      desc: 'Extend fingers back open and spread them comfortably wide (<strong>&gt;140°</strong>) to count <strong>+1 Rep</strong> and reduce swelling.'
+    },
+    liveTip: 'Keep your wrist neutral and relaxed while curling fingers.'
+  },
+  'carpal': {
+    name: 'Carpal Tunnel Release (Nerve Decompression & Recovery)',
+    shortName: 'Carpal Tunnel Release',
+    exerciseTitle: 'Median Nerve Mobilization & Tendon Gliding Curls',
+    goal: 'Encourage healthy median nerve gliding through the carpal canal, minimize pillar pain, and regain grip agility.',
+    hintDesc: 'Post-operative recovery following surgical release of the carpal ligament to decompress the median nerve and relieve numbness/tingling.',
+    hintExercise: 'Median Nerve Gliding Curls (Neutral Wrist ➡️ Gradual Curl ➡️ Gentle Extension)',
+    step1: {
+      icon: '🖐️',
+      title: '1. Neutral Wrist & Open Fingers',
+      desc: 'Keep wrist straight and relaxed with palm facing camera. Fingers straight upright (angle <strong>&gt;140°</strong>).'
+    },
+    step2: {
+      icon: '✊',
+      title: '2. Progressive Fist Squeeze',
+      desc: 'Roll fingertips into the palm past <strong>85°</strong>, feeling a gentle, comfortable gliding motion through your wrist.'
+    },
+    step3: {
+      icon: '✨',
+      title: '3. Full Release & Rep Count',
+      desc: 'Smoothly release and open the palm back out (<strong>&gt;140°</strong>) to decompress the carpal tunnel and log <strong>+1 Rep</strong>.'
+    },
+    liveTip: 'Keep wrist straight to allow the median nerve to glide freely.'
+  },
+  'metacarpal': {
+    name: 'Broken Hand Bone Recovery (Metacarpal Fracture)',
+    shortName: 'Broken Hand Bone Recovery',
+    exerciseTitle: 'Knuckle (MCP) Articulation & Finger Flexion',
+    goal: 'Restore knuckle joint (MCP) range of motion, prevent collateral ligament shortening, and restore grip closure.',
+    hintDesc: 'Rehabilitation after a broken hand bone (palm/knuckle fracture) to restore knuckle movement and prevent palm stiffness.',
+    hintExercise: 'Knuckle Articulation Curls (Open Hand ➡️ Knuckle Bending ➡️ Full Return)',
+    step1: {
+      icon: '🖐️',
+      title: '1. Extended Palm Position',
+      desc: 'Position your hand upright facing the camera with knuckles gently extended and fingers open (angle <strong>&gt;140°</strong>).'
+    },
+    step2: {
+      icon: '✊',
+      title: '2. Knuckle Flexion (Fist)',
+      desc: 'Bend from the main knuckles (MCP joints) curling fingers past <strong>85°</strong> into a compact fist without forcing pain.'
+    },
+    step3: {
+      icon: '✨',
+      title: '3. Controlled Knuckle Return',
+      desc: 'Straighten your knuckles smoothly back to the open start position (<strong>&gt;140°</strong>) to record <strong>+1 Rep</strong>.'
+    },
+    liveTip: 'Focus on bending from the main knuckles without twisting the hand.'
+  },
+  'general': {
+    name: 'General Hand Mobility & Stiffness (Everyday Recovery)',
+    shortName: 'General Hand Mobility',
+    exerciseTitle: 'Full Range Active Finger Flexion & Joint Lubrication',
+    goal: 'Increase joint fluid circulation, overcome morning stiffness, and maintain healthy active range of motion.',
+    hintDesc: 'Designed for everyday finger stiffness, arthritis management, or general post-immobilization hand recovery.',
+    hintExercise: 'Full Range Finger Curls (Open Hand Stretch ➡️ Full Fist ➡️ Release)',
+    step1: {
+      icon: '🖐️',
+      title: '1. Open Hand Stretch',
+      desc: 'Hold fingers comfortably open and facing the camera with a relaxed upright posture (angle <strong>&gt;140°</strong>).'
+    },
+    step2: {
+      icon: '✊',
+      title: '2. Full Fist Flexion',
+      desc: 'Curl fingers inward toward your palm past <strong>85°</strong> at a steady, comfortable pace. Watch the curl progress track.'
+    },
+    step3: {
+      icon: '✨',
+      title: '3. Full Return & Rep Count',
+      desc: 'Open your hand back out fully (angle <strong>&gt;140°</strong>) to complete <strong>+1 Rep</strong> toward your target.'
+    },
+    liveTip: 'Move at a steady, relaxed rhythm through your full comfortable range.'
+  }
+};
+
+function getConditionKey(surgeryType) {
+  if (!surgeryType) return 'general';
+  const s = String(surgeryType).toLowerCase();
+  if (s.includes('extensor')) return 'extensor';
+  if (s.includes('flexor')) return 'flexor';
+  if (s.includes('radius') || s.includes('wrist')) return 'radius';
+  if (s.includes('carpal')) return 'carpal';
+  if (s.includes('metacarpal') || s.includes('bone')) return 'metacarpal';
+  if (CONDITION_GUIDES[s]) return s;
+  return 'general';
+}
+
+function updateRegistrationHint(surgeryType) {
+  const key = getConditionKey(surgeryType);
+  const guide = CONDITION_GUIDES[key] || CONDITION_GUIDES['general'];
+
+  const titleEl = document.getElementById('reg-card-title');
+  const descEl = document.getElementById('reg-card-desc');
+  const exEl = document.getElementById('reg-card-exercise');
+
+  if (titleEl) titleEl.textContent = guide.shortName;
+  if (descEl) descEl.textContent = guide.hintDesc;
+  if (exEl) exEl.textContent = guide.hintExercise;
+}
+
+function updateExerciseGuide(surgeryTypeOrKey) {
+  const key = getConditionKey(surgeryTypeOrKey);
+  const guide = CONDITION_GUIDES[key] || CONDITION_GUIDES['general'];
+
+  // Update badge and title
+  const badgeEl = document.getElementById('guide-condition-badge');
+  if (badgeEl) badgeEl.textContent = `🎯 Prescribed for: ${guide.shortName}`;
+
+  const titleEl = document.getElementById('guide-exercise-title');
+  if (titleEl) titleEl.textContent = `Prescribed Exercise: ${guide.exerciseTitle}`;
+
+  const goalEl = document.getElementById('guide-condition-goal');
+  if (goalEl) goalEl.innerHTML = `<strong>Rehabilitation Goal:</strong> ${guide.goal}`;
+
+  // Update Step 1
+  const s1Icon = document.getElementById('guide-step-1-icon');
+  if (s1Icon) s1Icon.textContent = guide.step1.icon;
+  const s1Title = document.getElementById('guide-step-1-title');
+  if (s1Title) s1Title.textContent = guide.step1.title;
+  const s1Desc = document.getElementById('guide-step-1-desc');
+  if (s1Desc) s1Desc.innerHTML = guide.step1.desc;
+
+  // Update Step 2
+  const s2Icon = document.getElementById('guide-step-2-icon');
+  if (s2Icon) s2Icon.textContent = guide.step2.icon;
+  const s2Title = document.getElementById('guide-step-2-title');
+  if (s2Title) s2Title.textContent = guide.step2.title;
+  const s2Desc = document.getElementById('guide-step-2-desc');
+  if (s2Desc) s2Desc.innerHTML = guide.step2.desc;
+
+  // Update Step 3
+  const s3Icon = document.getElementById('guide-step-3-icon');
+  if (s3Icon) s3Icon.textContent = guide.step3.icon;
+  const s3Title = document.getElementById('guide-step-3-title');
+  if (s3Title) s3Title.textContent = guide.step3.title;
+  const s3Desc = document.getElementById('guide-step-3-desc');
+  if (s3Desc) s3Desc.innerHTML = guide.step3.desc;
+
+  // Sync selector dropdown
+  const selectEl = document.getElementById('guide-condition-select');
+  if (selectEl && selectEl.value !== key) {
+    selectEl.value = key;
+  }
+
+  // Update idle camera banner tip if camera is not active
+  const actionText = document.getElementById('live-action-text');
+  if (actionText && (!webcamStream && !simulationRunning)) {
+    actionText.textContent = `Camera ready for ${guide.shortName}. ${guide.liveTip}`;
+  }
+}
+
 // --- Mathematical Helper Functions ---
 
 function computeAngle3D(a, b, c) {
@@ -1205,6 +1430,9 @@ async function loadUserSession(user) {
   document.getElementById('display-user-name').textContent = user.full_name;
   document.getElementById('display-user-surgery').textContent = user.surgery_type;
 
+  // Tailor Camera Exercise Guide to Patient's Rehab Condition
+  updateExerciseGuide(user.surgery_type);
+
   // Switch from Auth screen to Dashboard
   document.getElementById('auth-screen').classList.add('hidden');
   document.getElementById('dashboard-app').classList.remove('hidden');
@@ -1517,6 +1745,21 @@ window.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('nav-btn-diary').addEventListener('click', () => switchView('diary'));
   document.getElementById('nav-btn-camera').addEventListener('click', () => switchView('camera'));
   document.getElementById('nav-btn-report').addEventListener('click', () => switchView('report'));
+
+  // Condition Hint & Dynamic Exercise Guide
+  const regSurgerySelect = document.getElementById('reg-surgery');
+  if (regSurgerySelect) {
+    regSurgerySelect.addEventListener('change', (e) => updateRegistrationHint(e.target.value));
+    updateRegistrationHint(regSurgerySelect.value);
+  }
+
+  const guideConditionSelect = document.getElementById('guide-condition-select');
+  if (guideConditionSelect) {
+    guideConditionSelect.addEventListener('change', (e) => updateExerciseGuide(e.target.value));
+  }
+
+  // Pre-seed default exercise guide
+  updateExerciseGuide('flexor');
 
   // Step Action Transitions
   document.getElementById('btn-goto-exercise').addEventListener('click', () => switchView('camera'));

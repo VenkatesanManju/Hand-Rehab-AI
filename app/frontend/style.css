@@ -153,6 +153,60 @@ body {
   box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
 }
 
+/* Registration Condition Helper Card */
+.reg-condition-card {
+  margin-top: 8px;
+  background: #f0fdfa;
+  border: 1px solid #99f6e4;
+  border-radius: var(--radius-sm);
+  padding: 11px 13px;
+  font-size: 0.8rem;
+  transition: all 0.2s ease;
+}
+
+.condition-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+
+.condition-badge {
+  background: #0d9488;
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.condition-card-desc {
+  color: #334155;
+  line-height: 1.38;
+  margin-bottom: 7px;
+  font-size: 0.79rem;
+}
+
+.condition-card-ex {
+  background: #ffffff;
+  border: 1px solid #ccfbf1;
+  border-radius: 4px;
+  padding: 6px 9px;
+  font-size: 0.78rem;
+  color: #0f766e;
+}
+
+.condition-card-ex .ex-label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
 .auth-demo-shortcut {
   margin-top: 10px;
   padding-top: 14px;
@@ -603,9 +657,24 @@ textarea#diary-input:focus {
 
 .guide-header {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  gap: 8px;
   margin-bottom: 14px;
+}
+
+.guide-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.guide-badge-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .guide-badge {
@@ -617,10 +686,66 @@ textarea#diary-input:focus {
   border-radius: 4px;
 }
 
+.guide-condition-pill {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.guide-selector-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.guide-select-label {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.guide-condition-select {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #0f172a;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.15s;
+}
+
+.guide-condition-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
+}
+
 .guide-header h3 {
   font-size: 1.05rem;
   font-weight: 700;
   color: #0c4a6e;
+  margin: 0;
+}
+
+.guide-goal-text {
+  font-size: 0.83rem;
+  color: #1e293b;
+  background: #f0fdf4;
+  border-left: 3px solid #10b981;
+  padding: 8px 12px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  line-height: 1.4;
+  margin: 0;
 }
 
 .guide-steps-grid {
