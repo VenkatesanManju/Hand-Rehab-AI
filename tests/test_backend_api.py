@@ -411,6 +411,9 @@ def test_registration_and_camera_exercise_guidance(client):
     assert 'id="guide-condition-select"' in html
     assert 'id="guide-exercise-title"' in html
     assert 'id="guide-condition-goal"' in html
+    assert 'id="btn-gesture-1"' in html
+    assert 'id="btn-gesture-2"' in html
+    assert 'id="guide-clinical-advisory"' in html
     assert 'id="guide-step-1-title"' in html
     assert 'id="guide-step-2-title"' in html
     assert 'id="guide-step-3-title"' in html
@@ -423,6 +426,9 @@ def test_registration_and_camera_exercise_guidance(client):
     assert ".guide-condition-pill" in css
     assert ".guide-condition-select" in css
     assert ".guide-goal-text" in css
+    assert ".gesture-switcher-row" in css
+    assert ".btn-gesture" in css
+    assert ".guide-advisory-text" in css
 
     # 3. JavaScript Verification
     res_js = client.get("/app.js")
@@ -432,6 +438,45 @@ def test_registration_and_camera_exercise_guidance(client):
     assert "updateRegistrationHint" in js
     assert "updateExerciseGuide" in js
     assert "getConditionKey" in js
+    assert "getActiveGesture" in js
+
+
+def test_candidate_gestures_and_clinical_advisory(client):
+    """
+    Verifies that all 5 rehabilitation conditions provide the required condition-specific
+    candidate gestures rather than generic exercises, and that the mandatory clinical
+    safety advisory is displayed.
+    """
+    res_index = client.get("/")
+    assert res_index.status_code == 200
+    html = res_index.data.decode("utf-8")
+
+    res_js = client.get("/app.js")
+    assert res_js.status_code == 200
+    js = res_js.data.decode("utf-8")
+
+    # Required 5 rehabilitation conditions and their pairs of candidate gestures
+    expected_gestures = {
+        "Palm / Finger Tendon Repair (Flexor)": ["Hook Fist", "Individual Finger Bend"],
+        "Back of Hand Tendon Repair (Extensor)": ["Straight Finger Extension", "Tabletop Hand Position"],
+        "Broken Wrist Recovery (Distal Radius)": ["Wrist Flexion", "Wrist Extension"],
+        "Carpal Tunnel Release (Post-Op)": ["Thumb-to-Index Fingertip Touch", "Thumb-to-Little Finger Touch"],
+        "General Hand Mobility & Stiffness": ["Finger Spreading and Closing", "Thumb Opposition"]
+    }
+
+    for condition, gestures in expected_gestures.items():
+        for gesture in gestures:
+            assert gesture in js, f"Expected gesture '{gesture}' for condition '{condition}' in app.js"
+
+    # Verbatim clinical warning requirement
+    advisory_text = (
+        "Important: These are candidate gestures for your project. "
+        "For tendon repairs and postoperative conditions, show or recommend "
+        "a gesture only when it is permitted by the patient's surgeon or hand therapist."
+    )
+    assert advisory_text in html
+    assert advisory_text in js
+
 
 
 

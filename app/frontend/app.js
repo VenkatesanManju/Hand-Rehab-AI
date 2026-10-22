@@ -55,124 +55,267 @@ const CONDITION_GUIDES = {
   'flexor': {
     name: 'Palm / Finger Tendon Repair (Flexor Tendon Zone II)',
     shortName: 'Palm / Finger Tendon Repair',
-    exerciseTitle: 'Controlled Finger Flexion & Tendon Gliding (Tendon Glide)',
-    goal: 'Smooth, non-jerky finger curls to safely glide deep flexor tendons without excessive load, preventing scar adhesions inside the tendon sheath.',
     hintDesc: 'Repair of tendons on the palm side that pull your fingers inward to make a fist. Rehabilitation focuses on gentle active gliding to prevent internal scar adhesions.',
-    hintExercise: 'Controlled Finger Flexion & Tendon Gliding (Open Palm ➡️ Gentle Fist ➡️ Open)',
-    step1: {
-      icon: '🖐️',
-      title: '1. Open Palm Facing Camera',
-      desc: 'Hold your hand upright facing the camera with fingers relaxed and straight. Finger angle should exceed <strong>140°</strong>.'
-    },
-    step2: {
-      icon: '✊',
-      title: '2. Smooth Composite Fist Curl',
-      desc: 'Slowly curl all four fingers inward toward your palm until knuckles bend past <strong>85°</strong>. Watch the curl depth bar fill up.'
-    },
-    step3: {
-      icon: '✨',
-      title: '3. Controlled Extension Return',
-      desc: 'Smoothly straighten fingers back to full open palm. Crossing <strong>140°</strong> records <strong>+1 Rep</strong> without snapping.'
-    },
-    liveTip: 'Focus on smooth, non-jerky finger curls to safely glide repaired flexor tendons.'
+    clinicalNote: 'Candidate gestures for flexor tendon healing. Perform a gesture only when permitted by your surgeon or hand therapist.',
+    gestures: [
+      {
+        id: 'hook_fist',
+        name: 'Gesture 1: Hook Fist',
+        exerciseTitle: 'Hook Fist (PIP & DIP Joint Gliding)',
+        goal: 'Differential gliding of the flexor digitorum superficialis (FDS) and profundus (FDP) tendons while keeping MCP knuckles straight.',
+        step1: {
+          icon: '🖐️',
+          title: '1. Open Hand Ready',
+          desc: 'Hold hand upright facing camera with wrist straight and all fingers open (>140°).'
+        },
+        step2: {
+          icon: '🪝',
+          title: '2. Hook Fist Bend',
+          desc: 'Bend middle (PIP) and end (DIP) finger joints inward into a hook claw, keeping main knuckles (MCP) straight.'
+        },
+        step3: {
+          icon: '✨',
+          title: '3. Return & Extend',
+          desc: 'Smoothly straighten fingers back open (>140°) to complete 1 repetition without forceful snapping.'
+        },
+        liveTip: 'Curl the finger tips into a hook while keeping the base knuckles straight.'
+      },
+      {
+        id: 'individual_bend',
+        name: 'Gesture 2: Individual Finger Bend',
+        exerciseTitle: 'Individual Finger Bend (Isolated Tendon Excursion)',
+        goal: 'Isolated flexor tendon excursion to prevent inter-tendinous adhesions and restore independent finger mobility.',
+        step1: {
+          icon: '🖐️',
+          title: '1. Stable Open Palm',
+          desc: 'Hold hand steady with palm facing camera and all 4 fingers comfortably open (>140°).'
+        },
+        step2: {
+          icon: '👇',
+          title: '2. Isolate & Bend Finger',
+          desc: 'Slowly bend the target finger (index or middle) inward toward your palm while keeping other fingers extended.'
+        },
+        step3: {
+          icon: '✨',
+          title: '3. Return to Level Palm',
+          desc: 'Straighten the finger back up in line with your other fingers (>140°) to count +1 Rep.'
+        },
+        liveTip: 'Bend one finger at a time smoothly; avoid forcing adjacent fingers.'
+      }
+    ]
   },
   'extensor': {
     name: 'Back of Hand / Finger Straightening (Extensor Tendon)',
     shortName: 'Back of Hand Tendon Repair',
-    exerciseTitle: 'Active Finger Extension & Tabletop/Hook Curl',
-    goal: 'Rebuild finger straightening strength, eliminate extensor tendon lag, and restore balanced opening coordination.',
     hintDesc: 'Repair of tendons on the back of your hand that lift and straighten fingers. Rehabilitation focuses on active extension and eliminating tendon lag.',
-    hintExercise: 'Active Finger Extension & Tabletop Curl (Tabletop ➡️ Gentle Fist ➡️ Full Open)',
-    step1: {
-      icon: '🖐️',
-      title: '1. Aligned Open Hand (Start)',
-      desc: 'Position palm facing camera with fingers actively held straight and upright (angle <strong>&gt;140°</strong>).'
-    },
-    step2: {
-      icon: '✊',
-      title: '2. Gentle Knuckle Curl',
-      desc: 'Bend fingers smoothly inward past <strong>85°</strong> into a comfortable curl. Avoid strain on the back of the hand.'
-    },
-    step3: {
-      icon: '✨',
-      title: '3. Active Extension & Rep Count',
-      desc: 'Actively focus on straightening every knuckle completely back to <strong>&gt;140°</strong> to register <strong>+1 Rep</strong>.'
-    },
-    liveTip: 'Actively straighten fingers on each rep to prevent extensor tendon lag.'
+    clinicalNote: 'Candidate gestures for extensor repairs. Perform only within the safe extension limits permitted by your surgeon or hand therapist.',
+    gestures: [
+      {
+        id: 'straight_extension',
+        name: 'Gesture 1: Straight Finger Extension',
+        exerciseTitle: 'Straight Finger Extension (Active Extensor Activation)',
+        goal: 'Activate dorsal extensor tendons and eliminate extensor lag by actively lifting all fingers into full alignment.',
+        step1: {
+          icon: '✊',
+          title: '1. Soft Curved Hand',
+          desc: 'Hold hand in front of camera with fingers relaxed and gently curved inward.'
+        },
+        step2: {
+          icon: '🖐️',
+          title: '2. Active Full Extension',
+          desc: 'Actively lift and straighten every knuckle and finger fully to 180° open alignment facing the camera.'
+        },
+        step3: {
+          icon: '✨',
+          title: '3. Soft Release & Count',
+          desc: 'Gently release tension back to a soft neutral curve to complete +1 Rep without hyperextending.'
+        },
+        liveTip: 'Actively focus on straightening every knuckle to prevent extensor lag.'
+      },
+      {
+        id: 'tabletop',
+        name: 'Gesture 2: Tabletop Hand Position',
+        exerciseTitle: 'Tabletop Hand Position (Intrinsic Plus Lumbrical Stretch)',
+        goal: 'Strengthen lumbrical and interossei muscles by flexing MCP knuckles 90° while keeping interphalangeal (IP) joints strictly straight.',
+        step1: {
+          icon: '🖐️',
+          title: '1. Upright Flat Palm',
+          desc: 'Position hand facing camera with fingers held straight together upright (>140°).'
+        },
+        step2: {
+          icon: '📐',
+          title: '2. Tabletop 90° Angle',
+          desc: 'Bend only the base knuckles (MCP joints) to a 90° angle like a flat tabletop, keeping your finger shafts completely straight.'
+        },
+        step3: {
+          icon: '✨',
+          title: '3. Return to Vertical Palm',
+          desc: 'Lift knuckles back up into a straight upright palm (>140°) to register +1 Rep.'
+        },
+        liveTip: 'Keep fingers straight like a flat table while bending only the big knuckles.'
+      }
+    ]
   },
   'radius': {
     name: 'Broken Wrist Recovery (Distal Radius Fracture)',
     shortName: 'Broken Wrist Recovery',
-    exerciseTitle: 'Finger-to-Wrist Mobility & Composite Curl (Post-Cast)',
-    goal: 'Overcome post-cast finger stiffness, promote lymphatic drainage, and rebuild coordinated active range of motion.',
     hintDesc: 'Recovery after a wrist fracture (broken distal radius) treated with a cast or surgery. Rehab restores finger mobility and prevents forearm stiffness.',
-    hintExercise: 'Finger-to-Wrist Mobility Curls (Forearm Steady ➡️ Finger Curl ➡️ Wide Spread)',
-    step1: {
-      icon: '🖐️',
-      title: '1. Neutral Forearm & Open Palm',
-      desc: 'Support your forearm comfortably on a table with palm facing camera and fingers spread (angle <strong>&gt;140°</strong>).'
-    },
-    step2: {
-      icon: '✊',
-      title: '2. Full Composite Curl',
-      desc: 'Slowly curl all fingers into a full fist past <strong>85°</strong>, keeping your wrist neutral and relaxed.'
-    },
-    step3: {
-      icon: '✨',
-      title: '3. Wide Finger Spread & Count',
-      desc: 'Extend fingers back open and spread them comfortably wide (<strong>&gt;140°</strong>) to count <strong>+1 Rep</strong> and reduce swelling.'
-    },
-    liveTip: 'Keep your wrist neutral and relaxed while curling fingers.'
+    clinicalNote: 'Candidate gestures for distal radius fractures. Perform wrist mobility only after cast/brace removal and therapist clearance.',
+    gestures: [
+      {
+        id: 'wrist_flexion',
+        name: 'Gesture 1: Wrist Flexion',
+        exerciseTitle: 'Wrist Flexion (Downward Mobility)',
+        goal: 'Re-establish volar wrist mobility, relieve post-immobilization radiocarpal stiffness, and stretch extensor tendons.',
+        step1: {
+          icon: '✋',
+          title: '1. Neutral Forearm Position',
+          desc: 'Rest forearm steady on table with wrist straight and hand level facing the camera.'
+        },
+        step2: {
+          icon: '⬇️',
+          title: '2. Gentle Downward Flexion',
+          desc: 'Smoothly bend your wrist downward toward the floor within a pain-free range, keeping fingers relaxed.'
+        },
+        step3: {
+          icon: '✨',
+          title: '3. Return to Level Position',
+          desc: 'Bring hand back up in line with your forearm to complete +1 Rep.'
+        },
+        liveTip: 'Bend gently from the wrist joint; keep forearm resting steady.'
+      },
+      {
+        id: 'wrist_extension',
+        name: 'Gesture 2: Wrist Extension',
+        exerciseTitle: 'Wrist Extension (Upward Lift)',
+        goal: 'Restore functional dorsiflexion Range of Motion (ROM) necessary for pushing, gripping, and everyday weight bearing.',
+        step1: {
+          icon: '✋',
+          title: '1. Neutral Level Hand',
+          desc: 'Hold forearm steady with hand flat in line with the wrist facing camera.'
+        },
+        step2: {
+          icon: '⬆️',
+          title: '2. Upward Wrist Extension',
+          desc: 'Gently lift your hand upward toward the ceiling, bending at the wrist joint without moving your forearm.'
+        },
+        step3: {
+          icon: '✨',
+          title: '3. Return to Neutral Alignment',
+          desc: 'Lower hand back to the horizontal resting position to register +1 Rep.'
+        },
+        liveTip: 'Lift hand upward using the wrist muscles without twisting your elbow.'
+      }
+    ]
   },
   'carpal': {
     name: 'Carpal Tunnel Release (Nerve Decompression & Recovery)',
     shortName: 'Carpal Tunnel Release',
-    exerciseTitle: 'Median Nerve Mobilization & Tendon Gliding Curls',
-    goal: 'Encourage healthy median nerve gliding through the carpal canal, minimize pillar pain, and regain grip agility.',
     hintDesc: 'Post-operative recovery following surgical release of the carpal ligament to decompress the median nerve and relieve numbness/tingling.',
-    hintExercise: 'Median Nerve Gliding Curls (Neutral Wrist ➡️ Gradual Curl ➡️ Gentle Extension)',
-    step1: {
-      icon: '🖐️',
-      title: '1. Neutral Wrist & Open Fingers',
-      desc: 'Keep wrist straight and relaxed with palm facing camera. Fingers straight upright (angle <strong>&gt;140°</strong>).'
-    },
-    step2: {
-      icon: '✊',
-      title: '2. Progressive Fist Squeeze',
-      desc: 'Roll fingertips into the palm past <strong>85°</strong>, feeling a gentle, comfortable gliding motion through your wrist.'
-    },
-    step3: {
-      icon: '✨',
-      title: '3. Full Release & Rep Count',
-      desc: 'Smoothly release and open the palm back out (<strong>&gt;140°</strong>) to decompress the carpal tunnel and log <strong>+1 Rep</strong>.'
-    },
-    liveTip: 'Keep wrist straight to allow the median nerve to glide freely.'
+    clinicalNote: 'Candidate gestures for carpal tunnel recovery. Perform gentle opposition without forceful fingertip pinching.',
+    gestures: [
+      {
+        id: 'thumb_index_touch',
+        name: 'Gesture 1: Thumb-to-Index Fingertip Touch',
+        exerciseTitle: 'Thumb-to-Index Fingertip Touch (O-Pinch)',
+        goal: 'Mobilize the median nerve through the carpal canal and rebuild fine motor tip-to-tip precision coordination.',
+        step1: {
+          icon: '🖐️',
+          title: '1. Open Hand Spread',
+          desc: 'Hold hand facing camera with thumb and index finger opened apart.'
+        },
+        step2: {
+          icon: '👌',
+          title: '2. Fingertip Circle Touch',
+          desc: 'Bring the tip of your thumb and the tip of your index finger together to form a gentle circle (O-shape).'
+        },
+        step3: {
+          icon: '✨',
+          title: '3. Release & Re-Open',
+          desc: 'Separate thumb and index finger back apart fully to complete +1 Rep.'
+        },
+        liveTip: 'Touch tips gently into an O-shape; do not squeeze or press hard.'
+      },
+      {
+        id: 'thumb_little_touch',
+        name: 'Gesture 2: Thumb-to-Little Finger Touch',
+        exerciseTitle: 'Thumb-to-Little Finger Touch (Full Palmar Opposition)',
+        goal: 'Promote full thenar muscle opposition across the carpal arch, stretching the healing transverse carpal retinaculum.',
+        step1: {
+          icon: '🖐️',
+          title: '1. Open Wide Palm',
+          desc: 'Open palm facing camera with thumb extended comfortably outward.'
+        },
+        step2: {
+          icon: '🤙',
+          title: '2. Cross-Palm Opposition',
+          desc: 'Reach your thumb tip across your palm to gently touch the tip of your little (pinky) finger.'
+        },
+        step3: {
+          icon: '✨',
+          title: '3. Open Hand Return',
+          desc: 'Extend thumb all the way back out to the open palm position to record +1 Rep.'
+        },
+        liveTip: 'Reach across the palm smoothly within your comfortable range.'
+      }
+    ]
   },
   'general': {
     name: 'General Hand Mobility & Stiffness (Everyday Recovery)',
     shortName: 'General Hand Mobility',
-    exerciseTitle: 'Full Range Active Finger Flexion & Joint Lubrication',
-    goal: 'Increase joint fluid circulation, overcome morning stiffness, and maintain healthy active range of motion.',
     hintDesc: 'Designed for everyday finger stiffness, arthritis management, or general post-immobilization hand recovery.',
-    hintExercise: 'Full Range Finger Curls (Open Hand Stretch ➡️ Full Fist ➡️ Release)',
-    step1: {
-      icon: '🖐️',
-      title: '1. Open Hand Stretch',
-      desc: 'Hold fingers comfortably open and facing the camera with a relaxed upright posture (angle <strong>&gt;140°</strong>).'
-    },
-    step2: {
-      icon: '✊',
-      title: '2. Full Fist Flexion',
-      desc: 'Curl fingers inward toward your palm past <strong>85°</strong> at a steady, comfortable pace. Watch the curl progress track.'
-    },
-    step3: {
-      icon: '✨',
-      title: '3. Full Return & Rep Count',
-      desc: 'Open your hand back out fully (angle <strong>&gt;140°</strong>) to complete <strong>+1 Rep</strong> toward your target.'
-    },
-    liveTip: 'Move at a steady, relaxed rhythm through your full comfortable range.'
+    clinicalNote: 'Candidate gestures for everyday flexibility and arthritis stiffness. Stop if you experience sharp pain.',
+    gestures: [
+      {
+        id: 'finger_spread_close',
+        name: 'Gesture 1: Finger Spreading and Closing',
+        exerciseTitle: 'Finger Spreading and Closing (Abduction/Adduction Fan)',
+        goal: 'Activate dorsal and palmar interossei muscles, expand web spaces, and relieve global morning hand stiffness.',
+        step1: {
+          icon: '✊',
+          title: '1. Fingers Closed Together',
+          desc: 'Hold hand facing camera with all fingers held straight and pressed gently side-by-side.'
+        },
+        step2: {
+          icon: '🖐️',
+          title: '2. Wide Starburst Spread',
+          desc: 'Spread all five fingers as wide apart as possible into a full starburst abduction fan.'
+        },
+        step3: {
+          icon: '✨',
+          title: '3. Close Fingers & Count',
+          desc: 'Bring fingers back together into a closed straight palm to complete +1 Rep.'
+        },
+        liveTip: 'Spread fingers wide like a star, then bring them back together.'
+      },
+      {
+        id: 'thumb_opposition',
+        name: 'Gesture 2: Thumb Opposition',
+        exerciseTitle: 'Thumb Opposition (Sequential Finger Touch)',
+        goal: 'Stimulate joint fluid circulation across all metacarpal and digital joints while maintaining thumb dexterity.',
+        step1: {
+          icon: '🖐️',
+          title: '1. Open Palm Facing Camera',
+          desc: 'Hold hand upright with palm facing camera and fingers comfortably relaxed.'
+        },
+        step2: {
+          icon: '👍',
+          title: '2. Sequential Fingertip Tap',
+          desc: 'Touch your thumb tip to each finger tip in sequence (Index ➡️ Middle ➡️ Ring ➡️ Little).'
+        },
+        step3: {
+          icon: '✨',
+          title: '3. Full Hand Stretch',
+          desc: 'Open hand wide after completing the sequence to record +1 Rep.'
+        },
+        liveTip: 'Touch thumb smoothly to each fingertip in sequence, then open wide.'
+      }
+    ]
   }
 };
+
+let currentActiveConditionKey = 'flexor';
+let currentActiveGestureIndex = 0;
 
 function getConditionKey(surgeryType) {
   if (!surgeryType) return 'general';
@@ -187,54 +330,87 @@ function getConditionKey(surgeryType) {
 
 function updateRegistrationHint(surgeryType) {
   const key = getConditionKey(surgeryType);
-  const guide = CONDITION_GUIDES[key] || CONDITION_GUIDES['general'];
+  const cond = CONDITION_GUIDES[key] || CONDITION_GUIDES['general'];
 
   const titleEl = document.getElementById('reg-card-title');
   const descEl = document.getElementById('reg-card-desc');
   const exEl = document.getElementById('reg-card-exercise');
 
-  if (titleEl) titleEl.textContent = guide.shortName;
-  if (descEl) descEl.textContent = guide.hintDesc;
-  if (exEl) exEl.textContent = guide.hintExercise;
+  if (titleEl) titleEl.textContent = cond.shortName;
+  if (descEl) descEl.textContent = cond.hintDesc;
+  if (exEl && cond.gestures && cond.gestures.length >= 2) {
+    exEl.textContent = `${cond.gestures[0].name} | ${cond.gestures[1].name}`;
+  }
 }
 
-function updateExerciseGuide(surgeryTypeOrKey) {
+function getActiveGesture() {
+  const cond = CONDITION_GUIDES[currentActiveConditionKey] || CONDITION_GUIDES['general'];
+  const gList = cond.gestures || [];
+  return gList[currentActiveGestureIndex] || gList[0];
+}
+
+function updateExerciseGuide(surgeryTypeOrKey, gestureIndex = 0) {
   const key = getConditionKey(surgeryTypeOrKey);
-  const guide = CONDITION_GUIDES[key] || CONDITION_GUIDES['general'];
+  currentActiveConditionKey = key;
+  const cond = CONDITION_GUIDES[key] || CONDITION_GUIDES['general'];
+
+  const gList = cond.gestures || [];
+  if (gestureIndex < 0 || gestureIndex >= gList.length) {
+    gestureIndex = 0;
+  }
+  currentActiveGestureIndex = gestureIndex;
+  const currentGesture = gList[currentActiveGestureIndex] || gList[0];
 
   // Update badge and title
   const badgeEl = document.getElementById('guide-condition-badge');
-  if (badgeEl) badgeEl.textContent = `🎯 Prescribed for: ${guide.shortName}`;
+  if (badgeEl) badgeEl.textContent = `🎯 Prescribed for: ${cond.shortName}`;
 
   const titleEl = document.getElementById('guide-exercise-title');
-  if (titleEl) titleEl.textContent = `Prescribed Exercise: ${guide.exerciseTitle}`;
+  if (titleEl) titleEl.textContent = `Prescribed Exercise: ${currentGesture.exerciseTitle}`;
+
+  // Update Gesture Toggle Buttons
+  const btnG1 = document.getElementById('btn-gesture-1');
+  const btnG2 = document.getElementById('btn-gesture-2');
+  if (btnG1 && gList[0]) {
+    btnG1.textContent = gList[0].name;
+    btnG1.className = `btn-gesture ${currentActiveGestureIndex === 0 ? 'active' : ''}`;
+  }
+  if (btnG2 && gList[1]) {
+    btnG2.textContent = gList[1].name;
+    btnG2.className = `btn-gesture ${currentActiveGestureIndex === 1 ? 'active' : ''}`;
+  }
 
   const goalEl = document.getElementById('guide-condition-goal');
-  if (goalEl) goalEl.innerHTML = `<strong>Rehabilitation Goal:</strong> ${guide.goal}`;
+  if (goalEl) goalEl.innerHTML = `<strong>Rehabilitation Goal:</strong> ${currentGesture.goal}`;
+
+  const advisoryEl = document.getElementById('guide-clinical-advisory');
+  if (advisoryEl) {
+    advisoryEl.innerHTML = `⚠️ <strong>Clinical Notice:</strong> Important: These are candidate gestures for your project. For tendon repairs and postoperative conditions, show or recommend a gesture only when it is permitted by the patient's surgeon or hand therapist.`;
+  }
 
   // Update Step 1
   const s1Icon = document.getElementById('guide-step-1-icon');
-  if (s1Icon) s1Icon.textContent = guide.step1.icon;
+  if (s1Icon) s1Icon.textContent = currentGesture.step1.icon;
   const s1Title = document.getElementById('guide-step-1-title');
-  if (s1Title) s1Title.textContent = guide.step1.title;
+  if (s1Title) s1Title.textContent = currentGesture.step1.title;
   const s1Desc = document.getElementById('guide-step-1-desc');
-  if (s1Desc) s1Desc.innerHTML = guide.step1.desc;
+  if (s1Desc) s1Desc.innerHTML = currentGesture.step1.desc;
 
   // Update Step 2
   const s2Icon = document.getElementById('guide-step-2-icon');
-  if (s2Icon) s2Icon.textContent = guide.step2.icon;
+  if (s2Icon) s2Icon.textContent = currentGesture.step2.icon;
   const s2Title = document.getElementById('guide-step-2-title');
-  if (s2Title) s2Title.textContent = guide.step2.title;
+  if (s2Title) s2Title.textContent = currentGesture.step2.title;
   const s2Desc = document.getElementById('guide-step-2-desc');
-  if (s2Desc) s2Desc.innerHTML = guide.step2.desc;
+  if (s2Desc) s2Desc.innerHTML = currentGesture.step2.desc;
 
   // Update Step 3
   const s3Icon = document.getElementById('guide-step-3-icon');
-  if (s3Icon) s3Icon.textContent = guide.step3.icon;
+  if (s3Icon) s3Icon.textContent = currentGesture.step3.icon;
   const s3Title = document.getElementById('guide-step-3-title');
-  if (s3Title) s3Title.textContent = guide.step3.title;
+  if (s3Title) s3Title.textContent = currentGesture.step3.title;
   const s3Desc = document.getElementById('guide-step-3-desc');
-  if (s3Desc) s3Desc.innerHTML = guide.step3.desc;
+  if (s3Desc) s3Desc.innerHTML = currentGesture.step3.desc;
 
   // Sync selector dropdown
   const selectEl = document.getElementById('guide-condition-select');
@@ -245,7 +421,7 @@ function updateExerciseGuide(surgeryTypeOrKey) {
   // Update idle camera banner tip if camera is not active
   const actionText = document.getElementById('live-action-text');
   if (actionText && (!webcamRunning && !simulationRunning)) {
-    actionText.textContent = `Camera ready for ${guide.shortName}. ${guide.liveTip}`;
+    actionText.textContent = `Camera ready for ${currentGesture.name}. ${currentGesture.liveTip}`;
   }
 }
 
@@ -271,28 +447,29 @@ function computeROM(meanPipAngle) {
 function updateRepCounter(angle) {
   const banner = document.getElementById('live-action-banner');
   const actionText = document.getElementById('live-action-text');
+  const activeG = getActiveGesture();
 
   if (angle <= FLEX_THRESH) {
     repState = 'FLEXED';
     hasCurled = true;
-    banner.className = 'live-action-banner curling';
-    actionText.textContent = `✊ Full curl achieved (${Math.round(angle)}°)! Now open your hand completely.`;
+    if (banner) banner.className = 'live-action-banner curling';
+    if (actionText) actionText.textContent = `🎯 Position reached (${Math.round(angle)}°)! Now return smoothly to complete rep.`;
   } else if (angle >= EXTEND_THRESH) {
     if (repState === 'FLEXED' && hasCurled) {
       repCount += 1;
       hasCurled = false;
       currentFormScore = Math.min(100, Math.max(85, Math.round(90 + Math.random() * 10)));
-      banner.className = 'live-action-banner completed';
-      actionText.textContent = `✨ Repetition ${repCount} Complete! Excellent extension.`;
+      if (banner) banner.className = 'live-action-banner completed';
+      if (actionText) actionText.textContent = `✨ Repetition ${repCount} Complete (${activeG ? activeG.name : 'Exercise'})! Excellent form.`;
     } else {
-      banner.className = 'live-action-banner ready';
-      actionText.textContent = `🖐️ Open palm ready (${Math.round(angle)}°). Now slowly curl fingers into a fist!`;
+      if (banner) banner.className = 'live-action-banner ready';
+      if (actionText) actionText.textContent = `🖐️ Position ready (${Math.round(angle)}°). Begin: ${activeG ? activeG.name : 'Gesture'}!`;
     }
     repState = 'EXTENDED';
   } else {
     if (repState === 'EXTENDED') {
-      banner.className = 'live-action-banner curling';
-      actionText.textContent = `🔄 Curling inward... bend knuckles past 85° (current: ${Math.round(angle)}°).`;
+      if (banner) banner.className = 'live-action-banner curling';
+      if (actionText) actionText.textContent = `🔄 Moving through gesture... (current: ${Math.round(angle)}°). ${activeG ? activeG.liveTip : ''}`;
     }
   }
 
@@ -1716,11 +1893,21 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   const guideConditionSelect = document.getElementById('guide-condition-select');
   if (guideConditionSelect) {
-    guideConditionSelect.addEventListener('change', (e) => updateExerciseGuide(e.target.value));
+    guideConditionSelect.addEventListener('change', (e) => updateExerciseGuide(e.target.value, 0));
+  }
+
+  const btnG1 = document.getElementById('btn-gesture-1');
+  if (btnG1) {
+    btnG1.addEventListener('click', () => updateExerciseGuide(currentActiveConditionKey, 0));
+  }
+
+  const btnG2 = document.getElementById('btn-gesture-2');
+  if (btnG2) {
+    btnG2.addEventListener('click', () => updateExerciseGuide(currentActiveConditionKey, 1));
   }
 
   // Pre-seed default exercise guide
-  updateExerciseGuide('flexor');
+  updateExerciseGuide('flexor', 0);
 
   // Step Action Transitions
   document.getElementById('btn-goto-exercise').addEventListener('click', () => switchView('camera'));
