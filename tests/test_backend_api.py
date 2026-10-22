@@ -494,6 +494,20 @@ def test_candidate_gestures_and_clinical_advisory(client):
     assert "getGestureSVG" in js
     assert "drawTargetGuideOverlay" in js
 
+    # Camera orientation (not reversed) and background blur hand focus
+    assert 'id="btn-toggle-bg-blur"' in html
+    assert "drawHandFocusSpotlight" in js
+    assert "bgBlurEnabled" in js
+
+    res_css = client.get("/style.css")
+    assert res_css.status_code == 200
+    css = res_css.data.decode("utf-8")
+    assert "#webcam-video.no-blur" in css
+    assert "blur(" in css
+    # Verify vision-canvas is not mirrored with scaleX(-1)
+    assert "#vision-canvas {\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  transform: none;" in css
+
+
 
 
 

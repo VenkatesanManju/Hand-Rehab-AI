@@ -357,6 +357,7 @@ const CONDITION_GUIDES = {
 let currentActiveConditionKey = 'flexor';
 let currentActiveGestureIndex = 0;
 let guideOverlayEnabled = true;
+let bgBlurEnabled = true;
 
 function getGestureSVG(gestureId) {
   switch (gestureId) {
@@ -833,14 +834,15 @@ function drawLandmarks(ctx, landmarks, width, height) {
     const p1 = landmarks[startIdx];
     const p2 = landmarks[endIdx];
     ctx.beginPath();
-    ctx.moveTo(p1.x * width, p1.y * height);
-    ctx.lineTo(p2.x * width, p2.y * height);
+    // Use (1 - x) to match horizontally mirrored webcam video
+    ctx.moveTo((1 - p1.x) * width, p1.y * height);
+    ctx.lineTo((1 - p2.x) * width, p2.y * height);
     ctx.stroke();
   }
 
   for (let i = 0; i < landmarks.length; i++) {
     const pt = landmarks[i];
-    const x = pt.x * width;
+    const x = (1 - pt.x) * width;
     const y = pt.y * height;
     ctx.beginPath();
     ctx.arc(x, y, (i === 6 || i === 10) ? 6 : 4, 0, 2 * Math.PI);
@@ -850,6 +852,67 @@ function drawLandmarks(ctx, landmarks, width, height) {
     ctx.lineWidth = 1.5;
     ctx.stroke();
   }
+  ctx.restore();
+}
+
+function drawHandFocusSpotlight(ctx, landmarks, width, height, videoEl) {
+  if (!landmarks || landmarks.length === 0 || !videoEl || !videoEl.videoWidth) return;
+
+  // Compute bounding box across all hand landmarks in normalized coords
+  let minX = 1, maxX = 0, minY = 1, maxY = 0;
+  for (let i = 0; i < landmarks.length; i++) {
+    const p = landmarks[i];
+    if (p.x < minX) minX = p.x;
+    if (p.x > maxX) maxX = p.x;
+    if (p.y < minY) minY = p.y;
+    if (p.y > maxY) maxY = p.y;
+  }
+
+  // Convert to mirrored screen coordinates
+  const centerX = (1 - (minX + maxX) / 2) * width;
+  const centerY = ((minY + maxY) / 2) * height;
+  const radiusX = Math.max(80, ((maxX - minX) * width) / 2 + 55);
+  const radiusY = Math.max(100, ((maxY - minY) * height) / 2 + 65);
+
+  ctx.save();
+  // 1. Clip to spotlight ellipse around hand
+  ctx.beginPath();
+  ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
+  ctx.clip();
+
+  // 2. Draw sharp, unblurred video inside clipped hand region (mirrored horizontally)
+  ctx.translate(width, 0);
+  ctx.scale(-1, 1);
+  ctx.drawImage(videoEl, 0, 0, width, height);
+  ctx.restore();
+
+  // 3. Draw glowing focus border and badge
+  ctx.save();
+  ctx.beginPath();
+  ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
+  ctx.strokeStyle = 'rgba(56, 189, 248, 0.85)';
+  ctx.lineWidth = 2.5;
+  ctx.shadowColor = '#0284c7';
+  ctx.shadowBlur = 14;
+  ctx.stroke();
+
+  // Subtle "✨ Hand Focused" indicator badge above hand
+  const tagW = 92;
+  const tagH = 18;
+  const tagX = Math.max(10, Math.min(width - tagW - 10, centerX - tagW / 2));
+  const tagY = Math.max(10, centerY - radiusY - 10);
+  ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+  ctx.beginPath();
+  if (ctx.roundRect) {
+    ctx.roundRect(tagX, tagY, tagW, tagH, 4);
+  } else {
+    ctx.rect(tagX, tagY, tagW, tagH);
+  }
+  ctx.fill();
+  ctx.fillStyle = '#38bdf8';
+  ctx.font = 'bold 9.5px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('✨ Hand Focused', tagX + tagW / 2, tagY + 13);
   ctx.restore();
 }
 
@@ -869,6 +932,13 @@ async function renderVideoLoop() {
       if (results && results.landmarks && results.landmarks.length > 0) {
         handDetected = true;
         const lm = results.landmarks[0];
+
+        // 1. Spotlight sharp hand if background blur is enabled
+        if (bgBlurEnabled) {
+          drawHandFocusSpotlight(canvasCtx, lm, canvasElement.width, canvasElement.height, videoElement);
+        }
+
+        // 2. Draw mirrored landmarks on top of mirrored video
         drawLandmarks(canvasCtx, lm, canvasElement.width, canvasElement.height);
 
         // Index: 5 (MCP), 6 (PIP), 7 (DIP)
@@ -2224,6 +2294,20 @@ window.addEventListener('DOMContentLoaded', async () => {
       btnToggleGuide.textContent = guideOverlayEnabled ? '🎯 Target Guide: ON' : '🎯 Target Guide: OFF';
       btnToggleGuide.classList.toggle('btn-primary', guideOverlayEnabled);
       btnToggleGuide.classList.toggle('btn-outline', !guideOverlayEnabled);
+    });
+  }
+
+  // Toggle Background Blur Hand Focus
+  const btnToggleBlur = document.getElementById('btn-toggle-bg-blur');
+  if (btnToggleBlur) {
+    btnToggleBlur.addEventListener('click', () => {
+      bgBlurEnabled = !bgBlurEnabled;
+      const videoEl = document.getElementById('webcam-video');
+      if (videoEl) {
+        videoEl.classList.toggle('no-blur', !bgBlurEnabled);
+      }
+      btnToggleBlur.textContent = bgBlurEnabled ? '✨ Hand Focus (Blur BG): ON' : '✨ Hand Focus (Blur BG): OFF';
+      btnToggleBlur.classList.toggle('active', bgBlurEnabled);
     });
   }
 

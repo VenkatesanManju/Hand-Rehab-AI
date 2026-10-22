@@ -1036,6 +1036,12 @@ textarea#diary-input:focus {
   height: 100%;
   object-fit: cover;
   transform: scaleX(-1);
+  filter: blur(14px) brightness(0.68);
+  transition: filter 0.3s ease;
+}
+
+#webcam-video.no-blur {
+  filter: none;
 }
 
 #vision-canvas {
@@ -1044,7 +1050,7 @@ textarea#diary-input:focus {
   left: 0;
   width: 100%;
   height: 100%;
-  transform: scaleX(-1);
+  transform: none; /* Fixed: Unmirrored so text & guide graphics render normally */
 }
 
 .vision-placeholder {
