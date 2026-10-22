@@ -47,7 +47,7 @@
       </div>
 
       <!-- LOGIN FORM -->
-      <form id="form-login" class="auth-form">
+      <form id="form-login" class="auth-form" onsubmit="return false;">
         <div class="form-group">
           <label for="login-username">Username</label>
           <input type="text" id="login-username" value="demo_patient" placeholder="e.g. demo_patient" required autocomplete="username">
@@ -56,7 +56,7 @@
           <label for="login-password">Password</label>
           <input type="password" id="login-password" value="rehab123" placeholder="••••••••" required autocomplete="current-password">
         </div>
-        <button type="submit" class="btn btn-primary btn-block">Sign In to Dashboard</button>
+        <button type="button" id="btn-submit-login" class="btn btn-primary btn-block">Sign In to Dashboard</button>
         
         <div class="auth-demo-shortcut">
           <span>Or test immediately with demo patient:</span>
@@ -65,7 +65,7 @@
       </form>
 
       <!-- REGISTRATION FORM -->
-      <form id="form-register" class="auth-form hidden">
+      <form id="form-register" class="auth-form hidden" onsubmit="return false;">
         <div class="form-group">
           <label for="reg-fullname">Full Name</label>
           <input type="text" id="reg-fullname" placeholder="e.g. Sarah Jenkins" required>
@@ -102,7 +102,7 @@
           <label for="reg-password">Choose Password (min 4 chars)</label>
           <input type="password" id="reg-password" placeholder="••••••••" required autocomplete="new-password">
         </div>
-        <button type="submit" class="btn btn-success btn-block">Create Patient Account</button>
+        <button type="button" id="btn-submit-register" class="btn btn-success btn-block">Create Patient Account</button>
       </form>
     </div>
   </section>
@@ -732,6 +732,208 @@
       <p class="footer-disclaimer">Notice: Simulated and experimental data. Not certified for medical diagnosis or clinical prescription. Consult a licensed physiotherapist.</p>
     </footer>
   </div>
+
+  <!-- Immediate Bulletproof Auth Controller (Zero-delay, No dependencies) -->
+  <script>
+    (function() {
+      // 1. Sanitize any legacy URL search query if a GET submission ever happened
+      try {
+        if (window.location.search && (window.location.search.includes('login-') || window.location.search.includes('username'))) {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      } catch (e) {}
+
+      function showAuthAlert(msg, type) {
+        const el = document.getElementById('auth-alert');
+        if (!el) return;
+        if (!msg) {
+          el.className = 'auth-alert hidden';
+          el.textContent = '';
+          return;
+        }
+        el.className = 'auth-alert ' + (type || 'error');
+        el.textContent = msg;
+        el.classList.remove('hidden');
+      }
+
+      function transitionToDashboard(user) {
+        try {
+          sessionStorage.setItem('handrehab_user', JSON.stringify(user));
+          const auth = document.getElementById('auth-screen');
+          const dash = document.getElementById('dashboard-app');
+          if (auth) auth.classList.add('hidden');
+          if (dash) dash.classList.remove('hidden');
+          const nameEl = document.getElementById('display-user-name');
+          if (nameEl && user.full_name) nameEl.textContent = user.full_name;
+          const surgEl = document.getElementById('display-user-surgery');
+          if (surgEl && user.surgery_type) surgEl.textContent = user.surgery_type;
+
+          window.__activeUser = user;
+          if (typeof window.loadUserSession === 'function') {
+            window.loadUserSession(user);
+          }
+        } catch (err) {
+          console.error('transitionToDashboard error:', err);
+        }
+      }
+
+      async function executeLogin(username, password) {
+        showAuthAlert('Signing in...', 'success');
+        try {
+          const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+          });
+          const data = await res.json();
+          if (res.ok && data.success && data.user) {
+            showAuthAlert('');
+            transitionToDashboard(data.user);
+          } else {
+            showAuthAlert(data.error || 'Invalid credentials. Hint: use demo_patient / rehab123', 'error');
+          }
+        } catch (err) {
+          showAuthAlert('Network error connecting to auth server: ' + err.message, 'error');
+        }
+      }
+
+      async function executeRegister(fullName, surgeryType, username, password) {
+        showAuthAlert('Creating patient account...', 'success');
+        try {
+          const res = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ full_name: fullName, surgery_type: surgeryType, username, password })
+          });
+          const data = await res.json();
+          if (res.ok && data.success && data.user) {
+            showAuthAlert('Registration successful! Logging in...', 'success');
+            setTimeout(() => transitionToDashboard(data.user), 400);
+          } else {
+            showAuthAlert(data.error || 'Registration failed.', 'error');
+          }
+        } catch (err) {
+          showAuthAlert('Network error during registration: ' + err.message, 'error');
+        }
+      }
+
+      // Check for saved session on load
+      try {
+        const saved = sessionStorage.getItem('handrehab_user');
+        if (saved) {
+          const user = JSON.parse(saved);
+          if (user && user.id) {
+            transitionToDashboard(user);
+          }
+        }
+      } catch (e) {}
+
+      // Wire tabs
+      const tabLogin = document.getElementById('tab-btn-login');
+      const tabReg = document.getElementById('tab-btn-register');
+      const formLogin = document.getElementById('form-login');
+      const formReg = document.getElementById('form-register');
+
+      tabLogin?.addEventListener('click', (e) => {
+        e.preventDefault();
+        tabLogin.classList.add('active');
+        tabReg?.classList.remove('active');
+        formLogin?.classList.remove('hidden');
+        formReg?.classList.add('hidden');
+        showAuthAlert('');
+      });
+
+      tabReg?.addEventListener('click', (e) => {
+        e.preventDefault();
+        tabReg.classList.add('active');
+        tabLogin?.classList.remove('active');
+        formReg?.classList.remove('hidden');
+        formLogin?.classList.add('hidden');
+        showAuthAlert('');
+      });
+
+      // Fill credentials button
+      document.getElementById('btn-fill-credentials')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        const u = document.getElementById('login-username');
+        const p = document.getElementById('login-password');
+        if (u) u.value = 'demo_patient';
+        if (p) p.value = 'rehab123';
+        showAuthAlert('Credentials pre-filled! Click "Sign In to Dashboard" to enter.', 'success');
+      });
+
+      // Quick Demo button
+      document.getElementById('btn-quick-demo')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        const u = document.getElementById('login-username');
+        const p = document.getElementById('login-password');
+        if (u) u.value = 'demo_patient';
+        if (p) p.value = 'rehab123';
+        executeLogin('demo_patient', 'rehab123');
+      });
+
+      // Form login submit & button click
+      function triggerLoginFromInputs() {
+        const u = document.getElementById('login-username')?.value?.trim() || '';
+        const p = document.getElementById('login-password')?.value?.trim() || '';
+        if (!u || !p) {
+          showAuthAlert('Please enter both username and password.', 'error');
+          return;
+        }
+        executeLogin(u, p);
+      }
+
+      formLogin?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        triggerLoginFromInputs();
+      });
+
+      document.getElementById('btn-submit-login')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        triggerLoginFromInputs();
+      });
+
+      // Enter key inside password or username inputs
+      ['login-username', 'login-password'].forEach(id => {
+        document.getElementById(id)?.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            triggerLoginFromInputs();
+          }
+        });
+      });
+
+      // Registration submit
+      function triggerRegisterFromInputs() {
+        const fullName = document.getElementById('reg-fullname')?.value?.trim();
+        const surgeryType = document.getElementById('reg-surgery')?.value;
+        const username = document.getElementById('reg-username')?.value?.trim();
+        const password = document.getElementById('reg-password')?.value?.trim();
+        if (!fullName || !username || !password) {
+          showAuthAlert('Please fill in all registration fields.', 'error');
+          return;
+        }
+        executeRegister(fullName, surgeryType, username, password);
+      }
+
+      formReg?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        triggerRegisterFromInputs();
+      });
+
+      document.getElementById('btn-submit-register')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        triggerRegisterFromInputs();
+      });
+
+      // Export helpers to window
+      window.__authController = {
+        transitionToDashboard,
+        executeLogin,
+        showAuthAlert
+      };
+    })();
+  </script>
 
   <!-- Application Logic (ES Module for local MediaPipe Tasks Vision JS) -->
   <script type="module" src="app.js"></script>

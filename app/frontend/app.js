@@ -2149,6 +2149,9 @@ async function loadUserSession(user) {
   }
 }
 
+// Expose globally for immediate auth controller
+window.loadUserSession = loadUserSession;
+
 function logoutUser() {
   currentUser = null;
   sessionStorage.removeItem('handrehab_user');
@@ -2323,7 +2326,7 @@ function switchView(viewName) {
 
 // --- Initialization ---
 
-window.addEventListener('DOMContentLoaded', async () => {
+async function initApp() {
   videoElement = document.getElementById('webcam-video');
   canvasElement = document.getElementById('vision-canvas');
   canvasCtx = canvasElement.getContext('2d');
@@ -2582,17 +2585,24 @@ window.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // Check existing session
-  const savedUser = sessionStorage.getItem('handrehab_user');
+  // Check existing session or pending session from immediate auth controller
+  const savedUser = sessionStorage.getItem('handrehab_user') || (window.__activeUser ? JSON.stringify(window.__activeUser) : null);
   if (savedUser) {
     try {
-      loadUserSession(JSON.parse(savedUser));
+      const u = typeof savedUser === 'string' ? JSON.parse(savedUser) : savedUser;
+      loadUserSession(u);
     } catch {
       sessionStorage.removeItem('handrehab_user');
     }
   }
 
-
   // Preload MediaPipe model in background
   initHandLandmarker();
-});
+}
+
+// Ensure initApp runs whether DOMContentLoaded has already fired or not
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
