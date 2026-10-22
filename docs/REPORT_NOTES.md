@@ -1,8 +1,8 @@
-# HandRehab-AI: A Multimodal Framework Fusing Attentive Patient Diaries and Markerless Joint Kinematics for Longitudinal Telerehabilitation Monitoring
+# HandRehab-AI: Monitoring Hand Recovery Using Patient Diaries and Computer Vision
 
-> **Proposed Conference Paper Title:**  
-> *HandRehab-AI: A Multimodal Framework Fusing Attentive Patient Diaries and Markerless Joint Kinematics for Longitudinal Telerehabilitation Monitoring*  
-> **Running Head (Short Title):** *Multimodal Hand Telerehabilitation Monitoring via NLP and Markerless Kinematics*  
+> **Conference Paper Title:**  
+> *HandRehab-AI: Monitoring Hand Recovery Using Patient Diaries and Computer Vision*  
+> **Running Head (Short Title):** *Hand Recovery Monitoring via Diaries and Computer Vision*  
 > **Target Venues:** IEEE EMBC (Biomedical & Health Informatics) / IEEE BHI / ACM CHIL / BioNLP
 
 > **Clinical Notice & Regulatory Disclaimer:**  
