@@ -304,4 +304,82 @@ def test_session_records_zero_one_multiple_flow(client):
     assert data_multi["records"][-1]["rom"] > data_multi["records"][0]["rom"]
 
 
+def test_diary_page_session_save_and_elements(client):
+    """
+    Verifies that Step 1: Diary Rehab page contains the Today's Session Ready box,
+    all 6 summary items, save/advance actions, and navigation buttons.
+    """
+    # 1. Verify HTML elements
+    res_index = client.get("/")
+    assert res_index.status_code == 200
+    html = res_index.data.decode("utf-8")
+
+    assert 'id="diary-session-summary-card"' in html
+    assert 'id="diary-summary-pain"' in html
+    assert 'id="diary-summary-stiffness"' in html
+    assert 'id="diary-summary-mobility"' in html
+    assert 'id="diary-summary-grip"' in html
+    assert 'id="diary-summary-rom"' in html
+    assert 'id="diary-summary-reps"' in html
+
+    assert 'id="btn-diary-save-session"' in html
+    assert 'id="label-diary-save-day"' in html
+    assert 'id="btn-diary-advance-day"' in html
+    assert 'id="label-diary-advance-day"' in html
+    assert 'id="btn-goto-exercise"' in html
+    assert 'id="btn-diary-goto-report"' in html
+
+    # 2. Verify CSS styles
+    res_css = client.get("/style.css")
+    assert res_css.status_code == 200
+    css = res_css.data.decode("utf-8")
+    assert ".diary-session-box" in css
+    assert ".diary-nav-actions-row" in css
+
+    # 3. Verify JavaScript logic
+    res_js = client.get("/app.js")
+    assert res_js.status_code == 200
+    js = res_js.data.decode("utf-8")
+    assert "btn-diary-save-session" in js
+    assert "btn-diary-advance-day" in js
+    assert "label-diary-save-day" in js
+    assert "diary-summary-pain" in js
+
+    # 4. Verify user registration seeds Day 0 baseline, and first rehab session is Day 1
+    import time
+    user_test = f"diary_saver_{int(time.time() * 1000)}"
+    reg_res = client.post("/api/auth/register", data=json.dumps({
+        "username": user_test,
+        "password": "secretpassword",
+        "full_name": "Diary Saver",
+        "surgery_type": "Carpal Tunnel"
+    }), content_type="application/json")
+    user_id = json.loads(reg_res.data)["user"]["id"]
+
+    # History starts with 1 record at Day 0
+    hist1 = json.loads(client.get(f"/api/user/history?user_id={user_id}").data)
+    assert hist1["total_records"] == 1
+    assert hist1["records"][0]["day"] == 0
+
+    # User saves from Diary Page -> logs Day 1
+    add_day1 = client.post("/api/user/record", data=json.dumps({
+        "user_id": user_id,
+        "day": 1,
+        "pain": 2.0,
+        "stiffness": 2.0,
+        "mobility": 1.5,
+        "grip": 1.5,
+        "rom": 40.0,
+        "reps": 5,
+        "diary_text": "Saved directly from Step 1 Diary page.",
+        "update_if_same_day": False
+    }), content_type="application/json")
+    assert add_day1.status_code == 200
+
+    hist2 = json.loads(client.get(f"/api/user/history?user_id={user_id}").data)
+    assert hist2["total_records"] == 2
+    assert [r["day"] for r in hist2["records"]] == [0, 1]
+
+
+
 

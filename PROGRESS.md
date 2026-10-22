@@ -12,4 +12,5 @@
 - [x] 11. Patient-friendly Step 3 Recovery Progress overhaul: 3 real-data charts (Pain/Stiffness, ROM, Mobility/Grip), 6 recovery summary cards, ROM educational guide, 7/14-day history filters, and separated AI estimates.
 - [x] 12. Conference paper title and metadata added to documentation (README.md & docs/REPORT_NOTES.md).
 - [x] 13. Final Project Report compilation: verified all table metrics, filled Tables 4.4 & 4.5, embedded System Architecture (Fig 3.1), generated Word Cloud & Bigram Association Graph from real project data, embedded all UI screenshots and empirical plots into docs/HandRehab_AI_Project_Report.docx.
+- [x] 14. Integrated "Today's Session Ready" box and save actions directly into Step 1: Daily Rehab Diary with real-time 6-metric summary, day advance/update controls, Day 0 baseline handling, and automated NLP analysis on direct save.
 

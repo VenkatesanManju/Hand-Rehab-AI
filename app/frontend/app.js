@@ -209,14 +209,26 @@ async function renderVideoLoop() {
 }
 
 function updateVisionUI() {
-  document.getElementById('live-angle').textContent = `${currentAngle}°`;
-  document.getElementById('live-rom').textContent = `${currentROM}°`;
-  document.getElementById('live-reps').textContent = `${repCount}`;
-  document.getElementById('live-form').textContent = `${currentFormScore}%`;
+  const liveAngle = document.getElementById('live-angle');
+  if (liveAngle) liveAngle.textContent = `${currentAngle}°`;
+  const liveRom = document.getElementById('live-rom');
+  if (liveRom) liveRom.textContent = `${currentROM}°`;
+  const liveReps = document.getElementById('live-reps');
+  if (liveReps) liveReps.textContent = `${repCount}`;
+  const liveForm = document.getElementById('live-form');
+  if (liveForm) liveForm.textContent = `${currentFormScore}%`;
 
   // Summary card on camera page
-  document.getElementById('summary-rom').textContent = `${currentROM}°`;
-  document.getElementById('summary-reps').textContent = `${repCount}`;
+  const sumRom = document.getElementById('summary-rom');
+  if (sumRom) sumRom.textContent = `${currentROM}°`;
+  const sumReps = document.getElementById('summary-reps');
+  if (sumReps) sumReps.textContent = `${repCount}`;
+
+  // Summary card on diary page
+  const diaryRom = document.getElementById('diary-summary-rom');
+  if (diaryRom) diaryRom.textContent = `${currentROM}°`;
+  const diaryReps = document.getElementById('diary-summary-reps');
+  if (diaryReps) diaryReps.textContent = `${repCount}`;
 }
 
 // --- Webcam Handlers ---
@@ -413,8 +425,20 @@ function renderDiaryResults(data, originalText) {
   });
 
   // Update summary card on Camera tab
-  document.getElementById('summary-pain').textContent = `${data.pain} (${data.pain_label})`;
-  document.getElementById('summary-stiffness').textContent = `${data.stiffness} (${data.stiffness_label})`;
+  const sumPain = document.getElementById('summary-pain');
+  if (sumPain) sumPain.textContent = `${data.pain} (${data.pain_label})`;
+  const sumStiff = document.getElementById('summary-stiffness');
+  if (sumStiff) sumStiff.textContent = `${data.stiffness} (${data.stiffness_label})`;
+
+  // Update summary card on Diary tab
+  const diaryPain = document.getElementById('diary-summary-pain');
+  if (diaryPain) diaryPain.textContent = `${data.pain} (${data.pain_label})`;
+  const diaryStiff = document.getElementById('diary-summary-stiffness');
+  if (diaryStiff) diaryStiff.textContent = `${data.stiffness} (${data.stiffness_label})`;
+  const diaryMob = document.getElementById('diary-summary-mobility');
+  if (diaryMob) diaryMob.textContent = `${data.mobility} (${data.mobility_label})`;
+  const diaryGrip = document.getElementById('diary-summary-grip');
+  if (diaryGrip) diaryGrip.textContent = `${data.grip} (${data.grip_label})`;
 
   // Render Causal Attribution Chips
   const chipContainer = document.getElementById('causal-chips');
@@ -1230,26 +1254,35 @@ function showAuthAlert(msg, type = 'error') {
 function updateDayLabels() {
   const saveLabel = document.getElementById('label-save-day');
   const advanceLabel = document.getElementById('label-advance-day');
-  if (!saveLabel || !advanceLabel) return;
+  const diarySaveLabel = document.getElementById('label-diary-save-day');
+  const diaryAdvanceLabel = document.getElementById('label-diary-advance-day');
 
   const todayStr = new Date().toISOString().substring(0, 10);
-  if (!patientHistory || patientHistory.length === 0) {
-    saveLabel.textContent = 'Day 1';
-    advanceLabel.textContent = 'Day 2';
-    return;
+  let saveText = 'Day 1';
+  let advanceText = 'Day 2';
+
+  if (patientHistory && patientHistory.length > 0) {
+    const lastRecord = patientHistory[patientHistory.length - 1];
+    const lastDate = lastRecord.recorded_at ? lastRecord.recorded_at.substring(0, 10) : '';
+
+    if (lastRecord.day === 0) {
+      // Day 0 is registration baseline; first rehabilitation session is Day 1
+      saveText = 'Day 1';
+      advanceText = 'Day 2';
+    } else if (lastDate === todayStr) {
+      saveText = `Day ${lastRecord.day}`;
+      advanceText = `Day ${lastRecord.day + 1}`;
+    } else {
+      const nextDay = lastRecord.day + 1;
+      saveText = `Day ${nextDay}`;
+      advanceText = `Day ${nextDay + 1}`;
+    }
   }
 
-  const lastRecord = patientHistory[patientHistory.length - 1];
-  const lastDate = lastRecord.recorded_at ? lastRecord.recorded_at.substring(0, 10) : '';
-
-  if (lastDate === todayStr) {
-    saveLabel.textContent = `Day ${lastRecord.day} (Update Today)`;
-    advanceLabel.textContent = `Day ${lastRecord.day + 1}`;
-  } else {
-    const nextDay = lastRecord.day + 1;
-    saveLabel.textContent = `Day ${nextDay}`;
-    advanceLabel.textContent = `Day ${nextDay + 1}`;
-  }
+  if (saveLabel) saveLabel.textContent = saveText;
+  if (advanceLabel) advanceLabel.textContent = advanceText;
+  if (diarySaveLabel) diarySaveLabel.textContent = saveText;
+  if (diaryAdvanceLabel) diaryAdvanceLabel.textContent = advanceText;
 }
 
 // --- Session Recording ---
@@ -1260,6 +1293,17 @@ async function saveSession(advanceDay = false) {
     return;
   }
 
+  // If user entered text in diary-input but hasn't run analysis yet, analyze it now
+  const diaryInputEl = document.getElementById('diary-input');
+  const inputVal = diaryInputEl ? diaryInputEl.value.trim() : '';
+  if (inputVal && (!currentDiaryPred.text || currentDiaryPred.text !== inputVal)) {
+    try {
+      await analyzeDiaryText();
+    } catch (e) {
+      console.warn('Auto-analysis before save failed:', e);
+    }
+  }
+
   const todayStr = new Date().toISOString().substring(0, 10);
   let targetDay = 1;
   let updateIfSame = false;
@@ -1268,19 +1312,28 @@ async function saveSession(advanceDay = false) {
     const lastRecord = patientHistory[patientHistory.length - 1];
     const lastDate = lastRecord.recorded_at ? lastRecord.recorded_at.substring(0, 10) : '';
 
-    if (advanceDay) {
-      targetDay = lastRecord.day + 1;
+    if (lastRecord.day === 0) {
+      // Day 0 is baseline registration; first exercise session is Day 1
+      targetDay = advanceDay ? 2 : 1;
       updateIfSame = false;
-    } else {
-      if (lastDate === todayStr) {
-        targetDay = lastRecord.day;
-        updateIfSame = true;
-      } else {
+    } else if (lastDate === todayStr) {
+      if (advanceDay) {
         targetDay = lastRecord.day + 1;
         updateIfSame = false;
+      } else {
+        targetDay = lastRecord.day;
+        updateIfSame = true;
       }
+    } else {
+      const nextDay = lastRecord.day + 1;
+      targetDay = advanceDay ? nextDay + 1 : nextDay;
+      updateIfSame = false;
     }
   }
+
+  const diaryText = (currentDiaryPred.text && currentDiaryPred.text.trim())
+    ? currentDiaryPred.text
+    : (inputVal || 'Daily exercise and finger curl training.');
 
   const payload = {
     user_id: currentUser.id,
@@ -1291,7 +1344,7 @@ async function saveSession(advanceDay = false) {
     grip: currentDiaryPred.grip,
     rom: currentROM,
     reps: repCount,
-    diary_text: currentDiaryPred.text || 'Daily exercise and finger curl training.',
+    diary_text: diaryText,
     update_if_same_day: updateIfSame
   };
 
@@ -1468,6 +1521,10 @@ window.addEventListener('DOMContentLoaded', async () => {
   // Step Action Transitions
   document.getElementById('btn-goto-exercise').addEventListener('click', () => switchView('camera'));
   document.getElementById('btn-goto-report').addEventListener('click', () => switchView('report'));
+  const diaryGotoReport = document.getElementById('btn-diary-goto-report');
+  if (diaryGotoReport) {
+    diaryGotoReport.addEventListener('click', () => switchView('report'));
+  }
   document.getElementById('btn-refresh-history').addEventListener('click', () => {
     if (currentUser) {
       fetch(`/api/user/history?user_id=${currentUser.id}`)
@@ -1505,6 +1562,15 @@ window.addEventListener('DOMContentLoaded', async () => {
   const advanceBtn = document.getElementById('btn-advance-day');
   if (advanceBtn) {
     advanceBtn.addEventListener('click', () => saveSession(true));
+  }
+
+  const diarySaveBtn = document.getElementById('btn-diary-save-session');
+  if (diarySaveBtn) {
+    diarySaveBtn.addEventListener('click', () => saveSession(false));
+  }
+  const diaryAdvanceBtn = document.getElementById('btn-diary-advance-day');
+  if (diaryAdvanceBtn) {
+    diaryAdvanceBtn.addEventListener('click', () => saveSession(true));
   }
 
   // 7. History Filter & Sort Controls

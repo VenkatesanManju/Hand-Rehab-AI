@@ -189,8 +189,28 @@
             </div>
           </div>
 
-          <div class="step-transition-row">
-            <button id="btn-goto-exercise" class="btn btn-success btn-lg">➡️ Proceed to Step 2: Camera Exercise Tracker</button>
+          <!-- TODAY'S DIARY SESSION READY & ACTIONS BOX -->
+          <div class="session-summary-box diary-session-box" id="diary-session-summary-card">
+            <h4>Today's Session Ready:</h4>
+            <ul class="session-bullets">
+              <li>Pain: <strong id="diary-summary-pain">0 (None)</strong></li>
+              <li>Stiffness: <strong id="diary-summary-stiffness">0 (None)</strong></li>
+              <li>Mobility: <strong id="diary-summary-mobility">0 (None)</strong></li>
+              <li>Grip: <strong id="diary-summary-grip">0 (None)</strong></li>
+              <li>Peak Range of Motion (ROM): <strong id="diary-summary-rom">5°</strong></li>
+              <li>Completed Reps: <strong id="diary-summary-reps">0</strong></li>
+            </ul>
+
+            <div class="save-actions-group">
+              <button id="btn-diary-save-session" class="btn btn-primary btn-block btn-lg">💾 Save / Update Today (<span id="label-diary-save-day">Day 1</span>)</button>
+              <button id="btn-diary-advance-day" class="btn btn-outline btn-block">⏩ Advance &amp; Log as Next Day (<span id="label-diary-advance-day">Day 2</span>)</button>
+              <p class="save-subtext">Multiple sessions on the same calendar day accumulate reps and keep your peak ROM and latest diary symptoms for that day.</p>
+            </div>
+
+            <div class="diary-nav-actions-row">
+              <button id="btn-goto-exercise" class="btn btn-success btn-lg">📷 Proceed to Step 2: Camera Exercise Tracker</button>
+              <button id="btn-diary-goto-report" class="btn btn-secondary btn-lg">📈 View Your Recovery Progress</button>
+            </div>
           </div>
         </div>
       </section>

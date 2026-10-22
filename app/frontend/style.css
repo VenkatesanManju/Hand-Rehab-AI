@@ -825,6 +825,51 @@ textarea#diary-input:focus {
   line-height: 1.3;
 }
 
+/* Diary Session Summary Card & Actions */
+.diary-session-box {
+  margin-top: 20px;
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.diary-session-box h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.diary-session-box .session-bullets {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 8px 16px;
+  margin-bottom: 14px;
+}
+
+.diary-session-box .save-actions-group {
+  margin-bottom: 10px;
+}
+
+.diary-nav-actions-row {
+  margin-top: 14px;
+  display: flex;
+  gap: 12px;
+}
+
+.diary-nav-actions-row .btn {
+  flex: 1;
+}
+
+@media (max-width: 640px) {
+  .diary-nav-actions-row {
+    flex-direction: column;
+  }
+}
+
 /* ============================================================ */
 
 /* RECOVERY REPORT & TREND STYLING                              */
