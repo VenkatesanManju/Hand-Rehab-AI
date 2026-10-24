@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use this software or empirical benchmark in your research, please cite it as below."
+authors:
+  - family-names: "Rehabilitation AI Research Group"
+title: "HandRehab-AI: Monitoring Hand Recovery Using Patient Diaries and Computer Vision"
+version: 1.0.0
+date-released: 2026-10-24
+url: "https://github.com/your-username/hand-rehab-ai"
+keywords:
+  - natural-language-processing
+  - computer-vision
+  - hand-rehabilitation
+  - attention-mechanism
+  - mediapipe
+  - recurrent-neural-networks
+  - longitudinal-recovery
+license: MIT

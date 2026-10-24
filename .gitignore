@@ -1,8 +1,43 @@
-.venv/
+# Python runtime and bytecode
 __pycache__/
-*.pt
-*.bin
+*.py[cod]
+*$py.class
+*.so
+
+# Environments
+.venv/
+venv/
+ENV/
+env/
+.env
+
+# Pytest and coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Operating System and IDEs
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Databases (SQLite runtime generated per instance)
 *.db
+*.sqlite3
+
+# Large raw embedding corpora (exceeds GitHub limits)
 data/embeddings/
 glove.6B/
-.ipynb_checkpoints/
+*.bin
+
+# PyTorch checkpoints (ignore generic .pt checkpoints, but preserve essential trained project weights)
+*.pt
+!data/processed/glove_100d_matrix.pt
+!results/best_diary_model.pt
+!results/best_trend_model.pt
