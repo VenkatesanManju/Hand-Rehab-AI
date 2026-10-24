@@ -189,9 +189,7 @@ hand-rehab/
 │   ├── processed/                   # Tokenized splits, vocab.json, glove_100d_matrix.pt
 │   └── simulated/                   # 60-day longitudinal patient recovery curves
 ├── docs/
-│   ├── figures/                     # Architecture diagrams, screenshots & benchmark plots
-│   ├── HandRehab_AI_Project_Report.docx # Comprehensive academic project report
-│   └── HandRehab_AI_Presentation.pptx   # 14-slide conference presentation
+│   └── figures/                     # Architecture diagrams, screenshots & benchmark plots
 ├── results/
 │   ├── best_diary_model.pt          # Trained diary BiLSTM + Attention PyTorch weights
 │   ├── best_trend_model.pt          # Trained sequence trend forecasting PyTorch weights
